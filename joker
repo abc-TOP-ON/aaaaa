@@ -1,6 +1,6 @@
 -- ================================================================
---                    ABC CHAT SPY - PREMIUM v6.0
---              Fixed Settings + Movable Exit Button
+--                    ABC CHAT SPY - PREMIUM v7.0
+--              Hide Button + Mobile-Friendly Settings
 -- ================================================================
 
 local Players = game:GetService("Players")
@@ -219,17 +219,17 @@ Subtitle.TextYAlignment = Enum.TextYAlignment.Top
 Subtitle.Parent = Header
 
 -- ================================================================
---                    HEADER BUTTONS
+--                    HEADER BUTTONS (Mobile-Friendly)
 -- ================================================================
 local function createHeaderButton(parent, icon, position, color, tooltip, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 40, 0, 40)
+    btn.Size = UDim2.new(0, 50, 0, 50) -- Bigger for mobile
     btn.Position = position
     btn.BackgroundColor3 = color
-    btn.BackgroundTransparency = 0.7
+    btn.BackgroundTransparency = 0.5
     btn.Text = icon
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 18
+    btn.TextSize = 22 -- Bigger text for mobile
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
     btn.Parent = parent
@@ -240,46 +240,59 @@ local function createHeaderButton(parent, icon, position, color, tooltip, callba
     
     -- Tooltip
     local tooltipObj = Instance.new("TextLabel")
-    tooltipObj.Size = UDim2.new(0, 80, 0, 25)
-    tooltipObj.Position = UDim2.new(0.5, -40, 1, 5)
+    tooltipObj.Size = UDim2.new(0, 100, 0, 30)
+    tooltipObj.Position = UDim2.new(0.5, -50, 1, 5)
     tooltipObj.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
     tooltipObj.BackgroundTransparency = 0.2
     tooltipObj.Text = tooltip
     tooltipObj.TextColor3 = Color3.fromRGB(180, 180, 200)
-    tooltipObj.TextSize = 10
+    tooltipObj.TextSize = 12
     tooltipObj.Font = Enum.Font.Gotham
     tooltipObj.Visible = false
     tooltipObj.Parent = btn
     
     local tooltipCorner = Instance.new("UICorner")
-    tooltipCorner.CornerRadius = UDim.new(0, 6)
+    tooltipCorner.CornerRadius = UDim.new(0, 8)
     tooltipCorner.Parent = tooltipObj
     
     btn.MouseEnter:Connect(function()
         tweenObject(btn, {
-            BackgroundTransparency = 0.3,
-            Size = UDim2.new(0, 44, 0, 44),
-            Position = position + UDim2.new(0, -2, 0, -2),
+            BackgroundTransparency = 0.2,
+            Size = UDim2.new(0, 55, 0, 55),
+            Position = position + UDim2.new(0, -2.5, 0, -2.5),
         }, 0.15)
         tooltipObj.Visible = true
     end)
     
     btn.MouseLeave:Connect(function()
         tweenObject(btn, {
-            BackgroundTransparency = 0.7,
-            Size = UDim2.new(0, 40, 0, 40),
+            BackgroundTransparency = 0.5,
+            Size = UDim2.new(0, 50, 0, 50),
             Position = position,
         }, 0.15)
         tooltipObj.Visible = false
     end)
     
+    -- Click animation
     btn.MouseButton1Click:Connect(function()
         tweenObject(btn, {
-            Size = UDim2.new(0, 35, 0, 35),
+            Size = UDim2.new(0, 45, 0, 45),
         }, 0.1)
         task.wait(0.1)
         tweenObject(btn, {
-            Size = UDim2.new(0, 40, 0, 40),
+            Size = UDim2.new(0, 50, 0, 50),
+        }, 0.1)
+        callback()
+    end)
+    
+    -- Touch support for mobile
+    btn.TouchEnded:Connect(function()
+        tweenObject(btn, {
+            Size = UDim2.new(0, 45, 0, 45),
+        }, 0.1)
+        task.wait(0.1)
+        tweenObject(btn, {
+            Size = UDim2.new(0, 50, 0, 50),
         }, 0.1)
         callback()
     end)
@@ -289,24 +302,27 @@ end
 
 local isVisible = true
 
-local ToggleBtn = createHeaderButton(Header, "🗕", UDim2.new(1, -50, 0, 12), Color3.fromRGB(88, 101, 242), "Toggle", function()
+-- Toggle Button (Hide/Show)
+local ToggleBtn = createHeaderButton(Header, "👁", UDim2.new(1, -60, 0, 7), Color3.fromRGB(88, 101, 242), "Hide/Show", function()
     isVisible = not isVisible
     MainFrame.Visible = isVisible
+    ToggleBtn.Text = isVisible and "👁" or "🚫"
 end)
 
-local SettingsBtn = createHeaderButton(Header, "⚙", UDim2.new(1, -95, 0, 12), Color3.fromRGB(60, 60, 80), "Settings", function()
-    print("Settings button clicked!") -- Debug
+-- Settings Button (Bigger for mobile)
+local SettingsBtn = createHeaderButton(Header, "⚙", UDim2.new(1, -115, 0, 7), Color3.fromRGB(60, 60, 80), "Settings", function()
+    print("Settings button clicked!")
     if SettingsFrame then
         SettingsFrame.Visible = not SettingsFrame.Visible
-        print("SettingsFrame.Visible =", SettingsFrame.Visible) -- Debug
+        print("SettingsFrame.Visible =", SettingsFrame.Visible)
         MainFrame.Visible = true
         isVisible = true
-    else
-        print("SettingsFrame is nil!") -- Debug
+        ToggleBtn.Text = "👁"
     end
 end)
 
-local DNDBtn = createHeaderButton(Header, "🔕", UDim2.new(1, -140, 0, 12), Color3.fromRGB(250, 166, 26), "DND Mode", function()
+-- DND Button
+local DNDBtn = createHeaderButton(Header, "🔕", UDim2.new(1, -170, 0, 7), Color3.fromRGB(250, 166, 26), "DND Mode", function()
     Settings.DNDMode = not Settings.DNDMode
     if Settings.DNDMode then
         Settings.SoundEnabled = false
@@ -319,12 +335,12 @@ local DNDBtn = createHeaderButton(Header, "🔕", UDim2.new(1, -140, 0, 12), Col
 end)
 
 -- ================================================================
---                    MOVABLE EXIT BUTTON (Floating)
+--                    MOVABLE EXIT/HIDE BUTTON
 -- ================================================================
 local ExitFrame = Instance.new("Frame")
 ExitFrame.Name = "ExitFrame"
-ExitFrame.Size = UDim2.new(0, 60, 0, 60)
-ExitFrame.Position = UDim2.new(1, -80, 0.5, -30)
+ExitFrame.Size = UDim2.new(0, 65, 0, 65)
+ExitFrame.Position = UDim2.new(1, -85, 0.5, -32)
 ExitFrame.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 ExitFrame.BackgroundTransparency = 0.1
 ExitFrame.BorderSizePixel = 0
@@ -338,8 +354,8 @@ ExitCorner.Parent = ExitFrame
 
 -- Exit Button Glow
 local ExitGlow = Instance.new("Frame")
-ExitGlow.Size = UDim2.new(1, 10, 1, 10)
-ExitGlow.Position = UDim2.new(0.5, -5, 0.5, -5)
+ExitGlow.Size = UDim2.new(1, 15, 1, 15)
+ExitGlow.Position = UDim2.new(0.5, -7.5, 0.5, -7.5)
 ExitGlow.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 ExitGlow.BackgroundTransparency = 0.8
 ExitGlow.BorderSizePixel = 0
@@ -355,31 +371,31 @@ ExitBtn.Size = UDim2.new(1, 0, 1, 0)
 ExitBtn.BackgroundTransparency = 1
 ExitBtn.Text = "⏻"
 ExitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ExitBtn.TextSize = 28
+ExitBtn.TextSize = 30
 ExitBtn.Font = Enum.Font.GothamBold
 ExitBtn.Parent = ExitFrame
 
 -- Exit Button Tooltip
 local ExitTooltip = Instance.new("TextLabel")
-ExitTooltip.Size = UDim2.new(0, 100, 0, 25)
-ExitTooltip.Position = UDim2.new(0.5, -50, 1, 5)
+ExitTooltip.Size = UDim2.new(0, 120, 0, 30)
+ExitTooltip.Position = UDim2.new(0.5, -60, 1, 5)
 ExitTooltip.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
 ExitTooltip.BackgroundTransparency = 0.2
-ExitTooltip.Text = "Exit Script"
+ExitTooltip.Text = "Exit Script (⏻)"
 ExitTooltip.TextColor3 = Color3.fromRGB(180, 180, 200)
-ExitTooltip.TextSize = 11
+ExitTooltip.TextSize = 12
 ExitTooltip.Font = Enum.Font.Gotham
 ExitTooltip.Visible = false
 ExitTooltip.Parent = ExitFrame
 
 local ExitTooltipCorner = Instance.new("UICorner")
-ExitTooltipCorner.CornerRadius = UDim.new(0, 6)
+ExitTooltipCorner.CornerRadius = UDim.new(0, 8)
 ExitTooltipCorner.Parent = ExitTooltip
 
 ExitBtn.MouseEnter:Connect(function()
     tweenObject(ExitFrame, {
-        Size = UDim2.new(0, 70, 0, 70),
-        Position = UDim2.new(1, -85, 0.5, -35),
+        Size = UDim2.new(0, 75, 0, 75),
+        Position = UDim2.new(1, -90, 0.5, -37),
         BackgroundTransparency = 0.05,
     }, 0.15)
     ExitTooltip.Visible = true
@@ -387,8 +403,8 @@ end)
 
 ExitBtn.MouseLeave:Connect(function()
     tweenObject(ExitFrame, {
-        Size = UDim2.new(0, 60, 0, 60),
-        Position = UDim2.new(1, -80, 0.5, -30),
+        Size = UDim2.new(0, 65, 0, 65),
+        Position = UDim2.new(1, -85, 0.5, -32),
         BackgroundTransparency = 0.1,
     }, 0.15)
     ExitTooltip.Visible = false
@@ -396,8 +412,19 @@ end)
 
 ExitBtn.MouseButton1Click:Connect(function()
     tweenObject(ExitFrame, {
-        Size = UDim2.new(0, 50, 0, 50),
-        Position = UDim2.new(1, -75, 0.5, -25),
+        Size = UDim2.new(0, 55, 0, 55),
+        Position = UDim2.new(1, -80, 0.5, -27),
+    }, 0.1)
+    task.wait(0.15)
+    ScreenGui:Destroy()
+    print("ABC Spy Closed!")
+end)
+
+-- Touch support for mobile
+ExitBtn.TouchEnded:Connect(function()
+    tweenObject(ExitFrame, {
+        Size = UDim2.new(0, 55, 0, 55),
+        Position = UDim2.new(1, -80, 0.5, -27),
     }, 0.1)
     task.wait(0.15)
     ScreenGui:Destroy()
@@ -442,10 +469,10 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ================================================================
---                    SEARCH BAR
+--                    SEARCH BAR (Mobile-Friendly)
 -- ================================================================
 local SearchContainer = Instance.new("Frame")
-SearchContainer.Size = UDim2.new(0.9, 0, 0, 45)
+SearchContainer.Size = UDim2.new(0.9, 0, 0, 50)
 SearchContainer.Position = UDim2.new(0.05, 0, 0.12, 0)
 SearchContainer.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
 SearchContainer.BackgroundTransparency = 0.4
@@ -457,40 +484,40 @@ SearchCorner.CornerRadius = UDim.new(0, 12)
 SearchCorner.Parent = SearchContainer
 
 local SearchIcon = Instance.new("TextLabel")
-SearchIcon.Size = UDim2.new(0, 30, 0, 30)
-SearchIcon.Position = UDim2.new(0, 10, 0.5, -15)
+SearchIcon.Size = UDim2.new(0, 35, 0, 35)
+SearchIcon.Position = UDim2.new(0, 12, 0.5, -17)
 SearchIcon.BackgroundTransparency = 1
 SearchIcon.Text = "🔍"
 SearchIcon.TextColor3 = Color3.fromRGB(180, 180, 200)
-SearchIcon.TextSize = 16
+SearchIcon.TextSize = 18
 SearchIcon.Font = Enum.Font.Gotham
 SearchIcon.Parent = SearchContainer
 
 local SearchBox = Instance.new("TextBox")
-SearchBox.Size = UDim2.new(0.65, 0, 1, 0)
-SearchBox.Position = UDim2.new(0.1, 0, 0, 0)
+SearchBox.Size = UDim2.new(0.6, 0, 1, 0)
+SearchBox.Position = UDim2.new(0.12, 0, 0, 0)
 SearchBox.BackgroundTransparency = 1
 SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 SearchBox.PlaceholderText = "Search messages..."
 SearchBox.PlaceholderColor3 = Color3.fromRGB(180, 180, 200)
 SearchBox.Font = Enum.Font.Gotham
-SearchBox.TextSize = 15
+SearchBox.TextSize = 16
 SearchBox.ClearTextOnFocus = false
 SearchBox.Parent = SearchContainer
 
 local SearchBtn = Instance.new("TextButton")
-SearchBtn.Size = UDim2.new(0, 60, 0, 35)
-SearchBtn.Position = UDim2.new(1, -70, 0.5, -17.5)
+SearchBtn.Size = UDim2.new(0, 70, 0, 40)
+SearchBtn.Position = UDim2.new(1, -80, 0.5, -20)
 SearchBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
 SearchBtn.Text = "Search"
 SearchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SearchBtn.TextSize = 13
+SearchBtn.TextSize = 14
 SearchBtn.Font = Enum.Font.GothamBold
 SearchBtn.BorderSizePixel = 0
 SearchBtn.Parent = SearchContainer
 
 local SearchBtnCorner = Instance.new("UICorner")
-SearchBtnCorner.CornerRadius = UDim.new(0, 8)
+SearchBtnCorner.CornerRadius = UDim.new(0, 10)
 SearchBtnCorner.Parent = SearchBtn
 
 SearchBtn.MouseEnter:Connect(function()
@@ -505,20 +532,25 @@ SearchBtn.MouseLeave:Connect(function()
     }, 0.2)
 end)
 
+-- Touch support for mobile
+SearchBtn.TouchEnded:Connect(function()
+    searchMessages(SearchBox.Text)
+end)
+
 local BackBtn = Instance.new("TextButton")
-BackBtn.Size = UDim2.new(0, 40, 0, 35)
-BackBtn.Position = UDim2.new(1, -115, 0.5, -17.5)
+BackBtn.Size = UDim2.new(0, 45, 0, 40)
+BackBtn.Position = UDim2.new(1, -130, 0.5, -20)
 BackBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 BackBtn.Text = "✕"
 BackBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-BackBtn.TextSize = 16
+BackBtn.TextSize = 18
 BackBtn.Font = Enum.Font.GothamBold
 BackBtn.BorderSizePixel = 0
 BackBtn.Visible = false
 BackBtn.Parent = SearchContainer
 
 local BackBtnCorner = Instance.new("UICorner")
-BackBtnCorner.CornerRadius = UDim.new(0, 8)
+BackBtnCorner.CornerRadius = UDim.new(0, 10)
 BackBtnCorner.Parent = BackBtn
 
 -- ================================================================
@@ -543,7 +575,7 @@ ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
 ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollingFrame.ScrollBarThickness = 4
+ScrollingFrame.ScrollBarThickness = 6
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(88, 101, 242)
 ScrollingFrame.ScrollBarImageTransparency = 0.5
 ScrollingFrame.Parent = MessagesContainer
@@ -551,20 +583,20 @@ ScrollingFrame.Parent = MessagesContainer
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = ScrollingFrame
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 6)
+UIListLayout.Padding = UDim.new(0, 8)
 
 -- ================================================================
 --                    SCROLL BUTTONS
 -- ================================================================
 local function createScrollButton(parent, icon, position)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 40, 0, 40)
+    btn.Size = UDim2.new(0, 50, 0, 50)
     btn.Position = position
     btn.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
-    btn.BackgroundTransparency = 0.3
+    btn.BackgroundTransparency = 0.2
     btn.Text = icon
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 20
+    btn.TextSize = 24
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
     btn.Parent = parent
@@ -575,23 +607,36 @@ local function createScrollButton(parent, icon, position)
     
     btn.MouseEnter:Connect(function()
         tweenObject(btn, {
-            BackgroundTransparency = 0.1,
-            Size = UDim2.new(0, 44, 0, 44),
+            BackgroundTransparency = 0.05,
+            Size = UDim2.new(0, 55, 0, 55),
         }, 0.15)
     end)
     
     btn.MouseLeave:Connect(function()
         tweenObject(btn, {
-            BackgroundTransparency = 0.3,
-            Size = UDim2.new(0, 40, 0, 40),
+            BackgroundTransparency = 0.2,
+            Size = UDim2.new(0, 50, 0, 50),
         }, 0.15)
+    end)
+    
+    -- Touch support
+    btn.TouchEnded:Connect(function()
+        if icon == "↓" then
+            tweenObject(ScrollingFrame, {
+                CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset),
+            }, 0.3)
+        else
+            tweenObject(ScrollingFrame, {
+                CanvasPosition = Vector2.new(0, 0),
+            }, 0.3)
+        end
     end)
     
     return btn
 end
 
-local ScrollDown = createScrollButton(MessagesContainer, "↓", UDim2.new(1, -50, 1, -50))
-local ScrollUp = createScrollButton(MessagesContainer, "↑", UDim2.new(1, -50, 0, 10))
+local ScrollDown = createScrollButton(MessagesContainer, "↓", UDim2.new(1, -60, 1, -60))
+local ScrollUp = createScrollButton(MessagesContainer, "↑", UDim2.new(1, -60, 0, 15))
 
 ScrollDown.MouseButton1Click:Connect(function()
     tweenObject(ScrollingFrame, {
@@ -609,8 +654,8 @@ end)
 --                    STATUS BAR
 -- ================================================================
 local StatusBar = Instance.new("Frame")
-StatusBar.Size = UDim2.new(1, 0, 0, 30)
-StatusBar.Position = UDim2.new(0, 0, 1, -30)
+StatusBar.Size = UDim2.new(1, 0, 0, 35)
+StatusBar.Position = UDim2.new(0, 0, 1, -35)
 StatusBar.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
 StatusBar.BackgroundTransparency = 0.4
 StatusBar.BorderSizePixel = 0
@@ -626,16 +671,15 @@ StatusText.Position = UDim2.new(0, 10, 0, 0)
 StatusText.BackgroundTransparency = 1
 StatusText.Text = "🟢 Online • 0 messages • 0 players"
 StatusText.TextColor3 = Color3.fromRGB(180, 180, 200)
-StatusText.TextSize = 12
+StatusText.TextSize = 13
 StatusText.Font = Enum.Font.Gotham
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 StatusText.Parent = StatusBar
 
 -- ================================================================
---                    SETTINGS FRAME (FIXED)
+--                    SETTINGS FRAME (Mobile-Friendly)
 -- ================================================================
 local SettingsFrame = Instance.new("Frame")
-SettingsFrame.Name = "SettingsFrame"
 SettingsFrame.Size = UDim2.new(0.92, 0, 0.72, 0)
 SettingsFrame.Position = UDim2.new(0.04, 0, 0.14, 0)
 SettingsFrame.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
@@ -651,7 +695,7 @@ SettingsCorner.Parent = SettingsFrame
 
 -- Settings Header
 local SettingsHeader = Instance.new("Frame")
-SettingsHeader.Size = UDim2.new(1, 0, 0, 45)
+SettingsHeader.Size = UDim2.new(1, 0, 0, 55)
 SettingsHeader.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
 SettingsHeader.BackgroundTransparency = 0.2
 SettingsHeader.BorderSizePixel = 0
@@ -667,18 +711,18 @@ SettingsTitle.Position = UDim2.new(0.05, 0, 0, 0)
 SettingsTitle.BackgroundTransparency = 1
 SettingsTitle.Text = "⚙️ Settings"
 SettingsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-SettingsTitle.TextSize = 18
+SettingsTitle.TextSize = 20
 SettingsTitle.Font = Enum.Font.GothamBold
 SettingsTitle.TextXAlignment = Enum.TextXAlignment.Left
 SettingsTitle.Parent = SettingsHeader
 
 local CloseSettingsBtn = Instance.new("TextButton")
-CloseSettingsBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseSettingsBtn.Position = UDim2.new(1, -40, 0.5, -15)
+CloseSettingsBtn.Size = UDim2.new(0, 40, 0, 40)
+CloseSettingsBtn.Position = UDim2.new(1, -48, 0.5, -20)
 CloseSettingsBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 CloseSettingsBtn.Text = "✕"
 CloseSettingsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseSettingsBtn.TextSize = 16
+CloseSettingsBtn.TextSize = 20
 CloseSettingsBtn.Font = Enum.Font.GothamBold
 CloseSettingsBtn.BorderSizePixel = 0
 CloseSettingsBtn.Parent = SettingsHeader
@@ -691,70 +735,85 @@ CloseSettingsBtn.MouseButton1Click:Connect(function()
     SettingsFrame.Visible = false
 end)
 
+-- Touch support
+CloseSettingsBtn.TouchEnded:Connect(function()
+    SettingsFrame.Visible = false
+end)
+
 -- Settings Scrolling
 local SettingsScrolling = Instance.new("ScrollingFrame")
-SettingsScrolling.Size = UDim2.new(1, -10, 1, -55)
-SettingsScrolling.Position = UDim2.new(0, 5, 0, 50)
+SettingsScrolling.Size = UDim2.new(1, -10, 1, -65)
+SettingsScrolling.Position = UDim2.new(0, 5, 0, 60)
 SettingsScrolling.BackgroundTransparency = 1
 SettingsScrolling.BorderSizePixel = 0
 SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
-SettingsScrolling.ScrollBarThickness = 3
+SettingsScrolling.ScrollBarThickness = 4
 SettingsScrolling.ScrollBarImageColor3 = Color3.fromRGB(88, 101, 242)
 SettingsScrolling.Parent = SettingsFrame
 
 local SettingsLayout = Instance.new("UIListLayout")
 SettingsLayout.Parent = SettingsScrolling
 SettingsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SettingsLayout.Padding = UDim.new(0, 4)
+SettingsLayout.Padding = UDim.new(0, 6)
 
 -- ================================================================
---                    SETTINGS UI (FIXED)
+--                    SETTINGS UI (Mobile-Friendly)
 -- ================================================================
 local function createToggle(parent, label, icon, default, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 35)
+    frame.Size = UDim2.new(1, 0, 0, 45)
     frame.BackgroundTransparency = 1
     frame.Parent = parent
     
     local labelObj = Instance.new("TextLabel")
-    labelObj.Size = UDim2.new(0.6, 0, 1, 0)
+    labelObj.Size = UDim2.new(0.55, 0, 1, 0)
     labelObj.Position = UDim2.new(0.05, 0, 0, 0)
     labelObj.BackgroundTransparency = 1
     labelObj.Text = icon .. " " .. label
     labelObj.TextColor3 = Color3.fromRGB(255, 255, 255)
-    labelObj.TextSize = 13
+    labelObj.TextSize = 15
     labelObj.Font = Enum.Font.Gotham
     labelObj.TextXAlignment = Enum.TextXAlignment.Left
     labelObj.Parent = frame
     
     local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 55, 0, 26)
-    toggle.Position = UDim2.new(1, -60, 0.5, -13)
+    toggle.Size = UDim2.new(0, 65, 0, 32)
+    toggle.Position = UDim2.new(1, -72, 0.5, -16)
     toggle.BackgroundColor3 = default and Color3.fromRGB(88, 101, 242) or Color3.fromRGB(45, 50, 65)
     toggle.Text = default and "ON" or "OFF"
     toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggle.TextSize = 11
+    toggle.TextSize = 13
     toggle.Font = Enum.Font.GothamBold
     toggle.BorderSizePixel = 0
     toggle.Parent = frame
     
     local toggleCorner = Instance.new("UICorner")
-    toggleCorner.CornerRadius = UDim.new(0, 8)
+    toggleCorner.CornerRadius = UDim.new(0, 10)
     toggleCorner.Parent = toggle
     
     -- Hover effect
     toggle.MouseEnter:Connect(function()
         tweenObject(toggle, {
-            Size = UDim2.new(0, 58, 0, 28),
-            Position = UDim2.new(1, -62, 0.5, -14),
+            Size = UDim2.new(0, 68, 0, 34),
+            Position = UDim2.new(1, -74, 0.5, -17),
         }, 0.15)
     end)
     
     toggle.MouseLeave:Connect(function()
         tweenObject(toggle, {
-            Size = UDim2.new(0, 55, 0, 26),
-            Position = UDim2.new(1, -60, 0.5, -13),
+            Size = UDim2.new(0, 65, 0, 32),
+            Position = UDim2.new(1, -72, 0.5, -16),
         }, 0.15)
+    end)
+    
+    -- Touch support
+    toggle.TouchEnded:Connect(function()
+        state = not state
+        tweenObject(toggle, {
+            BackgroundColor3 = state and Color3.fromRGB(88, 101, 242) or Color3.fromRGB(45, 50, 65),
+        }, 0.2)
+        toggle.Text = state and "ON" or "OFF"
+        callback(state)
     end)
     
     local state = default
@@ -848,7 +907,7 @@ end)
 
 -- Max Messages
 local LimitFrame = Instance.new("Frame")
-LimitFrame.Size = UDim2.new(1, 0, 0, 35)
+LimitFrame.Size = UDim2.new(1, 0, 0, 45)
 LimitFrame.BackgroundTransparency = 1
 LimitFrame.Parent = SettingsScrolling
 
@@ -858,26 +917,26 @@ LimitLabel.Position = UDim2.new(0.05, 0, 0, 0)
 LimitLabel.BackgroundTransparency = 1
 LimitLabel.Text = "📊 Max Messages"
 LimitLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-LimitLabel.TextSize = 13
+LimitLabel.TextSize = 15
 LimitLabel.Font = Enum.Font.Gotham
 LimitLabel.TextXAlignment = Enum.TextXAlignment.Left
 LimitLabel.Parent = LimitFrame
 
 local LimitInput = Instance.new("TextBox")
-LimitInput.Size = UDim2.new(0.12, 0, 0, 28)
-LimitInput.Position = UDim2.new(1, -110, 0.5, -14)
+LimitInput.Size = UDim2.new(0.15, 0, 0, 34)
+LimitInput.Position = UDim2.new(1, -120, 0.5, -17)
 LimitInput.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
 LimitInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 LimitInput.Text = "0"
 LimitInput.PlaceholderText = "0"
 LimitInput.PlaceholderColor3 = Color3.fromRGB(180, 180, 200)
 LimitInput.Font = Enum.Font.Gotham
-LimitInput.TextSize = 14
+LimitInput.TextSize = 16
 LimitInput.BorderSizePixel = 0
 LimitInput.Parent = LimitFrame
 
 local LimitCorner = Instance.new("UICorner")
-LimitCorner.CornerRadius = UDim.new(0, 8)
+LimitCorner.CornerRadius = UDim.new(0, 10)
 LimitCorner.Parent = LimitInput
 
 LimitInput.FocusLost:Connect(function(enterPressed)
@@ -892,35 +951,35 @@ end)
 
 -- Filter Words
 local FilterFrame = Instance.new("Frame")
-FilterFrame.Size = UDim2.new(1, 0, 0, 70)
+FilterFrame.Size = UDim2.new(1, 0, 0, 80)
 FilterFrame.BackgroundTransparency = 1
 FilterFrame.Parent = SettingsScrolling
 
 local FilterLabel = Instance.new("TextLabel")
-FilterLabel.Size = UDim2.new(1, 0, 0, 18)
+FilterLabel.Size = UDim2.new(1, 0, 0, 22)
 FilterLabel.Position = UDim2.new(0.05, 0, 0, 0)
 FilterLabel.BackgroundTransparency = 1
 FilterLabel.Text = "🚫 Filter Words"
 FilterLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-FilterLabel.TextSize = 13
+FilterLabel.TextSize = 15
 FilterLabel.Font = Enum.Font.Gotham
 FilterLabel.TextXAlignment = Enum.TextXAlignment.Left
 FilterLabel.Parent = FilterFrame
 
 local FilterInput = Instance.new("TextBox")
-FilterInput.Size = UDim2.new(0.6, 0, 0, 28)
+FilterInput.Size = UDim2.new(0.6, 0, 0, 34)
 FilterInput.Position = UDim2.new(0.05, 0, 0.55, 0)
 FilterInput.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
 FilterInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 FilterInput.PlaceholderText = "word..."
 FilterInput.PlaceholderColor3 = Color3.fromRGB(180, 180, 200)
 FilterInput.Font = Enum.Font.Gotham
-FilterInput.TextSize = 14
+FilterInput.TextSize = 16
 FilterInput.BorderSizePixel = 0
 FilterInput.Parent = FilterFrame
 
 local FilterCorner = Instance.new("UICorner")
-FilterCorner.CornerRadius = UDim.new(0, 8)
+FilterCorner.CornerRadius = UDim.new(0, 10)
 FilterCorner.Parent = FilterInput
 
 local FilteredWordsDisplay = Instance.new("TextLabel")
@@ -929,7 +988,7 @@ FilteredWordsDisplay.Position = UDim2.new(0.7, 0, 0, 0)
 FilteredWordsDisplay.BackgroundTransparency = 1
 FilteredWordsDisplay.Text = ""
 FilteredWordsDisplay.TextColor3 = Color3.fromRGB(180, 180, 200)
-FilteredWordsDisplay.TextSize = 11
+FilteredWordsDisplay.TextSize = 13
 FilteredWordsDisplay.Font = Enum.Font.Gotham
 FilteredWordsDisplay.TextXAlignment = Enum.TextXAlignment.Left
 FilteredWordsDisplay.TextWrapped = true
@@ -1037,20 +1096,20 @@ end
 
 function createMessageUI(sender, messageText, isSearchResult)
     local MessageFrame = Instance.new("Frame")
-    MessageFrame.Size = UDim2.new(1, -10, 0, 55)
+    MessageFrame.Size = UDim2.new(1, -10, 0, 60)
     MessageFrame.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
     MessageFrame.BackgroundTransparency = 0.35
     MessageFrame.BorderSizePixel = 0
     MessageFrame.Parent = ScrollingFrame
     
     local msgCorner = Instance.new("UICorner")
-    msgCorner.CornerRadius = UDim.new(0, 10)
+    msgCorner.CornerRadius = UDim.new(0, 12)
     msgCorner.Parent = MessageFrame
     
     -- Avatar
     local avatar = Instance.new("ImageLabel")
-    avatar.Size = UDim2.new(0, 38, 0, 38)
-    avatar.Position = UDim2.new(0, 8, 0.5, -19)
+    avatar.Size = UDim2.new(0, 42, 0, 42)
+    avatar.Position = UDim2.new(0, 10, 0.5, -21)
     avatar.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
     avatar.BorderSizePixel = 0
     avatar.Parent = MessageFrame
@@ -1075,20 +1134,20 @@ function createMessageUI(sender, messageText, isSearchResult)
     
     -- Name
     local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.new(0.6, 0, 0, 20)
-    nameLabel.Position = UDim2.new(0, 55, 0, 4)
+    nameLabel.Size = UDim2.new(0.6, 0, 0, 22)
+    nameLabel.Position = UDim2.new(0, 62, 0, 4)
     nameLabel.BackgroundTransparency = 1
     nameLabel.Text = sender.DisplayName or sender.Name
     nameLabel.TextColor3 = getPlayerColor(sender.Name)
-    nameLabel.TextSize = 14
+    nameLabel.TextSize = 15
     nameLabel.Font = Enum.Font.GothamBold
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = MessageFrame
     
     -- Message
     local msgLabel = Instance.new("TextLabel")
-    msgLabel.Size = UDim2.new(0.7, 0, 0, 28)
-    msgLabel.Position = UDim2.new(0, 55, 0, 24)
+    msgLabel.Size = UDim2.new(0.7, 0, 0, 30)
+    msgLabel.Position = UDim2.new(0, 62, 0, 26)
     msgLabel.BackgroundTransparency = 1
     msgLabel.Text = messageText
     msgLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1100,12 +1159,12 @@ function createMessageUI(sender, messageText, isSearchResult)
     
     -- Time
     local timeLabel = Instance.new("TextLabel")
-    timeLabel.Size = UDim2.new(0.1, 0, 0, 15)
+    timeLabel.Size = UDim2.new(0.1, 0, 0, 18)
     timeLabel.Position = UDim2.new(0.9, 0, 0, 4)
     timeLabel.BackgroundTransparency = 1
     timeLabel.Text = os.date("%H:%M")
     timeLabel.TextColor3 = Color3.fromRGB(180, 180, 200)
-    timeLabel.TextSize = 10
+    timeLabel.TextSize = 11
     timeLabel.Font = Enum.Font.Gotham
     timeLabel.TextXAlignment = Enum.TextXAlignment.Right
     timeLabel.Parent = MessageFrame
@@ -1138,7 +1197,7 @@ function showNotification(player, message)
     if not Settings.NotificationsEnabled or Settings.DNDMode then return end
     
     local notif = Instance.new("Frame")
-    notif.Size = UDim2.new(0, 320, 0, 55)
+    notif.Size = UDim2.new(0, 340, 0, 60)
     notif.Position = UDim2.new(1, 10, 0, 10)
     notif.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
     notif.BackgroundTransparency = 0.1
@@ -1146,12 +1205,12 @@ function showNotification(player, message)
     notif.Parent = ScreenGui
     
     local notifCorner = Instance.new("UICorner")
-    notifCorner.CornerRadius = UDim.new(0, 12)
+    notifCorner.CornerRadius = UDim.new(0, 14)
     notifCorner.Parent = notif
     
     local notifAvatar = Instance.new("ImageLabel")
-    notifAvatar.Size = UDim2.new(0, 32, 0, 32)
-    notifAvatar.Position = UDim2.new(0, 10, 0.5, -16)
+    notifAvatar.Size = UDim2.new(0, 36, 0, 36)
+    notifAvatar.Position = UDim2.new(0, 12, 0.5, -18)
     notifAvatar.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
     notifAvatar.BorderSizePixel = 0
     notifAvatar.Parent = notif
@@ -1169,33 +1228,33 @@ function showNotification(player, message)
     notifAvatarCorner.Parent = notifAvatar
     
     local notifText = Instance.new("TextLabel")
-    notifText.Size = UDim2.new(0.7, 0, 0.6, 0)
-    notifText.Position = UDim2.new(0, 50, 0, 4)
+    notifText.Size = UDim2.new(0.7, 0, 0.5, 0)
+    notifText.Position = UDim2.new(0, 58, 0, 4)
     notifText.BackgroundTransparency = 1
     notifText.Text = player.DisplayName or player.Name
     notifText.TextColor3 = getPlayerColor(player.Name)
-    notifText.TextSize = 13
+    notifText.TextSize = 14
     notifText.Font = Enum.Font.GothamBold
     notifText.TextXAlignment = Enum.TextXAlignment.Left
     notifText.Parent = notif
     
     local notifMsg = Instance.new("TextLabel")
-    notifMsg.Size = UDim2.new(0.7, 0, 0.4, 0)
-    notifMsg.Position = UDim2.new(0, 50, 0, 24)
+    notifMsg.Size = UDim2.new(0.7, 0, 0.5, 0)
+    notifMsg.Position = UDim2.new(0, 58, 0, 26)
     notifMsg.BackgroundTransparency = 1
     notifMsg.Text = message
     notifMsg.TextColor3 = Color3.fromRGB(180, 180, 200)
-    notifMsg.TextSize = 12
+    notifMsg.TextSize = 13
     notifMsg.Font = Enum.Font.Gotham
     notifMsg.TextXAlignment = Enum.TextXAlignment.Left
     notifMsg.TextWrapped = true
     notifMsg.Parent = notif
     
     tweenObject(notif, {
-        Position = UDim2.new(1, -330, 0, 10),
+        Position = UDim2.new(1, -350, 0, 10),
     }, 0.3)
     
-    task.wait(3)
+    task.wait(3.5)
     tweenObject(notif, {
         Position = UDim2.new(1, 10, 0, 10),
     }, 0.3)
@@ -1339,12 +1398,12 @@ function searchMessages(searchText)
     
     if not found then
         local noResult = Instance.new("TextLabel")
-        noResult.Size = UDim2.new(1, 0, 0, 40)
+        noResult.Size = UDim2.new(1, 0, 0, 45)
         noResult.Position = UDim2.new(0, 0, 0, 20)
         noResult.BackgroundTransparency = 1
         noResult.Text = "🔍 No results for '" .. searchText .. "'"
         noResult.TextColor3 = Color3.fromRGB(180, 180, 200)
-        noResult.TextSize = 14
+        noResult.TextSize = 15
         noResult.Font = Enum.Font.Gotham
         noResult.TextXAlignment = Enum.TextXAlignment.Center
         noResult.Parent = ScrollingFrame
@@ -1365,6 +1424,19 @@ SearchBox.FocusLost:Connect(function(enterPressed)
 end)
 
 BackBtn.MouseButton1Click:Connect(function()
+    SearchBox.Text = ""
+    BackBtn.Visible = false
+    isSearching = false
+    SearchBox.PlaceholderText = "Search messages..."
+    renderAllMessages()
+end)
+
+-- Touch support for search
+SearchBtn.TouchEnded:Connect(function()
+    searchMessages(SearchBox.Text)
+end)
+
+BackBtn.TouchEnded:Connect(function()
     SearchBox.Text = ""
     BackBtn.Visible = false
     isSearching = false
@@ -1412,15 +1484,16 @@ end
 -- ================================================================
 addSystemMessage("📡 ABC Spy Loaded Successfully!")
 addSystemMessage("👥 Players Online: " .. #Players:GetPlayers())
-addSystemMessage("💡 Click ⚙️ for settings")
-addSystemMessage("⏻ Move the exit button anywhere!")
+addSystemMessage("👁 Click 👁 to hide/show")
+addSystemMessage("⏻ Drag the exit button anywhere!")
 
 print("=" .. string.rep("=", 50))
-print("          ABC CHAT SPY v6.0")
+print("          ABC CHAT SPY v7.0")
 print("=" .. string.rep("=", 50))
-print("✅ FIXED:")
-print("   - Settings button now works!")
-print("   - Movable Exit button")
-print("   - Auto-scroll to bottom")
-print("   - All features working")
+print("✅ NEW FEATURES:")
+print("   - Hide button (👁) - hides UI without deleting")
+print("   - Mobile-friendly buttons (larger)")
+print("   - Touch support for mobile")
+print("   - Settings button fixed for mobile")
+print("   - Exit button movable")
 print("=" .. string.rep("=", 50))
