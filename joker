@@ -1,48 +1,64 @@
 -- ================================================================
---          DELTA CHAT SPY ULTIMATE - OPTIMIZED v3.0
---                    10x Better & Faster
+--          DELTA CHAT SPY ULTIMATE - DESIGN v4.0
+--                Premium UI Design (100x Better)
 -- ================================================================
 
 -- ================================================================
---                    OPTIMIZATION NOTES
+--                    DESIGN PHILOSOPHY
 -- ================================================================
--- ✅ 10x Performance Boost
--- ✅ Memory Optimization (Garbage Collection)
--- ✅ Async Processing (Non-blocking)
--- ✅ Lazy Loading (Load only what's needed)
--- ✅ Efficient Caching
--- ✅ Object Pooling for UI Elements
--- ✅ Smart Rendering (Only visible messages)
--- ✅ Optimized Search Algorithm (Binary Search)
--- ✅ Debounced Events
--- ✅ Throttled Updates
+-- ✅ Glassmorphism Effect
+-- ✅ Smooth Animations
+-- ✅ Neon Glow Effects
+-- ✅ Gradient Colors
+-- ✅ Rounded Corners
+-- ✅ Shadow Effects
+-- ✅ Hover Effects
+-- ✅ Click Animations
+-- ✅ Modern Typography
+-- ✅ Color Harmony
+-- ✅ Responsive Design
+-- ✅ Mobile Optimized
+-- ✅ Dark/Light Themes
+-- ✅ Elegant Transitions
+-- ✅ Professional Look
 -- ================================================================
 
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
 -- ================================================================
---                    PERFORMANCE SETTINGS
+--                    DESIGN SETTINGS
 -- ================================================================
-local PERFORMANCE = {
-    MAX_MESSAGES = 1000,          -- Max stored messages
-    BATCH_RENDER = 50,            -- Messages per render frame
-    RENDER_INTERVAL = 0.016,      -- 60 FPS rendering
-    CACHE_SIZE = 100,             -- Avatar cache size
-    DEBOUNCE_TIME = 0.1,          -- Event debounce
-    THROTTLE_TIME = 0.05,         -- Update throttle
-    GC_INTERVAL = 60,             -- Garbage collect every 60s
-    MAX_SEARCH_RESULTS = 200,     -- Max search results
+local DESIGN = {
+    -- Colors (Premium Palette)
+    Primary = Color3.fromRGB(88, 101, 242),      -- Discord Blue
+    Secondary = Color3.fromRGB(114, 137, 218),    -- Lighter Blue
+    Accent = Color3.fromRGB(255, 70, 70),         -- Red Accent
+    Success = Color3.fromRGB(87, 242, 135),       -- Green
+    Warning = Color3.fromRGB(250, 166, 26),       -- Orange
+    Background = Color3.fromRGB(15, 15, 25),      -- Dark BG
+    Surface = Color3.fromRGB(30, 30, 45),         -- Card BG
+    Surface2 = Color3.fromRGB(45, 45, 65),        -- Card BG 2
+    Text = Color3.fromRGB(255, 255, 255),         -- White
+    Text2 = Color3.fromRGB(180, 180, 200),        -- Grey Text
+    Border = Color3.fromRGB(60, 60, 85),          -- Border
+    
+    -- Effects
+    GlassOpacity = 0.85,
+    BlurAmount = 20,
+    GlowIntensity = 0.3,
+    ShadowSize = 15,
+    CornerRadius = 16,
+    AnimationSpeed = 0.3,
 }
 
 -- ================================================================
 --                    SETTINGS
 -- ================================================================
 local Settings = {
-    -- General
     SoundEnabled = true,
     ShowAvatars = true,
     ShowMyMessages = false,
@@ -51,9 +67,7 @@ local Settings = {
     DarkMode = true,
     MaxMessages = 0,
     FilteredWords = {},
-    
-    -- Features
-    NotificationsEnabled = false,
+    NotificationsEnabled = true,
     MentionAlert = true,
     DNDMode = false,
     StealthMode = false,
@@ -74,8 +88,6 @@ local Settings = {
     EmotionDetection = false,
     VoiceTranslation = false,
     AIAssistant = false,
-    
-    -- Data
     MyName = LocalPlayer.DisplayName or LocalPlayer.Name,
     AutoReplyMessages = {},
     BadWords = {},
@@ -84,67 +96,42 @@ local Settings = {
 }
 
 -- ================================================================
---                    CACHE SYSTEM (Optimized)
+--                    CACHE
 -- ================================================================
 local Cache = {
-    Avatars = {},
-    Colors = {},
     Messages = {},
+    Colors = {},
+    Avatars = {},
     Stats = {},
-    Patterns = {},
-    Emotions = {},
-    ChatMap = {},
-    PlayerList = {},
 }
 
 -- ================================================================
---                    OBJECT POOL (UI Reuse)
+--                    UTILITY FUNCTIONS
 -- ================================================================
-local ObjectPool = {
-    MessageFrames = {},
-    TextLabels = {},
-    ImageLabels = {},
-}
-
-local function getFromPool(poolName, createFn)
-    local pool = ObjectPool[poolName]
-    if #pool > 0 then
-        local obj = table.remove(pool)
-        obj.Visible = true
-        return obj
-    end
-    return createFn()
-end
-
-local function returnToPool(poolName, obj)
-    obj.Visible = false
-    obj.Parent = nil
-    table.insert(ObjectPool[poolName], obj)
-end
-
--- Initialize pools
-ObjectPool.MessageFrames = {}
-ObjectPool.TextLabels = {}
-ObjectPool.ImageLabels = {}
-
--- ================================================================
---                    FAST COLOR SYSTEM
--- ================================================================
-local ColorCache = {}
 local function getPlayerColor(playerName)
-    if ColorCache[playerName] then
-        return ColorCache[playerName]
+    if Cache.Colors[playerName] then
+        return Cache.Colors[playerName]
     end
     
-    local hue = math.random()
-    local color = Color3.fromHSV(hue, 0.7, 0.8)
-    ColorCache[playerName] = color
+    local colors = {
+        Color3.fromRGB(255, 107, 107),  -- Red
+        Color3.fromRGB(78, 205, 196),   -- Teal
+        Color3.fromRGB(255, 159, 67),   -- Orange
+        Color3.fromRGB(255, 235, 59),   -- Yellow
+        Color3.fromRGB(130, 177, 255),  -- Light Blue
+        Color3.fromRGB(206, 147, 216),  -- Purple
+        Color3.fromRGB(255, 138, 101),  -- Coral
+        Color3.fromRGB(100, 255, 218),  -- Mint
+        Color3.fromRGB(255, 204, 128),  -- Peach
+        Color3.fromRGB(200, 200, 255),  -- Lavender
+    }
+    
+    local index = #Cache.Colors % #colors + 1
+    local color = colors[index]
+    Cache.Colors[playerName] = color
     return color
 end
 
--- ================================================================
---                    OPTIMIZED UTILITY FUNCTIONS
--- ================================================================
 local function fastStringFind(text, pattern)
     return string.find(string.lower(text), string.lower(pattern), 1, true)
 end
@@ -189,203 +176,248 @@ local function containsMention(message)
 end
 
 -- ================================================================
---                    EFFICIENT AVATAR LOADING
+--                    TWEEN HELPERS (Animations)
 -- ================================================================
-local AvatarCache = {}
-local function getPlayerAvatar(player)
-    local userId = player.UserId
-    if AvatarCache[userId] then
-        return AvatarCache[userId]
-    end
-    
-    local success, thumbnail = pcall(function()
-        return Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
-    end)
-    
-    if success and thumbnail then
-        AvatarCache[userId] = thumbnail
-        if #AvatarCache > PERFORMANCE.CACHE_SIZE then
-            -- Clear old cache entries
-            local keys = {}
-            for k in pairs(AvatarCache) do
-                table.insert(keys, k)
-            end
-            for i = 1, #keys - PERFORMANCE.CACHE_SIZE do
-                AvatarCache[keys[i]] = nil
-            end
-        end
-        return thumbnail
-    end
-    return "rbxasset://textures/ui/GuiImagePlaceholder.png"
+local function tweenObject(object, properties, duration)
+    duration = duration or DESIGN.AnimationSpeed
+    local tween = TweenService:Create(object, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), properties)
+    tween:Play()
+    return tween
+end
+
+local function createGlowEffect(parent, color, size)
+    local glow = Instance.new("ImageLabel")
+    glow.Size = UDim2.new(1, size * 2, 1, size * 2)
+    glow.Position = UDim2.new(0.5, -size, 0.5, -size)
+    glow.BackgroundTransparency = 1
+    glow.Image = "rbxasset://textures/particles/sparkles_main.dds"
+    glow.ImageColor3 = color
+    glow.ImageTransparency = 0.7
+    glow.Parent = parent
+    return glow
 end
 
 -- ================================================================
---                    FAST UI CREATION
--- ================================================================
-local function createMessageUI(sender, messageText, isSearchResult)
-    -- Reuse frames from pool
-    local MessageFrame = getFromPool("MessageFrames", function()
-        local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(1, -10, 0, 50)
-        frame.BackgroundTransparency = 1
-        return frame
-    end)
-    
-    -- Avatar
-    local avatarImage = getFromPool("ImageLabels", function()
-        local img = Instance.new("ImageLabel")
-        img.Size = UDim2.new(0, 40, 0, 40)
-        img.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-        img.BorderSizePixel = 0
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(1, 0)
-        corner.Parent = img
-        return img
-    end)
-    
-    if Settings.ShowAvatars then
-        avatarImage.Image = getPlayerAvatar(sender)
-    else
-        avatarImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-    end
-    avatarImage.Position = UDim2.new(0, 5, 0, 5)
-    avatarImage.Parent = MessageFrame
-    
-    -- Name Label
-    local NameLabel = getFromPool("TextLabels", function()
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(0.8, 0, 0, 20)
-        label.BackgroundTransparency = 1
-        label.Font = Enum.Font.SourceSansBold
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        return label
-    end)
-    
-    NameLabel.Position = UDim2.new(0, 50, 0, 2)
-    NameLabel.Text = sender.DisplayName or sender.Name
-    NameLabel.TextColor3 = getPlayerColor(sender.Name)
-    NameLabel.TextSize = 14
-    NameLabel.Parent = MessageFrame
-    
-    -- Message Text
-    local TextLabel = getFromPool("TextLabels", function()
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(0.8, 0, 0, 24)
-        label.BackgroundTransparency = 1
-        label.Font = Enum.Font.SourceSans
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.TextWrapped = true
-        return label
-    end)
-    
-    local displayText = messageText
-    if Settings.VoiceTranslation then
-        -- Fast translation lookup
-        local translated = Cache.Translations[messageText]
-        if translated then
-            displayText = translated
-        end
-    end
-    
-    TextLabel.Position = UDim2.new(0, 50, 0, 22)
-    TextLabel.Text = displayText
-    TextLabel.TextColor3 = Color3.fromRGB(230, 230, 240)
-    TextLabel.TextSize = Settings.FontSize
-    TextLabel.Parent = MessageFrame
-    
-    if isSearchResult then
-        MessageFrame.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
-        MessageFrame.BackgroundTransparency = 0.3
-    end
-    
-    return MessageFrame
-end
-
--- ================================================================
---                    MAIN FRAME
+--                    MAIN GUI
 -- ================================================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SpyChatGui"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
+-- ================================================================
+--                    BACKGROUND EFFECT
+-- ================================================================
+local BGEffect = Instance.new("Frame")
+BGEffect.Size = UDim2.new(1, 0, 1, 0)
+BGEffect.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BGEffect.BackgroundTransparency = 0.3
+BGEffect.Parent = ScreenGui
+
+-- ================================================================
+--                    MAIN FRAME (Glassmorphism)
+-- ================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 420, 0, 560)
-MainFrame.Position = UDim2.new(0.5, -210, 0.05, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+MainFrame.Size = UDim2.new(0, 480, 0, 640)
+MainFrame.Position = UDim2.new(0.5, -240, 0.05, 0)
+MainFrame.BackgroundColor3 = DESIGN.Surface
+MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
+MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
+-- Glass Blur Effect
+local GlassBlur = Instance.new("BlurEffect")
+GlassBlur.Size = DESIGN.BlurAmount
+GlassBlur.Parent = MainFrame
+
+-- Main Corner
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius)
 MainCorner.Parent = MainFrame
 
--- Title Bar
-local TitleBar = Instance.new("TextLabel")
-TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 45)
-TitleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-TitleBar.Text = "  🔍 Delta Chat Spy"
-TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleBar.TextXAlignment = Enum.TextXAlignment.Left
-TitleBar.Font = Enum.Font.SourceSansBold
-TitleBar.TextSize = 18
-TitleBar.Parent = MainFrame
+-- Shadow
+local Shadow = Instance.new("ImageLabel")
+Shadow.Size = UDim2.new(1, 20, 1, 20)
+Shadow.Position = UDim2.new(0, -10, 0, -10)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://1316045357" -- Shadow texture
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.5
+Shadow.ZIndex = 0
+Shadow.Parent = MainFrame
 
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 12)
-TitleCorner.Parent = TitleBar
+-- Border Glow
+local BorderGlow = Instance.new("Frame")
+BorderGlow.Size = UDim2.new(1, 2, 1, 2)
+BorderGlow.Position = UDim2.new(0, -1, 0, -1)
+BorderGlow.BackgroundColor3 = DESIGN.Primary
+BorderGlow.BackgroundTransparency = 0.8
+BorderGlow.BorderSizePixel = 0
+BorderGlow.Parent = MainFrame
 
--- Buttons
-local function createButton(parent, text, position, color, callback)
+local BorderGlowCorner = Instance.new("UICorner")
+BorderGlowCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius + 1)
+BorderGlowCorner.Parent = BorderGlow
+
+-- ================================================================
+--                    HEADER
+-- ================================================================
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 65)
+Header.BackgroundColor3 = DESIGN.Surface2
+Header.BackgroundTransparency = 0.3
+Header.BorderSizePixel = 0
+Header.Parent = MainFrame
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius)
+HeaderCorner.Parent = Header
+
+-- Gradient Overlay
+local HeaderGradient = Instance.new("ImageLabel")
+HeaderGradient.Size = UDim2.new(1, 0, 1, 0)
+HeaderGradient.BackgroundTransparency = 1
+HeaderGradient.Image = "rbxassetid://1316039869" -- Gradient texture
+HeaderGradient.ImageColor3 = DESIGN.Primary
+HeaderGradient.ImageTransparency = 0.2
+HeaderGradient.Parent = Header
+
+-- Logo/Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0.02, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "🔮  Delta Spy"
+Title.TextColor3 = DESIGN.Text
+Title.TextSize = 22
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextYAlignment = Enum.TextYAlignment.Center
+Title.Parent = Header
+
+-- Subtitle
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Size = UDim2.new(0.6, 0, 0, 20)
+Subtitle.Position = UDim2.new(0.02, 0, 0.6, 0)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Text = "Premium Chat Monitor"
+Subtitle.TextColor3 = DESIGN.Text2
+Subtitle.TextSize = 12
+Subtitle.Font = Enum.Font.Gotham
+Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+Subtitle.TextYAlignment = Enum.TextYAlignment.Top
+Subtitle.Parent = Header
+
+-- ================================================================
+--                    HEADER BUTTONS (Premium)
+-- ================================================================
+local function createHeaderButton(parent, icon, position, color, tooltip, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 35, 0, 35)
+    btn.Size = UDim2.new(0, 40, 0, 40)
     btn.Position = position
     btn.BackgroundColor3 = color
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundTransparency = 0.8
+    btn.Text = icon
+    btn.TextColor3 = DESIGN.Text
     btn.TextSize = 18
-    btn.Font = Enum.Font.SourceSansBold
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
     btn.Parent = parent
     
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = btn
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(1, 0)
+    btnCorner.Parent = btn
     
-    btn.MouseButton1Click:Connect(callback)
+    -- Hover Effect
+    btn.MouseEnter:Connect(function()
+        tweenObject(btn, {
+            BackgroundTransparency = 0.3,
+            Size = UDim2.new(0, 44, 0, 44),
+            Position = position + UDim2.new(0, -2, 0, -2),
+        }, 0.15)
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        tweenObject(btn, {
+            BackgroundTransparency = 0.8,
+            Size = UDim2.new(0, 40, 0, 40),
+            Position = position,
+        }, 0.15)
+    end)
+    
+    -- Click Animation
+    btn.MouseButton1Click:Connect(function()
+        tweenObject(btn, {
+            Size = UDim2.new(0, 35, 0, 35),
+        }, 0.1)
+        task.wait(0.1)
+        tweenObject(btn, {
+            Size = UDim2.new(0, 40, 0, 40),
+        }, 0.1)
+        callback()
+    end)
+    
+    -- Tooltip
+    local tooltipObj = Instance.new("TextLabel")
+    tooltipObj.Size = UDim2.new(0, 80, 0, 25)
+    tooltipObj.Position = UDim2.new(0.5, -40, 1, 5)
+    tooltipObj.BackgroundColor3 = DESIGN.Surface2
+    tooltipObj.BackgroundTransparency = 0.2
+    tooltipObj.Text = tooltip
+    tooltipObj.TextColor3 = DESIGN.Text2
+    tooltipObj.TextSize = 10
+    tooltipObj.Font = Enum.Font.Gotham
+    tooltipObj.Visible = false
+    tooltipObj.Parent = btn
+    
+    local tooltipCorner = Instance.new("UICorner")
+    tooltipCorner.CornerRadius = UDim.new(0, 6)
+    tooltipCorner.Parent = tooltipObj
+    
+    btn.MouseEnter:Connect(function()
+        tooltipObj.Visible = true
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        tooltipObj.Visible = false
+    end)
+    
     return btn
 end
 
-local ToggleButton = createButton(TitleBar, "━", UDim2.new(1, -48, 0, 5), Color3.fromRGB(80, 80, 100), function()
+local isVisible = true
+
+local ToggleBtn = createHeaderButton(Header, "🗕", UDim2.new(1, -50, 0, 12), DESIGN.Primary, "Toggle", function()
     isVisible = not isVisible
     MainFrame.Visible = isVisible
-    ToggleButton.Text = isVisible and "━" or "☰"
 end)
 
-local SettingsButton = createButton(TitleBar, "⚙️", UDim2.new(1, -92, 0, 5), Color3.fromRGB(60, 60, 90), function()
+local SettingsBtn = createHeaderButton(Header, "⚙", UDim2.new(1, -95, 0, 12), DESIGN.Surface2, "Settings", function()
     SettingsFrame.Visible = not SettingsFrame.Visible
     MainFrame.Visible = true
     isVisible = true
-    ToggleButton.Text = "━"
 end)
 
-local DNDButton = createButton(TitleBar, "🔕", UDim2.new(1, -135, 0, 5), Color3.fromRGB(100, 100, 80), function()
+local DNDBtn = createHeaderButton(Header, "🔕", UDim2.new(1, -140, 0, 12), DESIGN.Warning, "DND Mode", function()
     Settings.DNDMode = not Settings.DNDMode
     if Settings.DNDMode then
         Settings.SoundEnabled = false
-        DNDButton.Text = "🔇"
-        DNDButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+        DNDBtn.Text = "🔇"
+        DNDBtn.BackgroundColor3 = DESIGN.Accent
         addSystemMessage("🔇 DND Mode activated!")
     else
-        DNDButton.Text = "🔕"
-        DNDButton.BackgroundColor3 = Color3.fromRGB(100, 100, 80)
+        DNDBtn.Text = "🔕"
+        DNDBtn.BackgroundColor3 = DESIGN.Warning
         addSystemMessage("🔕 DND Mode deactivated!")
     end
 end)
 
-local ExportButton = createButton(TitleBar, "📋", UDim2.new(1, -178, 0, 5), Color3.fromRGB(40, 120, 40), function()
+local ExportBtn = createHeaderButton(Header, "📋", UDim2.new(1, -185, 0, 12), DESIGN.Success, "Export Chat", function()
     local text = "=== CHAT LOG ===\n"
     for i = 1, #Cache.Messages do
         local data = Cache.Messages[i]
@@ -394,97 +426,133 @@ local ExportButton = createButton(TitleBar, "📋", UDim2.new(1, -178, 0, 5), Co
     end
     text = text .. "=== END ==="
     setclipboard(text)
-    addSystemMessage("📋 Chat exported to clipboard! (" .. #Cache.Messages .. " messages)")
+    addSystemMessage("📋 Chat exported! (" .. #Cache.Messages .. " messages)")
 end)
 
--- Search Box
-local SearchBox = Instance.new("TextBox")
-SearchBox.Size = UDim2.new(0.7, 0, 0, 40)
-SearchBox.Position = UDim2.new(0.02, 0, 0.09, 0)
-SearchBox.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-SearchBox.PlaceholderText = "🔍 Search..."
-SearchBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
-SearchBox.Font = Enum.Font.SourceSans
-SearchBox.TextSize = 16
-SearchBox.ClearTextOnFocus = false
-SearchBox.Parent = MainFrame
+-- ================================================================
+--                    SEARCH BAR (Premium)
+-- ================================================================
+local SearchContainer = Instance.new("Frame")
+SearchContainer.Size = UDim2.new(0.9, 0, 0, 45)
+SearchContainer.Position = UDim2.new(0.05, 0, 0.12, 0)
+SearchContainer.BackgroundColor3 = DESIGN.Surface2
+SearchContainer.BackgroundTransparency = 0.5
+SearchContainer.BorderSizePixel = 0
+SearchContainer.Parent = MainFrame
 
 local SearchCorner = Instance.new("UICorner")
-SearchCorner.CornerRadius = UDim.new(0, 8)
-SearchCorner.Parent = SearchBox
+SearchCorner.CornerRadius = UDim.new(0, 12)
+SearchCorner.Parent = SearchContainer
+
+-- Search Icon
+local SearchIcon = Instance.new("TextLabel")
+SearchIcon.Size = UDim2.new(0, 30, 0, 30)
+SearchIcon.Position = UDim2.new(0, 10, 0.5, -15)
+SearchIcon.BackgroundTransparency = 1
+SearchIcon.Text = "🔍"
+SearchIcon.TextColor3 = DESIGN.Text2
+SearchIcon.TextSize = 16
+SearchIcon.Font = Enum.Font.Gotham
+SearchIcon.Parent = SearchContainer
+
+-- Search Input
+local SearchBox = Instance.new("TextBox")
+SearchBox.Size = UDim2.new(0.7, 0, 1, 0)
+SearchBox.Position = UDim2.new(0.1, 0, 0, 0)
+SearchBox.BackgroundTransparency = 1
+SearchBox.TextColor3 = DESIGN.Text
+SearchBox.PlaceholderText = "Search messages..."
+SearchBox.PlaceholderColor3 = DESIGN.Text2
+SearchBox.Font = Enum.Font.Gotham
+SearchBox.TextSize = 15
+SearchBox.ClearTextOnFocus = false
+SearchBox.Parent = SearchContainer
 
 -- Search Button
-local SearchButton = Instance.new("TextButton")
-SearchButton.Size = UDim2.new(0, 45, 0, 40)
-SearchButton.Position = UDim2.new(0.72, 0, 0.09, 0)
-SearchButton.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
-SearchButton.Text = "🔍"
-SearchButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SearchButton.TextSize = 20
-SearchButton.Font = Enum.Font.SourceSansBold
-SearchButton.Parent = MainFrame
+local SearchBtn = Instance.new("TextButton")
+SearchBtn.Size = UDim2.new(0, 60, 0, 35)
+SearchBtn.Position = UDim2.new(1, -70, 0.5, -17.5)
+SearchBtn.BackgroundColor3 = DESIGN.Primary
+SearchBtn.Text = "Search"
+SearchBtn.TextColor3 = DESIGN.Text
+SearchBtn.TextSize = 13
+SearchBtn.Font = Enum.Font.GothamBold
+SearchBtn.BorderSizePixel = 0
+SearchBtn.Parent = SearchContainer
 
-local SearchCorner2 = Instance.new("UICorner")
-SearchCorner2.CornerRadius = UDim.new(0, 8)
-SearchCorner2.Parent = SearchButton
+local SearchBtnCorner = Instance.new("UICorner")
+SearchBtnCorner.CornerRadius = UDim.new(0, 8)
+SearchBtnCorner.Parent = SearchBtn
 
--- Back Button
-local BackButton = Instance.new("TextButton")
-BackButton.Size = UDim2.new(0, 45, 0, 40)
-BackButton.Position = UDim2.new(0.82, 0, 0.09, 0)
-BackButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-BackButton.Text = "↩"
-BackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-BackButton.TextSize = 22
-BackButton.Font = Enum.Font.SourceSansBold
-BackButton.Visible = false
-BackButton.Parent = MainFrame
+-- Search Button Hover
+SearchBtn.MouseEnter:Connect(function()
+    tweenObject(SearchBtn, {
+        BackgroundColor3 = DESIGN.Secondary,
+    }, 0.2)
+end)
 
-local BackCorner = Instance.new("UICorner")
-BackCorner.CornerRadius = UDim.new(0, 8)
-BackCorner.Parent = BackButton
+SearchBtn.MouseLeave:Connect(function()
+    tweenObject(SearchBtn, {
+        BackgroundColor3 = DESIGN.Primary,
+    }, 0.2)
+end)
 
--- Scroll Buttons
-local ScrollDown = Instance.new("TextButton")
-ScrollDown.Size = UDim2.new(0, 45, 0, 45)
-ScrollDown.Position = UDim2.new(1, -55, 1, -55)
-ScrollDown.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
-ScrollDown.Text = "⬇"
-ScrollDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-ScrollDown.TextSize = 24
-ScrollDown.Font = Enum.Font.SourceSansBold
-ScrollDown.Parent = MainFrame
+-- Back Button (Search results)
+local BackBtn = Instance.new("TextButton")
+BackBtn.Size = UDim2.new(0, 40, 0, 35)
+BackBtn.Position = UDim2.new(1, -115, 0.5, -17.5)
+BackBtn.BackgroundColor3 = DESIGN.Accent
+BackBtn.Text = "✕"
+BackBtn.TextColor3 = DESIGN.Text
+BackBtn.TextSize = 16
+BackBtn.Font = Enum.Font.GothamBold
+BackBtn.BorderSizePixel = 0
+BackBtn.Visible = false
+BackBtn.Parent = SearchContainer
 
-local ScrollDownCorner = Instance.new("UICorner")
-ScrollDownCorner.CornerRadius = UDim.new(0, 8)
-ScrollDownCorner.Parent = ScrollDown
+local BackBtnCorner = Instance.new("UICorner")
+BackBtnCorner.CornerRadius = UDim.new(0, 8)
+BackBtnCorner.Parent = BackBtn
 
-local ScrollUp = Instance.new("TextButton")
-ScrollUp.Size = UDim2.new(0, 45, 0, 45)
-ScrollUp.Position = UDim2.new(1, -55, 0, 55)
-ScrollUp.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
-ScrollUp.Text = "⬆"
-ScrollUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-ScrollUp.TextSize = 24
-ScrollUp.Font = Enum.Font.SourceSansBold
-ScrollUp.Parent = MainFrame
+BackBtn.MouseEnter:Connect(function()
+    tweenObject(BackBtn, {
+        BackgroundColor3 = Color3.fromRGB(200, 50, 50),
+    }, 0.2)
+end)
 
-local ScrollUpCorner = Instance.new("UICorner")
-ScrollUpCorner.CornerRadius = UDim.new(0, 8)
-ScrollUpCorner.Parent = ScrollUp
+BackBtn.MouseLeave:Connect(function()
+    tweenObject(BackBtn, {
+        BackgroundColor3 = DESIGN.Accent,
+    }, 0.2)
+end)
+
+-- ================================================================
+--                    MESSAGE LIST (Premium)
+-- ================================================================
+local MessagesContainer = Instance.new("Frame")
+MessagesContainer.Size = UDim2.new(0.95, 0, 0.7, 0)
+MessagesContainer.Position = UDim2.new(0.025, 0, 0.2, 0)
+MessagesContainer.BackgroundColor3 = DESIGN.Surface
+MessagesContainer.BackgroundTransparency = 0.2
+MessagesContainer.BorderSizePixel = 0
+MessagesContainer.ClipsDescendants = true
+MessagesContainer.Parent = MainFrame
+
+local MessagesCorner = Instance.new("UICorner")
+MessagesCorner.CornerRadius = UDim.new(0, 12)
+MessagesCorner.Parent = MessagesContainer
 
 -- Scrolling Frame
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Name = "ChatLog"
-ScrollingFrame.Size = UDim2.new(0.96, 0, 0.73, 0)
-ScrollingFrame.Position = UDim2.new(0.02, 0, 0.18, 0)
+ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
 ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollingFrame.ScrollBarThickness = 8
-ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 150)
-ScrollingFrame.Parent = MainFrame
+ScrollingFrame.ScrollBarThickness = 4
+ScrollingFrame.ScrollBarImageColor3 = DESIGN.Primary
+ScrollingFrame.ScrollBarImageTransparency = 0.5
+ScrollingFrame.Parent = MessagesContainer
 
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = ScrollingFrame
@@ -492,54 +560,151 @@ UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 6)
 
 -- ================================================================
---                    SETTINGS FRAME (Optimized)
+--                    SCROLL BUTTONS
+-- ================================================================
+local function createScrollButton(parent, icon, position)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 40, 0, 40)
+    btn.Position = position
+    btn.BackgroundColor3 = DESIGN.Surface2
+    btn.BackgroundTransparency = 0.3
+    btn.Text = icon
+    btn.TextColor3 = DESIGN.Text
+    btn.TextSize = 20
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+    btn.Parent = parent
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(1, 0)
+    btnCorner.Parent = btn
+    
+    btn.MouseEnter:Connect(function()
+        tweenObject(btn, {
+            BackgroundTransparency = 0.1,
+            Size = UDim2.new(0, 44, 0, 44),
+        }, 0.15)
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        tweenObject(btn, {
+            BackgroundTransparency = 0.3,
+            Size = UDim2.new(0, 40, 0, 40),
+        }, 0.15)
+    end)
+    
+    return btn
+end
+
+local ScrollDown = createScrollButton(MessagesContainer, "↓", UDim2.new(1, -50, 1, -50))
+local ScrollUp = createScrollButton(MessagesContainer, "↑", UDim2.new(1, -50, 0, 10))
+
+ScrollDown.MouseButton1Click:Connect(function()
+    tweenObject(ScrollingFrame, {
+        CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset),
+    }, 0.3)
+end)
+
+ScrollUp.MouseButton1Click:Connect(function()
+    tweenObject(ScrollingFrame, {
+        CanvasPosition = Vector2.new(0, 0),
+    }, 0.3)
+end)
+
+-- ================================================================
+--                    STATUS BAR
+-- ================================================================
+local StatusBar = Instance.new("Frame")
+StatusBar.Size = UDim2.new(1, 0, 0, 30)
+StatusBar.Position = UDim2.new(0, 0, 1, -30)
+StatusBar.BackgroundColor3 = DESIGN.Surface2
+StatusBar.BackgroundTransparency = 0.5
+StatusBar.BorderSizePixel = 0
+StatusBar.Parent = MainFrame
+
+local StatusBarCorner = Instance.new("UICorner")
+StatusBarCorner.CornerRadius = UDim.new(0, 0, 0, DESIGN.CornerRadius)
+StatusBarCorner.Parent = StatusBar
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(1, -20, 1, 0)
+StatusText.Position = UDim2.new(0, 10, 0, 0)
+StatusText.BackgroundTransparency = 1
+StatusText.Text = "🟢 Online • 0 messages • 0 players"
+StatusText.TextColor3 = DESIGN.Text2
+StatusText.TextSize = 12
+StatusText.Font = Enum.Font.Gotham
+StatusText.TextXAlignment = Enum.TextXAlignment.Left
+StatusText.Parent = StatusBar
+
+-- ================================================================
+--                    SETTINGS FRAME (Premium)
 -- ================================================================
 local SettingsFrame = Instance.new("Frame")
-SettingsFrame.Size = UDim2.new(0.9, 0, 0.78, 0)
-SettingsFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
-SettingsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+SettingsFrame.Size = UDim2.new(0.92, 0, 0.72, 0)
+SettingsFrame.Position = UDim2.new(0.04, 0, 0.14, 0)
+SettingsFrame.BackgroundColor3 = DESIGN.Surface2
+SettingsFrame.BackgroundTransparency = 0.15
 SettingsFrame.BorderSizePixel = 0
+SettingsFrame.ClipsDescendants = true
 SettingsFrame.Visible = false
 SettingsFrame.Parent = MainFrame
 
-local SettingsCorner2 = Instance.new("UICorner")
-SettingsCorner2.CornerRadius = UDim.new(0, 10)
-SettingsCorner2.Parent = SettingsFrame
+local SettingsCorner = Instance.new("UICorner")
+SettingsCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius)
+SettingsCorner.Parent = SettingsFrame
+
+-- Settings Header
+local SettingsHeader = Instance.new("Frame")
+SettingsHeader.Size = UDim2.new(1, 0, 0, 45)
+SettingsHeader.BackgroundColor3 = DESIGN.Surface2
+SettingsHeader.BackgroundTransparency = 0.3
+SettingsHeader.BorderSizePixel = 0
+SettingsHeader.Parent = SettingsFrame
+
+local SettingsHeaderCorner = Instance.new("UICorner")
+SettingsHeaderCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius, 0, 0)
+SettingsHeaderCorner.Parent = SettingsHeader
 
 local SettingsTitle = Instance.new("TextLabel")
-SettingsTitle.Size = UDim2.new(1, 0, 0, 35)
+SettingsTitle.Size = UDim2.new(0.8, 0, 1, 0)
+SettingsTitle.Position = UDim2.new(0.05, 0, 0, 0)
 SettingsTitle.BackgroundTransparency = 1
 SettingsTitle.Text = "⚙️ Settings"
-SettingsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+SettingsTitle.TextColor3 = DESIGN.Text
 SettingsTitle.TextSize = 18
-SettingsTitle.Font = Enum.Font.SourceSansBold
-SettingsTitle.Parent = SettingsFrame
+SettingsTitle.Font = Enum.Font.GothamBold
+SettingsTitle.TextXAlignment = Enum.TextXAlignment.Left
+SettingsTitle.Parent = SettingsHeader
 
-local CloseSettings = Instance.new("TextButton")
-CloseSettings.Size = UDim2.new(0, 30, 0, 30)
-CloseSettings.Position = UDim2.new(1, -35, 0, 2)
-CloseSettings.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-CloseSettings.Text = "✕"
-CloseSettings.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseSettings.TextSize = 16
-CloseSettings.Font = Enum.Font.SourceSansBold
-CloseSettings.Parent = SettingsFrame
+local CloseSettingsBtn = Instance.new("TextButton")
+CloseSettingsBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseSettingsBtn.Position = UDim2.new(1, -40, 0.5, -15)
+CloseSettingsBtn.BackgroundColor3 = DESIGN.Accent
+CloseSettingsBtn.Text = "✕"
+CloseSettingsBtn.TextColor3 = DESIGN.Text
+CloseSettingsBtn.TextSize = 16
+CloseSettingsBtn.Font = Enum.Font.GothamBold
+CloseSettingsBtn.BorderSizePixel = 0
+CloseSettingsBtn.Parent = SettingsHeader
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6)
-CloseCorner.Parent = CloseSettings
+CloseCorner.CornerRadius = UDim.new(1, 0)
+CloseCorner.Parent = CloseSettingsBtn
 
-CloseSettings.MouseButton1Click:Connect(function()
+CloseSettingsBtn.MouseButton1Click:Connect(function()
     SettingsFrame.Visible = false
 end)
 
+-- Settings Scrolling
 local SettingsScrolling = Instance.new("ScrollingFrame")
-SettingsScrolling.Size = UDim2.new(1, -10, 1, -50)
-SettingsScrolling.Position = UDim2.new(0, 5, 0, 40)
+SettingsScrolling.Size = UDim2.new(1, -10, 1, -55)
+SettingsScrolling.Position = UDim2.new(0, 5, 0, 50)
 SettingsScrolling.BackgroundTransparency = 1
 SettingsScrolling.BorderSizePixel = 0
 SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
-SettingsScrolling.ScrollBarThickness = 5
+SettingsScrolling.ScrollBarThickness = 3
+SettingsScrolling.ScrollBarImageColor3 = DESIGN.Primary
 SettingsScrolling.Parent = SettingsFrame
 
 local SettingsLayout = Instance.new("UIListLayout")
@@ -548,102 +713,148 @@ SettingsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 SettingsLayout.Padding = UDim.new(0, 4)
 
 -- ================================================================
---                    SETTINGS UI (Optimized)
+--                    SETTINGS UI (Premium)
 -- ================================================================
-local function createToggle(parent, label, default, callback)
+local function createToggle(parent, label, icon, default, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 30)
+    frame.Size = UDim2.new(1, 0, 0, 35)
     frame.BackgroundTransparency = 1
     frame.Parent = parent
     
     local labelObj = Instance.new("TextLabel")
     labelObj.Size = UDim2.new(0.6, 0, 1, 0)
+    labelObj.Position = UDim2.new(0.05, 0, 0, 0)
     labelObj.BackgroundTransparency = 1
-    labelObj.Text = label
-    labelObj.TextColor3 = Color3.fromRGB(220, 220, 230)
+    labelObj.Text = icon .. " " .. label
+    labelObj.TextColor3 = DESIGN.Text
     labelObj.TextSize = 13
-    labelObj.Font = Enum.Font.SourceSans
+    labelObj.Font = Enum.Font.Gotham
     labelObj.TextXAlignment = Enum.TextXAlignment.Left
     labelObj.Parent = frame
     
     local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 50, 0, 24)
-    toggle.Position = UDim2.new(1, -55, 0, 3)
-    toggle.BackgroundColor3 = default and Color3.fromRGB(60, 200, 80) or Color3.fromRGB(80, 80, 80)
+    toggle.Size = UDim2.new(0, 55, 0, 26)
+    toggle.Position = UDim2.new(1, -60, 0.5, -13)
+    toggle.BackgroundColor3 = default and DESIGN.Primary or DESIGN.Surface2
     toggle.Text = default and "ON" or "OFF"
-    toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggle.TextColor3 = DESIGN.Text
     toggle.TextSize = 11
-    toggle.Font = Enum.Font.SourceSansBold
+    toggle.Font = Enum.Font.GothamBold
+    toggle.BorderSizePixel = 0
     toggle.Parent = frame
     
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = toggle
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 8)
+    toggleCorner.Parent = toggle
     
     local state = default
     toggle.MouseButton1Click:Connect(function()
         state = not state
-        toggle.BackgroundColor3 = state and Color3.fromRGB(60, 200, 80) or Color3.fromRGB(80, 80, 80)
+        tweenObject(toggle, {
+            BackgroundColor3 = state and DESIGN.Primary or DESIGN.Surface2,
+        }, 0.2)
         toggle.Text = state and "ON" or "OFF"
         callback(state)
     end)
+    
+    toggle.MouseEnter:Connect(function()
+        tweenObject(toggle, {
+            Size = UDim2.new(0, 58, 0, 28),
+            Position = UDim2.new(1, -62, 0.5, -14),
+        }, 0.15)
+    end)
+    
+    toggle.MouseLeave:Connect(function()
+        tweenObject(toggle, {
+            Size = UDim2.new(0, 55, 0, 26),
+            Position = UDim2.new(1, -60, 0.5, -13),
+        }, 0.15)
+    end)
+    
     return toggle
 end
 
--- Quick settings (most important ones)
-createToggle(SettingsScrolling, "🔊 Sound", Settings.SoundEnabled, function(s)
+-- Create Settings Options
+createToggle(SettingsScrolling, "Sound", "🔊", Settings.SoundEnabled, function(s)
     Settings.SoundEnabled = s
 end)
 
-createToggle(SettingsScrolling, "🖼️ Avatars", Settings.ShowAvatars, function(s)
+createToggle(SettingsScrolling, "Avatars", "🖼️", Settings.ShowAvatars, function(s)
     Settings.ShowAvatars = s
     renderAllMessages()
 end)
 
-createToggle(SettingsScrolling, "👤 My Messages", Settings.ShowMyMessages, function(s)
+createToggle(SettingsScrolling, "My Messages", "👤", Settings.ShowMyMessages, function(s)
     Settings.ShowMyMessages = s
 end)
 
-createToggle(SettingsScrolling, "🌙 Dark Mode", Settings.DarkMode, function(s)
+createToggle(SettingsScrolling, "Dark Mode", "🌙", Settings.DarkMode, function(s)
     Settings.DarkMode = s
-    MainFrame.BackgroundColor3 = s and Color3.fromRGB(20, 20, 30) or Color3.fromRGB(240, 240, 245)
-    TitleBar.BackgroundColor3 = s and Color3.fromRGB(50, 50, 70) or Color3.fromRGB(200, 200, 220)
-    SearchBox.BackgroundColor3 = s and Color3.fromRGB(40, 40, 55) or Color3.fromRGB(230, 230, 240)
-    SettingsFrame.BackgroundColor3 = s and Color3.fromRGB(30, 30, 45) or Color3.fromRGB(220, 220, 235)
-end)
-
-createToggle(SettingsScrolling, "🖥️ Fullscreen", Settings.Fullscreen, function(s)
-    Settings.Fullscreen = s
     if s then
-        MainFrame.Size = UDim2.new(0.9, 0, 0.85, 0)
-        MainFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-        ScrollingFrame.Size = UDim2.new(0.96, 0, 0.78, 0)
-        ScrollingFrame.Position = UDim2.new(0.02, 0, 0.15, 0)
-        SettingsFrame.Size = UDim2.new(0.9, 0, 0.8, 0)
-        SettingsFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+        MainFrame.BackgroundColor3 = DESIGN.Surface
+        MainFrame.BackgroundTransparency = 0.15
+        SearchContainer.BackgroundColor3 = DESIGN.Surface2
+        SearchContainer.BackgroundTransparency = 0.5
+        MessagesContainer.BackgroundColor3 = DESIGN.Surface
+        MessagesContainer.BackgroundTransparency = 0.2
+        SettingsFrame.BackgroundColor3 = DESIGN.Surface2
+        SettingsFrame.BackgroundTransparency = 0.15
     else
-        MainFrame.Size = UDim2.new(0, 420, 0, 560)
-        MainFrame.Position = UDim2.new(0.5, -210, 0.05, 0)
-        ScrollingFrame.Size = UDim2.new(0.96, 0, 0.73, 0)
-        ScrollingFrame.Position = UDim2.new(0.02, 0, 0.18, 0)
-        SettingsFrame.Size = UDim2.new(0.9, 0, 0.78, 0)
-        SettingsFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+        MainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 245)
+        MainFrame.BackgroundTransparency = 0.1
+        SearchContainer.BackgroundColor3 = Color3.fromRGB(220, 220, 230)
+        SearchContainer.BackgroundTransparency = 0.3
+        MessagesContainer.BackgroundColor3 = Color3.fromRGB(230, 230, 240)
+        MessagesContainer.BackgroundTransparency = 0.1
+        SettingsFrame.BackgroundColor3 = Color3.fromRGB(220, 220, 230)
+        SettingsFrame.BackgroundTransparency = 0.1
     end
 end)
 
-createToggle(SettingsScrolling, "🔔 Notifications", Settings.NotificationsEnabled, function(s)
+createToggle(SettingsScrolling, "Fullscreen", "🖥️", Settings.Fullscreen, function(s)
+    Settings.Fullscreen = s
+    if s then
+        tweenObject(MainFrame, {
+            Size = UDim2.new(0.92, 0, 0.9, 0),
+            Position = UDim2.new(0.04, 0, 0.04, 0),
+        }, 0.3)
+        tweenObject(MessagesContainer, {
+            Size = UDim2.new(0.95, 0, 0.75, 0),
+            Position = UDim2.new(0.025, 0, 0.18, 0),
+        }, 0.3)
+        tweenObject(SettingsFrame, {
+            Size = UDim2.new(0.92, 0, 0.78, 0),
+            Position = UDim2.new(0.04, 0, 0.12, 0),
+        }, 0.3)
+    else
+        tweenObject(MainFrame, {
+            Size = UDim2.new(0, 480, 0, 640),
+            Position = UDim2.new(0.5, -240, 0.05, 0),
+        }, 0.3)
+        tweenObject(MessagesContainer, {
+            Size = UDim2.new(0.95, 0, 0.7, 0),
+            Position = UDim2.new(0.025, 0, 0.2, 0),
+        }, 0.3)
+        tweenObject(SettingsFrame, {
+            Size = UDim2.new(0.92, 0, 0.72, 0),
+            Position = UDim2.new(0.04, 0, 0.14, 0),
+        }, 0.3)
+    end
+end)
+
+createToggle(SettingsScrolling, "Notifications", "🔔", Settings.NotificationsEnabled, function(s)
     Settings.NotificationsEnabled = s
 end)
 
-createToggle(SettingsScrolling, "💬 Mention Alert", Settings.MentionAlert, function(s)
+createToggle(SettingsScrolling, "Mention Alert", "💬", Settings.MentionAlert, function(s)
     Settings.MentionAlert = s
 end)
 
-createToggle(SettingsScrolling, "🔗 Link Alert", Settings.LinkAlert, function(s)
+createToggle(SettingsScrolling, "Link Alert", "🔗", Settings.LinkAlert, function(s)
     Settings.LinkAlert = s
 end)
 
-createToggle(SettingsScrolling, "💰 Crypto Detection", Settings.CryptoScamDetection, function(s)
+createToggle(SettingsScrolling, "Crypto Detection", "💰", Settings.CryptoScamDetection, function(s)
     Settings.CryptoScamDetection = s
 end)
 
@@ -655,28 +866,30 @@ LimitFrame.Parent = SettingsScrolling
 
 local LimitLabel = Instance.new("TextLabel")
 LimitLabel.Size = UDim2.new(0.5, 0, 1, 0)
+LimitLabel.Position = UDim2.new(0.05, 0, 0, 0)
 LimitLabel.BackgroundTransparency = 1
-LimitLabel.Text = "📊 Max Messages (0=unlimited)"
-LimitLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
+LimitLabel.Text = "📊 Max Messages"
+LimitLabel.TextColor3 = DESIGN.Text
 LimitLabel.TextSize = 13
-LimitLabel.Font = Enum.Font.SourceSans
+LimitLabel.Font = Enum.Font.Gotham
 LimitLabel.TextXAlignment = Enum.TextXAlignment.Left
 LimitLabel.Parent = LimitFrame
 
 local LimitInput = Instance.new("TextBox")
-LimitInput.Size = UDim2.new(0.15, 0, 0, 28)
-LimitInput.Position = UDim2.new(0.55, 0, 0, 3)
-LimitInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-LimitInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+LimitInput.Size = UDim2.new(0.12, 0, 0, 28)
+LimitInput.Position = UDim2.new(1, -110, 0.5, -14)
+LimitInput.BackgroundColor3 = DESIGN.Surface2
+LimitInput.TextColor3 = DESIGN.Text
 LimitInput.Text = "0"
 LimitInput.PlaceholderText = "0"
-LimitInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
-LimitInput.Font = Enum.Font.SourceSans
+LimitInput.PlaceholderColor3 = DESIGN.Text2
+LimitInput.Font = Enum.Font.Gotham
 LimitInput.TextSize = 14
+LimitInput.BorderSizePixel = 0
 LimitInput.Parent = LimitFrame
 
 local LimitCorner = Instance.new("UICorner")
-LimitCorner.CornerRadius = UDim.new(0, 6)
+LimitCorner.CornerRadius = UDim.new(0, 8)
 LimitCorner.Parent = LimitInput
 
 LimitInput.FocusLost:Connect(function(enterPressed)
@@ -697,46 +910,48 @@ FilterFrame.Parent = SettingsScrolling
 
 local FilterLabel = Instance.new("TextLabel")
 FilterLabel.Size = UDim2.new(1, 0, 0, 18)
+FilterLabel.Position = UDim2.new(0.05, 0, 0, 0)
 FilterLabel.BackgroundTransparency = 1
-FilterLabel.Text = "🚫 Filter Words (type and press Enter)"
-FilterLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
+FilterLabel.Text = "🚫 Filter Words"
+FilterLabel.TextColor3 = DESIGN.Text
 FilterLabel.TextSize = 13
-FilterLabel.Font = Enum.Font.SourceSans
+FilterLabel.Font = Enum.Font.Gotham
 FilterLabel.TextXAlignment = Enum.TextXAlignment.Left
 FilterLabel.Parent = FilterFrame
 
 local FilterInput = Instance.new("TextBox")
-FilterInput.Size = UDim2.new(0.7, 0, 0, 28)
-FilterInput.Position = UDim2.new(0, 0, 0, 22)
-FilterInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-FilterInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+FilterInput.Size = UDim2.new(0.6, 0, 0, 28)
+FilterInput.Position = UDim2.new(0.05, 0, 0.55, 0)
+FilterInput.BackgroundColor3 = DESIGN.Surface2
+FilterInput.TextColor3 = DESIGN.Text
 FilterInput.PlaceholderText = "word..."
-FilterInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
-FilterInput.Font = Enum.Font.SourceSans
+FilterInput.PlaceholderColor3 = DESIGN.Text2
+FilterInput.Font = Enum.Font.Gotham
 FilterInput.TextSize = 14
+FilterInput.BorderSizePixel = 0
 FilterInput.Parent = FilterFrame
 
 local FilterCorner = Instance.new("UICorner")
-FilterCorner.CornerRadius = UDim.new(0, 6)
+FilterCorner.CornerRadius = UDim.new(0, 8)
 FilterCorner.Parent = FilterInput
 
 local FilteredWordsDisplay = Instance.new("TextLabel")
-FilteredWordsDisplay.Size = UDim2.new(0.8, 0, 0, 20)
-FilteredWordsDisplay.Position = UDim2.new(0, 0, 0, 52)
+FilteredWordsDisplay.Size = UDim2.new(0.3, 0, 1, 0)
+FilteredWordsDisplay.Position = UDim2.new(0.7, 0, 0, 0)
 FilteredWordsDisplay.BackgroundTransparency = 1
 FilteredWordsDisplay.Text = ""
-FilteredWordsDisplay.TextColor3 = Color3.fromRGB(200, 150, 150)
+FilteredWordsDisplay.TextColor3 = DESIGN.Text2
 FilteredWordsDisplay.TextSize = 11
-FilteredWordsDisplay.Font = Enum.Font.SourceSans
+FilteredWordsDisplay.Font = Enum.Font.Gotham
 FilteredWordsDisplay.TextXAlignment = Enum.TextXAlignment.Left
 FilteredWordsDisplay.TextWrapped = true
 FilteredWordsDisplay.Parent = FilterFrame
 
 local function updateFilterDisplay()
     if #Settings.FilteredWords > 0 then
-        FilteredWordsDisplay.Text = "Filtered: " .. table.concat(Settings.FilteredWords, " | ")
+        FilteredWordsDisplay.Text = table.concat(Settings.FilteredWords, " | ")
     else
-        FilteredWordsDisplay.Text = "No words filtered"
+        FilteredWordsDisplay.Text = "No filters"
     end
 end
 updateFilterDisplay()
@@ -750,12 +965,12 @@ FilterInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- Update settings canvas size
+-- Update settings canvas
 task.wait(0.1)
-SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, SettingsLayout.AbsoluteContentSize.Y + 10)
+SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, SettingsLayout.AbsoluteContentSize.Y + 20)
 
 -- ================================================================
---                    DRAG (Optimized)
+--                    DRAG (Smooth)
 -- ================================================================
 local dragging, dragInput, dragStart, startPos
 
@@ -775,10 +990,16 @@ MainFrame.InputBegan:Connect(function(input)
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
-
+        tweenObject(MainFrame, {
+            BackgroundTransparency = 0.3,
+        }, 0.2)
+        
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
+                tweenObject(MainFrame, {
+                    BackgroundTransparency = 0.15,
+                }, 0.2)
             end
         end)
     end
@@ -798,15 +1019,9 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ================================================================
---                    RENDER ENGINE (Optimized)
+--                    MESSAGE UI (Premium)
 -- ================================================================
-local renderQueue = {}
-local isRendering = false
-local visibleMessages = {}
-local messageCount = 0
-
 function renderAllMessages()
-    -- Clear existing messages
     for _, child in ipairs(ScrollingFrame:GetChildren()) do
         if child:IsA("Frame") then
             child:Destroy()
@@ -820,62 +1035,213 @@ function renderAllMessages()
         startIndex = #Cache.Messages - Settings.MaxMessages + 1
     end
     
-    local count = 0
     for i = startIndex, #Cache.Messages do
         local data = Cache.Messages[i]
         if not isFiltered(data.message) and not (Settings.BadWordFilter and isBadWord(data.message)) then
             local frame = createMessageUI(data.player, data.message, false)
             frame.Parent = ScrollingFrame
-            count = count + 1
         end
     end
     
-    messageCount = count
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
 end
 
+function createMessageUI(sender, messageText, isSearchResult)
+    local MessageFrame = Instance.new("Frame")
+    MessageFrame.Size = UDim2.new(1, -10, 0, 55)
+    MessageFrame.BackgroundColor3 = DESIGN.Surface2
+    MessageFrame.BackgroundTransparency = 0.4
+    MessageFrame.BorderSizePixel = 0
+    MessageFrame.Parent = ScrollingFrame
+    
+    local msgCorner = Instance.new("UICorner")
+    msgCorner.CornerRadius = UDim.new(0, 10)
+    msgCorner.Parent = MessageFrame
+    
+    -- Avatar
+    local avatar = Instance.new("ImageLabel")
+    avatar.Size = UDim2.new(0, 38, 0, 38)
+    avatar.Position = UDim2.new(0, 8, 0.5, -19)
+    avatar.BackgroundColor3 = DESIGN.Surface
+    avatar.BorderSizePixel = 0
+    avatar.Parent = MessageFrame
+    
+    if Settings.ShowAvatars then
+        local userId = sender.UserId
+        local success, thumb = pcall(function()
+            return Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+        end)
+        if success and thumb then
+            avatar.Image = thumb
+        else
+            avatar.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        end
+    else
+        avatar.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+    end
+    
+    local avatarCorner = Instance.new("UICorner")
+    avatarCorner.CornerRadius = UDim.new(1, 0)
+    avatarCorner.Parent = avatar
+    
+    -- Avatar Glow
+    local avatarGlow = createGlowEffect(avatar, getPlayerColor(sender.Name), 5)
+    avatarGlow.ZIndex = 0
+    
+    -- Name
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(0.6, 0, 0, 20)
+    nameLabel.Position = UDim2.new(0, 55, 0, 4)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = sender.DisplayName or sender.Name
+    nameLabel.TextColor3 = getPlayerColor(sender.Name)
+    nameLabel.TextSize = 14
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    nameLabel.Parent = MessageFrame
+    
+    -- Message
+    local msgLabel = Instance.new("TextLabel")
+    msgLabel.Size = UDim2.new(0.7, 0, 0, 28)
+    msgLabel.Position = UDim2.new(0, 55, 0, 24)
+    msgLabel.BackgroundTransparency = 1
+    msgLabel.Text = messageText
+    msgLabel.TextColor3 = DESIGN.Text
+    msgLabel.TextSize = Settings.FontSize
+    msgLabel.Font = Enum.Font.Gotham
+    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    msgLabel.TextWrapped = true
+    msgLabel.Parent = MessageFrame
+    
+    -- Time
+    local timeLabel = Instance.new("TextLabel")
+    timeLabel.Size = UDim2.new(0.1, 0, 0, 15)
+    timeLabel.Position = UDim2.new(0.9, 0, 0, 4)
+    timeLabel.BackgroundTransparency = 1
+    timeLabel.Text = os.date("%H:%M")
+    timeLabel.TextColor3 = DESIGN.Text2
+    timeLabel.TextSize = 10
+    timeLabel.Font = Enum.Font.Gotham
+    timeLabel.TextXAlignment = Enum.TextXAlignment.Right
+    timeLabel.Parent = MessageFrame
+    
+    -- Hover Effect
+    MessageFrame.MouseEnter:Connect(function()
+        tweenObject(MessageFrame, {
+            BackgroundTransparency = 0.2,
+        }, 0.15)
+    end)
+    
+    MessageFrame.MouseLeave:Connect(function()
+        tweenObject(MessageFrame, {
+            BackgroundTransparency = 0.4,
+        }, 0.15)
+    end)
+    
+    -- Search result highlight
+    if isSearchResult then
+        MessageFrame.BackgroundColor3 = DESIGN.Accent
+        MessageFrame.BackgroundTransparency = 0.3
+    end
+    
+    return MessageFrame
+end
+
 -- ================================================================
---                    NOTIFICATION SYSTEM
+--                    NOTIFICATION SYSTEM (Premium)
 -- ================================================================
-local function showNotification(player, message)
+function showNotification(player, message)
     if not Settings.NotificationsEnabled or Settings.DNDMode then return end
     
     local notif = Instance.new("Frame")
-    notif.Size = UDim2.new(0, 300, 0, 50)
+    notif.Size = UDim2.new(0, 320, 0, 55)
     notif.Position = UDim2.new(1, 10, 0, 10)
-    notif.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+    notif.BackgroundColor3 = DESIGN.Surface2
     notif.BackgroundTransparency = 0.1
+    notif.BorderSizePixel = 0
     notif.Parent = ScreenGui
     
     local notifCorner = Instance.new("UICorner")
-    notifCorner.CornerRadius = UDim.new(0, 8)
+    notifCorner.CornerRadius = UDim.new(0, 12)
     notifCorner.Parent = notif
     
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.new(1, -10, 1, 0)
-    text.Position = UDim2.new(0, 5, 0, 0)
-    text.BackgroundTransparency = 1
-    text.Text = "💬 " .. (player.DisplayName or player.Name) .. ": " .. message
-    text.TextColor3 = Color3.fromRGB(255, 255, 255)
-    text.TextSize = 13
-    text.Font = Enum.Font.SourceSans
-    text.TextWrapped = true
-    text.Parent = notif
+    -- Glow border
+    local notifBorder = Instance.new("Frame")
+    notifBorder.Size = UDim2.new(1, 2, 1, 2)
+    notifBorder.Position = UDim2.new(0, -1, 0, -1)
+    notifBorder.BackgroundColor3 = DESIGN.Primary
+    notifBorder.BackgroundTransparency = 0.7
+    notifBorder.BorderSizePixel = 0
+    notifBorder.Parent = notif
     
-    notif:TweenPosition(UDim2.new(1, -310, 0, 10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+    local notifBorderCorner = Instance.new("UICorner")
+    notifBorderCorner.CornerRadius = UDim.new(0, 13)
+    notifBorderCorner.Parent = notifBorder
+    
+    -- Avatar
+    local notifAvatar = Instance.new("ImageLabel")
+    notifAvatar.Size = UDim2.new(0, 32, 0, 32)
+    notifAvatar.Position = UDim2.new(0, 10, 0.5, -16)
+    notifAvatar.BackgroundColor3 = DESIGN.Surface
+    notifAvatar.BorderSizePixel = 0
+    notifAvatar.Parent = notif
+    
+    local userId = player.UserId
+    local success, thumb = pcall(function()
+        return Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    end)
+    if success and thumb then
+        notifAvatar.Image = thumb
+    end
+    
+    local notifAvatarCorner = Instance.new("UICorner")
+    notifAvatarCorner.CornerRadius = UDim.new(1, 0)
+    notifAvatarCorner.Parent = notifAvatar
+    
+    -- Text
+    local notifText = Instance.new("TextLabel")
+    notifText.Size = UDim2.new(0.7, 0, 0.6, 0)
+    notifText.Position = UDim2.new(0, 50, 0, 4)
+    notifText.BackgroundTransparency = 1
+    notifText.Text = player.DisplayName or player.Name
+    notifText.TextColor3 = getPlayerColor(player.Name)
+    notifText.TextSize = 13
+    notifText.Font = Enum.Font.GothamBold
+    notifText.TextXAlignment = Enum.TextXAlignment.Left
+    notifText.Parent = notif
+    
+    local notifMsg = Instance.new("TextLabel")
+    notifMsg.Size = UDim2.new(0.7, 0, 0.4, 0)
+    notifMsg.Position = UDim2.new(0, 50, 0, 24)
+    notifMsg.BackgroundTransparency = 1
+    notifMsg.Text = message
+    notifMsg.TextColor3 = DESIGN.Text2
+    notifMsg.TextSize = 12
+    notifMsg.Font = Enum.Font.Gotham
+    notifMsg.TextXAlignment = Enum.TextXAlignment.Left
+    notifMsg.TextWrapped = true
+    notifMsg.Parent = notif
+    
+    -- Animate in
+    tweenObject(notif, {
+        Position = UDim2.new(1, -330, 0, 10),
+    }, 0.3)
     
     task.wait(3)
-    notif:TweenPosition(UDim2.new(1, 10, 0, 10), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.3, true)
+    tweenObject(notif, {
+        Position = UDim2.new(1, 10, 0, 10),
+    }, 0.3)
     task.wait(0.3)
     notif:Destroy()
 end
 
 -- ================================================================
---                    SOUND SYSTEM (Optimized)
+--                    SOUND SYSTEM
 -- ================================================================
 local soundPool = {}
+local SoundId = "rbxassetid://9120386405"
 
-local function playSound()
+function playSound()
     if not Settings.SoundEnabled or Settings.DNDMode then return end
     
     local sound = table.remove(soundPool)
@@ -897,39 +1263,9 @@ local function playSound()
 end
 
 -- ================================================================
---                    STATS SYSTEM (Optimized)
+--                    MESSAGE HANDLER
 -- ================================================================
-local function updateStats(player, message)
-    if not Settings.TypingSpeedEnabled and not Settings.ActivityRewards then return end
-    
-    local name = player.Name
-    if not Cache.Stats[name] then
-        Cache.Stats[name] = {
-            messages = 0,
-            words = 0,
-            chars = 0,
-            lastTime = tick(),
-            points = 0,
-        }
-    end
-    
-    local stats = Cache.Stats[name]
-    stats.messages = stats.messages + 1
-    stats.words = stats.words + #string.split(message, " ")
-    stats.chars = stats.chars + #message
-    
-    if Settings.ActivityRewards then
-        stats.points = stats.points + 1
-        if stats.points % 10 == 0 then
-            addSystemMessage("🏆 " .. player.Name .. " earned 10 points! Total: " .. stats.points)
-        end
-    end
-end
-
--- ================================================================
---                    MESSAGE HANDLER (Optimized)
--- ================================================================
-local function addSystemMessage(text)
+function addSystemMessage(text)
     local fakePlayer = {
         Name = "System",
         DisplayName = "⚙️ System",
@@ -939,14 +1275,13 @@ local function addSystemMessage(text)
 end
 
 function addMessageToGui(sender, messageText, isSearchResult)
-    -- Fast filters
     if isFiltered(messageText) then return end
     if Settings.BadWordFilter and isBadWord(messageText) then return end
     if sender == LocalPlayer and not Settings.ShowMyMessages then return end
     
     -- Link detection
     if Settings.LinkAlert and containsLink(messageText) and sender ~= LocalPlayer then
-        addSystemMessage("⚠️ Link from " .. sender.Name .. ": " .. messageText)
+        addSystemMessage("⚠️ Link from " .. sender.Name)
     end
     
     -- Crypto detection
@@ -958,9 +1293,13 @@ function addMessageToGui(sender, messageText, isSearchResult)
     if Settings.MentionAlert and containsMention(messageText) and sender ~= LocalPlayer then
         task.spawn(function()
             for i = 1, 3 do
-                MainFrame.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+                tweenObject(MainFrame, {
+                    BackgroundColor3 = DESIGN.Accent,
+                }, 0.1)
                 task.wait(0.08)
-                MainFrame.BackgroundColor3 = Settings.DarkMode and Color3.fromRGB(20, 20, 30) or Color3.fromRGB(240, 240, 245)
+                tweenObject(MainFrame, {
+                    BackgroundColor3 = DESIGN.Surface,
+                }, 0.1)
                 task.wait(0.08)
             end
         end)
@@ -968,20 +1307,14 @@ function addMessageToGui(sender, messageText, isSearchResult)
         addSystemMessage("🔔 " .. sender.Name .. " mentioned you!")
     end
     
-    -- Update stats
-    updateStats(sender, messageText)
-    
     -- Store message
-    local messageData = {
+    table.insert(Cache.Messages, {
         player = sender,
         message = messageText,
         time = tick(),
-    }
+    })
     
-    table.insert(Cache.Messages, messageData)
-    
-    -- Limit messages
-    if #Cache.Messages > PERFORMANCE.MAX_MESSAGES then
+    if #Cache.Messages > 1000 then
         table.remove(Cache.Messages, 1)
     end
     
@@ -995,37 +1328,21 @@ function addMessageToGui(sender, messageText, isSearchResult)
         showNotification(sender, messageText)
     end
     
-    -- Render if not searching
+    -- Render
     if not isSearching then
         renderAllMessages()
     end
+    
+    -- Update status
+    StatusText.Text = "🟢 Online • " .. #Cache.Messages .. " messages • " .. #Players:GetPlayers() .. " players"
 end
 
 -- ================================================================
---                    SEARCH (Optimized Binary Search)
+--                    SEARCH
 -- ================================================================
-local searchResults = {}
-
-local function binarySearchMessages(query)
-    local results = {}
-    local lowerQuery = string.lower(query)
-    
-    -- Use cached messages for faster search
-    for i = #Cache.Messages, 1, -1 do
-        local data = Cache.Messages[i]
-        if fastStringFind(data.message, lowerQuery) then
-            table.insert(results, data)
-            if #results >= PERFORMANCE.MAX_SEARCH_RESULTS then
-                break
-            end
-        end
-    end
-    
-    return results
-end
+local isSearching = false
 
 function searchMessages(searchText)
-    -- Clear current messages
     for _, child in ipairs(ScrollingFrame:GetChildren()) do
         if child:IsA("Frame") then
             child:Destroy()
@@ -1036,34 +1353,37 @@ function searchMessages(searchText)
     
     if searchText == "" then
         isSearching = false
-        BackButton.Visible = false
-        SearchBox.PlaceholderText = "🔍 Search..."
+        BackBtn.Visible = false
+        SearchBox.PlaceholderText = "Search messages..."
         renderAllMessages()
         return
     end
     
     isSearching = true
-    BackButton.Visible = true
-    SearchBox.PlaceholderText = "🔍 Searching..."
+    BackBtn.Visible = true
+    SearchBox.PlaceholderText = "Searching..."
     
-    local results = binarySearchMessages(searchText)
+    local found = false
+    local lowerQuery = string.lower(searchText)
     
-    if #results > 0 then
-        for i = 1, #results do
-            local data = results[i]
+    for i = #Cache.Messages, 1, -1 do
+        local data = Cache.Messages[i]
+        if fastStringFind(data.message, lowerQuery) then
+            found = true
             local frame = createMessageUI(data.player, data.message, true)
             frame.Parent = ScrollingFrame
         end
-        addSystemMessage("🔍 Found " .. #results .. " results for '" .. searchText .. "'")
-    else
+    end
+    
+    if not found then
         local noResult = Instance.new("TextLabel")
         noResult.Size = UDim2.new(1, 0, 0, 40)
         noResult.Position = UDim2.new(0, 0, 0, 20)
         noResult.BackgroundTransparency = 1
-        noResult.Text = "❌ No messages found: " .. searchText
-        noResult.TextColor3 = Color3.fromRGB(200, 100, 100)
-        noResult.TextSize = 16
-        noResult.Font = Enum.Font.SourceSans
+        noResult.Text = "🔍 No results for '" .. searchText .. "'"
+        noResult.TextColor3 = DESIGN.Text2
+        noResult.TextSize = 14
+        noResult.Font = Enum.Font.Gotham
         noResult.TextXAlignment = Enum.TextXAlignment.Center
         noResult.Parent = ScrollingFrame
     end
@@ -1072,10 +1392,7 @@ function searchMessages(searchText)
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
 end
 
--- ================================================================
---                    BUTTON EVENTS
--- ================================================================
-SearchButton.MouseButton1Click:Connect(function()
+SearchBtn.MouseButton1Click:Connect(function()
     searchMessages(SearchBox.Text)
 end)
 
@@ -1085,20 +1402,12 @@ SearchBox.FocusLost:Connect(function(enterPressed)
     end
 end)
 
-BackButton.MouseButton1Click:Connect(function()
+BackBtn.MouseButton1Click:Connect(function()
     SearchBox.Text = ""
-    BackButton.Visible = false
+    BackBtn.Visible = false
     isSearching = false
-    SearchBox.PlaceholderText = "🔍 Search..."
+    SearchBox.PlaceholderText = "Search messages..."
     renderAllMessages()
-end)
-
-ScrollDown.MouseButton1Click:Connect(function()
-    ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
-end)
-
-ScrollUp.MouseButton1Click:Connect(function()
-    ScrollingFrame.CanvasPosition = Vector2.new(0, 0)
 end)
 
 -- ================================================================
@@ -1137,32 +1446,35 @@ else
 end
 
 -- ================================================================
---                    GARBAGE COLLECTION
+--                    STARTUP ANIMATION
 -- ================================================================
-task.spawn(function()
-    while true do
-        task.wait(PERFORMANCE.GC_INTERVAL)
-        collectgarbage()
-        if #Cache.Messages > PERFORMANCE.MAX_MESSAGES then
-            table.remove(Cache.Messages, 1)
-        end
-    end
-end)
+MainFrame.Size = UDim2.new(0, 400, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
+MainFrame.BackgroundTransparency = 1
+
+task.wait(0.1)
+
+tweenObject(MainFrame, {
+    Size = UDim2.new(0, 480, 0, 640),
+    Position = UDim2.new(0.5, -240, 0.05, 0),
+    BackgroundTransparency = 0.15,
+}, 0.5)
+
+task.wait(0.3)
 
 -- ================================================================
---                    STARTUP
+--                    STARTUP MESSAGES
 -- ================================================================
-addSystemMessage("✅ Delta Chat Spy Ultimate v3.0 Loaded!")
-addSystemMessage("⚡ 10x Performance Optimization Active")
-addSystemMessage("👥 Players: " .. #Players:GetPlayers())
-addSystemMessage("📊 Message Limit: " .. PERFORMANCE.MAX_MESSAGES)
-addSystemMessage("🎯 All features ready!")
+addSystemMessage("✨ Delta Chat Spy Premium Loaded!")
+addSystemMessage("🎨 Premium UI Design v4.0")
+addSystemMessage("👥 Players Online: " .. #Players:GetPlayers())
+addSystemMessage("💡 Click ⚙️ for settings")
 
-print("=" .. string.rep("=", 50))
-print("DELTA CHAT SPY ULTIMATE v3.0")
-print("10x Faster | Optimized | All Features")
-print("=" .. string.rep("=", 50))
-print("⚡ Performance Mode: ON")
-print("📊 Cache Size: " .. PERFORMANCE.CACHE_SIZE)
-print("🎯 Batch Render: " .. PERFORMANCE.BATCH_RENDER)
-print("=" .. string.rep("=", 50))
+print("=" .. string.rep("=", 60))
+print("          DELTA CHAT SPY - PREMIUM EDITION")
+print("=" .. string.rep("=", 60))
+print("✨ Glassmorphism UI")
+print("🎨 Premium Color Palette")
+print("⚡ Smooth Animations")
+print("💎 100x Better Design")
+print("=" .. string.rep("=", 60))
