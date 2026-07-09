@@ -3,12 +3,26 @@ local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
+-- ===== الإعدادات الافتراضية =====
+local Settings = {
+    SoundEnabled = true,
+    ShowAvatars = true,
+    ShowMyMessages = false,
+    FontSize = 15, -- 12, 15, 18
+    Fullscreen = false,
+    FilteredWords = {}, -- قائمة الكلمات الممنوعة
+    MaxMessages = 0, -- 0 = غير محدود
+    DarkMode = true
+}
+
 -- متغيرات
 local PlayerColors = {}
 local AllMessages = {}
 local isSearching = false
+local MessagesCount = 0
+local SoundId = "rbxassetid://9120386405" -- صوت تنبيه (غير الرقم حسب رغبتك)
 
--- دالة لتوليد لون عشوائي ثابت لكل لاعب
+-- دالة لتوليد لون
 local function getPlayerColor(playerName)
     if not PlayerColors[playerName] then
         local hue = math.random()
@@ -17,17 +31,27 @@ local function getPlayerColor(playerName)
     return PlayerColors[playerName]
 end
 
+-- دالة للتحقق من الفلتر
+local function isFiltered(message)
+    for _, word in ipairs(Settings.FilteredWords) do
+        if string.find(string.lower(message), string.lower(word)) then
+            return true
+        end
+    end
+    return false
+end
+
 -- 1. إنشاء الواجهة الرسومية
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SpyChatGui"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- 2. الإطار الرئيسي (متجاوب مع الهاتف)
+-- 2. الإطار الرئيسي
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 500) -- حجم ثابت لكن مناسب
-MainFrame.Position = UDim2.new(0.5, -200, 0.1, 0) -- توسيط أفقي
+MainFrame.Size = UDim2.new(0, 420, 0, 520)
+MainFrame.Position = UDim2.new(0.5, -210, 0.1, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -37,7 +61,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 12)
 MainCorner.Parent = MainFrame
 
--- 3. شريط العنوان (مكبر للهاتف)
+-- 3. شريط العنوان
 local TitleBar = Instance.new("TextLabel")
 TitleBar.Name = "TitleBar"
 TitleBar.Size = UDim2.new(1, 0, 0, 45)
@@ -53,7 +77,7 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 12)
 TitleCorner.Parent = TitleBar
 
--- زر الإخفاء/الإظهار (كبير للهاتف)
+-- زر الإخفاء/الإظهار
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "ToggleButton"
 ToggleButton.Size = UDim2.new(0, 40, 0, 35)
@@ -69,6 +93,22 @@ local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(0, 6)
 ToggleCorner.Parent = ToggleButton
 
+-- زر الإعدادات (⚙️)
+local SettingsButton = Instance.new("TextButton")
+SettingsButton.Name = "SettingsButton"
+SettingsButton.Size = UDim2.new(0, 40, 0, 35)
+SettingsButton.Position = UDim2.new(1, -92, 0, 5)
+SettingsButton.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+SettingsButton.Text = "⚙️"
+SettingsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SettingsButton.TextSize = 22
+SettingsButton.Font = Enum.Font.SourceSansBold
+SettingsButton.Parent = TitleBar
+
+local SettingsCorner = Instance.new("UICorner")
+SettingsCorner.CornerRadius = UDim.new(0, 6)
+SettingsCorner.Parent = SettingsButton
+
 local isVisible = true
 ToggleButton.MouseButton1Click:Connect(function()
     isVisible = not isVisible
@@ -76,7 +116,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     ToggleButton.Text = isVisible and "━" or "☰"
 end)
 
--- 4. صندوق البحث (كبير ومناسب للهاتف)
+-- 4. صندوق البحث
 local SearchBox = Instance.new("TextBox")
 SearchBox.Name = "SearchBox"
 SearchBox.Size = UDim2.new(0.7, 0, 0, 40)
@@ -94,7 +134,7 @@ local SearchCorner = Instance.new("UICorner")
 SearchCorner.CornerRadius = UDim.new(0, 8)
 SearchCorner.Parent = SearchBox
 
--- 5. أزرار التحكم (صف من الأزرار)
+-- 5. أزرار التحكم
 local ButtonFrame = Instance.new("Frame")
 ButtonFrame.Name = "ButtonFrame"
 ButtonFrame.Size = UDim2.new(0.26, 0, 0, 40)
@@ -118,7 +158,7 @@ local SearchButtonCorner = Instance.new("UICorner")
 SearchButtonCorner.CornerRadius = UDim.new(0, 8)
 SearchButtonCorner.Parent = SearchButton
 
--- زر الرجوع للقائمة الرئيسية (بدل زر الإلغاء)
+-- زر الرجوع
 local BackButton = Instance.new("TextButton")
 BackButton.Name = "BackButton"
 BackButton.Size = UDim2.new(0.45, 0, 1, 0)
@@ -128,14 +168,14 @@ BackButton.Text = "↩"
 BackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 BackButton.TextSize = 22
 BackButton.Font = Enum.Font.SourceSansBold
-BackButton.Visible = false -- يظهر فقط أثناء البحث
+BackButton.Visible = false
 BackButton.Parent = ButtonFrame
 
 local BackCorner = Instance.new("UICorner")
 BackCorner.CornerRadius = UDim.new(0, 8)
 BackCorner.Parent = BackButton
 
--- 6. صندوق التمرير للرسائل (مكبر للهاتف)
+-- 6. صندوق التمرير للرسائل
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Name = "ChatLog"
 ScrollingFrame.Size = UDim2.new(0.96, 0, 0.72, 0)
@@ -152,7 +192,373 @@ UIListLayout.Parent = ScrollingFrame
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 6)
 
--- 7. كود تحريك الواجهة (محسن للهاتف)
+-- ===== قائمة الإعدادات =====
+local SettingsFrame = Instance.new("Frame")
+SettingsFrame.Name = "SettingsFrame"
+SettingsFrame.Size = UDim2.new(0.9, 0, 0.75, 0)
+SettingsFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
+SettingsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+SettingsFrame.BorderSizePixel = 0
+SettingsFrame.Visible = false
+SettingsFrame.Parent = MainFrame
+
+local SettingsCorner2 = Instance.new("UICorner")
+SettingsCorner2.CornerRadius = UDim.new(0, 10)
+SettingsCorner2.Parent = SettingsFrame
+
+-- عنوان الإعدادات
+local SettingsTitle = Instance.new("TextLabel")
+SettingsTitle.Size = UDim2.new(1, 0, 0, 35)
+SettingsTitle.BackgroundTransparency = 1
+SettingsTitle.Text = "⚙️ الإعدادات"
+SettingsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+SettingsTitle.TextSize = 18
+SettingsTitle.Font = Enum.Font.SourceSansBold
+SettingsTitle.Parent = SettingsFrame
+
+-- زر إغلاق الإعدادات
+local CloseSettings = Instance.new("TextButton")
+CloseSettings.Size = UDim2.new(0, 30, 0, 30)
+CloseSettings.Position = UDim2.new(1, -35, 0, 2)
+CloseSettings.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseSettings.Text = "✕"
+CloseSettings.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseSettings.TextSize = 16
+CloseSettings.Font = Enum.Font.SourceSansBold
+CloseSettings.Parent = SettingsFrame
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseSettings
+
+-- إطار للتمرير داخل الإعدادات
+local SettingsScrolling = Instance.new("ScrollingFrame")
+SettingsScrolling.Size = UDim2.new(1, -10, 1, -50)
+SettingsScrolling.Position = UDim2.new(0, 5, 0, 40)
+SettingsScrolling.BackgroundTransparency = 1
+SettingsScrolling.BorderSizePixel = 0
+SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
+SettingsScrolling.ScrollBarThickness = 5
+SettingsScrolling.Parent = SettingsFrame
+
+local SettingsLayout = Instance.new("UIListLayout")
+SettingsLayout.Parent = SettingsScrolling
+SettingsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SettingsLayout.Padding = UDim.new(0, 8)
+
+-- ===== دوال إنشاء خيارات الإعدادات =====
+
+-- دالة لإنشاء خيار تبديل (ON/OFF)
+local function createToggleOption(parent, labelText, defaultValue, callback)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 40)
+    Frame.BackgroundTransparency = 1
+    Frame.Parent = parent
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.6, 0, 1, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = labelText
+    Label.TextColor3 = Color3.fromRGB(220, 220, 230)
+    Label.TextSize = 15
+    Label.Font = Enum.Font.SourceSans
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Frame
+    
+    local Toggle = Instance.new("TextButton")
+    Toggle.Size = UDim2.new(0, 55, 0, 30)
+    Toggle.Position = UDim2.new(1, -60, 0, 5)
+    Toggle.BackgroundColor3 = defaultValue and Color3.fromRGB(60, 200, 80) or Color3.fromRGB(80, 80, 80)
+    Toggle.Text = defaultValue and "ON" or "OFF"
+    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Toggle.TextSize = 13
+    Toggle.Font = Enum.Font.SourceSansBold
+    Toggle.Parent = Frame
+    
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(0, 6)
+    ToggleCorner.Parent = Toggle
+    
+    local state = defaultValue
+    Toggle.MouseButton1Click:Connect(function()
+        state = not state
+        Toggle.BackgroundColor3 = state and Color3.fromRGB(60, 200, 80) or Color3.fromRGB(80, 80, 80)
+        Toggle.Text = state and "ON" or "OFF"
+        callback(state)
+    end)
+    
+    return Toggle
+end
+
+-- دالة لإنشاء خيار اختيار (حجم الخط)
+local function createSelectOption(parent, labelText, options, defaultIndex, callback)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 45)
+    Frame.BackgroundTransparency = 1
+    Frame.Parent = parent
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.4, 0, 1, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = labelText
+    Label.TextColor3 = Color3.fromRGB(220, 220, 230)
+    Label.TextSize = 15
+    Label.Font = Enum.Font.SourceSans
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Frame
+    
+    local ButtonFrame = Instance.new("Frame")
+    ButtonFrame.Size = UDim2.new(0.55, 0, 1, 0)
+    ButtonFrame.Position = UDim2.new(0.45, 0, 0, 0)
+    ButtonFrame.BackgroundTransparency = 1
+    ButtonFrame.Parent = Frame
+    
+    local buttons = {}
+    local selectedIndex = defaultIndex or 1
+    
+    for i, option in ipairs(options) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0.3, 0, 1, -8)
+        btn.Position = UDim2.new((i-1) * 0.34, 0, 0, 4)
+        btn.BackgroundColor3 = (i == selectedIndex) and Color3.fromRGB(60, 60, 120) or Color3.fromRGB(50, 50, 70)
+        btn.Text = option
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 13
+        btn.Font = Enum.Font.SourceSansBold
+        btn.Parent = ButtonFrame
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 6)
+        btnCorner.Parent = btn
+        
+        buttons[i] = btn
+        
+        btn.MouseButton1Click:Connect(function()
+            for j, b in ipairs(buttons) do
+                b.BackgroundColor3 = (j == i) and Color3.fromRGB(60, 60, 120) or Color3.fromRGB(50, 50, 70)
+            end
+            selectedIndex = i
+            callback(i, option)
+        end)
+    end
+    
+    return buttons
+end
+
+-- دالة لإضافة كلمة للفلتر
+local function addFilterWord(word)
+    if word and word ~= "" then
+        table.insert(Settings.FilteredWords, word)
+        -- تحديث الرسائل المعروضة
+        displayAllMessages()
+    end
+end
+
+-- دالة لإزالة كلمة من الفلتر
+local function removeFilterWord(word)
+    for i, w in ipairs(Settings.FilteredWords) do
+        if w == word then
+            table.remove(Settings.FilteredWords, i)
+            break
+        end
+    end
+    displayAllMessages()
+end
+
+-- ===== إنشاء خيارات الإعدادات =====
+
+-- 1. صوت التنبيه
+createToggleOption(SettingsScrolling, "🔊 صوت التنبيه", Settings.SoundEnabled, function(state)
+    Settings.SoundEnabled = state
+end)
+
+-- 2. صور اللاعبين
+createToggleOption(SettingsScrolling, "🖼️ صور اللاعبين", Settings.ShowAvatars, function(state)
+    Settings.ShowAvatars = state
+    displayAllMessages()
+end)
+
+-- 3. إظهار رسائلك أنت
+createToggleOption(SettingsScrolling, "👤 رسائلك أنت", Settings.ShowMyMessages, function(state)
+    Settings.ShowMyMessages = state
+end)
+
+-- 4. حجم الخط
+local fontSizes = {"صغير", "متوسط", "كبير"}
+local fontSizeValues = {12, 15, 18}
+local currentFontIndex = 2 -- متوسط
+
+createSelectOption(SettingsScrolling, "📏 حجم الخط", fontSizes, currentFontIndex, function(index, option)
+    Settings.FontSize = fontSizeValues[index]
+    displayAllMessages()
+end)
+
+-- 5. وضع الشاشة الكاملة
+createToggleOption(SettingsScrolling, "🖥️ شاشة كاملة", Settings.Fullscreen, function(state)
+    Settings.Fullscreen = state
+    if state then
+        MainFrame.Size = UDim2.new(0.9, 0, 0.85, 0)
+        MainFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
+        ScrollingFrame.Size = UDim2.new(0.96, 0, 0.78, 0)
+        ScrollingFrame.Position = UDim2.new(0.02, 0, 0.15, 0)
+        SettingsFrame.Size = UDim2.new(0.9, 0, 0.8, 0)
+        SettingsFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+    else
+        MainFrame.Size = UDim2.new(0, 420, 0, 520)
+        MainFrame.Position = UDim2.new(0.5, -210, 0.1, 0)
+        ScrollingFrame.Size = UDim2.new(0.96, 0, 0.72, 0)
+        ScrollingFrame.Position = UDim2.new(0.02, 0, 0.2, 0)
+        SettingsFrame.Size = UDim2.new(0.9, 0, 0.75, 0)
+        SettingsFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
+    end
+end)
+
+-- 6. فلتر الكلمات
+local FilterFrame = Instance.new("Frame")
+FilterFrame.Size = UDim2.new(1, 0, 0, 60)
+FilterFrame.BackgroundTransparency = 1
+FilterFrame.Parent = SettingsScrolling
+
+local FilterLabel = Instance.new("TextLabel")
+FilterLabel.Size = UDim2.new(1, 0, 0, 20)
+FilterLabel.BackgroundTransparency = 1
+FilterLabel.Text = "🚫 فلتر الكلمات (اكتب واضغط Enter)"
+FilterLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
+FilterLabel.TextSize = 14
+FilterLabel.Font = Enum.Font.SourceSans
+FilterLabel.TextXAlignment = Enum.TextXAlignment.Left
+FilterLabel.Parent = FilterFrame
+
+local FilterInput = Instance.new("TextBox")
+FilterInput.Size = UDim2.new(0.7, 0, 0, 30)
+FilterInput.Position = UDim2.new(0, 0, 0, 25)
+FilterInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+FilterInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+FilterInput.PlaceholderText = "كلمة..."
+FilterInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
+FilterInput.Font = Enum.Font.SourceSans
+FilterInput.TextSize = 14
+FilterInput.Parent = FilterFrame
+
+local FilterCorner = Instance.new("UICorner")
+FilterCorner.CornerRadius = UDim.new(0, 6)
+FilterCorner.Parent = FilterInput
+
+-- عرض الكلمات المفلترة
+local FilteredWordsDisplay = Instance.new("TextLabel")
+FilteredWordsDisplay.Size = UDim2.new(0.8, 0, 0, 20)
+FilteredWordsDisplay.Position = UDim2.new(0, 0, 0, 60)
+FilteredWordsDisplay.BackgroundTransparency = 1
+FilteredWordsDisplay.Text = ""
+FilteredWordsDisplay.TextColor3 = Color3.fromRGB(200, 150, 150)
+FilteredWordsDisplay.TextSize = 13
+FilteredWordsDisplay.Font = Enum.Font.SourceSans
+FilteredWordsDisplay.TextXAlignment = Enum.TextXAlignment.Left
+FilteredWordsDisplay.TextWrapped = true
+FilteredWordsDisplay.Parent = FilterFrame
+
+local function updateFilterDisplay()
+    if #Settings.FilteredWords > 0 then
+        FilteredWordsDisplay.Text = "المفلترة: " .. table.concat(Settings.FilteredWords, " | ")
+    else
+        FilteredWordsDisplay.Text = "لا توجد كلمات مفلترة"
+    end
+end
+updateFilterDisplay()
+
+FilterInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed and FilterInput.Text ~= "" then
+        addFilterWord(FilterInput.Text)
+        FilterInput.Text = ""
+        updateFilterDisplay()
+    end
+end)
+
+-- 7. عدد الرسائل المحفوظة
+local LimitFrame = Instance.new("Frame")
+LimitFrame.Size = UDim2.new(1, 0, 0, 40)
+LimitFrame.BackgroundTransparency = 1
+LimitFrame.Parent = SettingsScrolling
+
+local LimitLabel = Instance.new("TextLabel")
+LimitLabel.Size = UDim2.new(0.4, 0, 1, 0)
+LimitLabel.BackgroundTransparency = 1
+LimitLabel.Text = "📊 عدد الرسائل"
+LimitLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
+LimitLabel.TextSize = 15
+LimitLabel.Font = Enum.Font.SourceSans
+LimitLabel.TextXAlignment = Enum.TextXAlignment.Left
+LimitLabel.Parent = LimitFrame
+
+local LimitInput = Instance.new("TextBox")
+LimitInput.Size = UDim2.new(0.2, 0, 0, 30)
+LimitInput.Position = UDim2.new(0.5, 0, 0, 5)
+LimitInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+LimitInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+LimitInput.Text = "0"
+LimitInput.PlaceholderText = "0=غير محدود"
+LimitInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
+LimitInput.Font = Enum.Font.SourceSans
+LimitInput.TextSize = 14
+LimitInput.Parent = LimitFrame
+
+local LimitCorner = Instance.new("UICorner")
+LimitCorner.CornerRadius = UDim.new(0, 6)
+LimitCorner.Parent = LimitInput
+
+LimitInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local num = tonumber(LimitInput.Text)
+        if num and num >= 0 then
+            Settings.MaxMessages = num
+            displayAllMessages()
+        end
+    end
+end)
+
+-- 8. لون الخلفية
+createToggleOption(SettingsScrolling, "🌙 الوضع الداكن", Settings.DarkMode, function(state)
+    Settings.DarkMode = state
+    if state then
+        MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        TitleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+        SearchBox.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+        SettingsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+    else
+        MainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 245)
+        TitleBar.BackgroundColor3 = Color3.fromRGB(200, 200, 220)
+        SearchBox.BackgroundColor3 = Color3.fromRGB(230, 230, 240)
+        SettingsFrame.BackgroundColor3 = Color3.fromRGB(220, 220, 235)
+        -- تغيير ألوان النصوص
+        for _, child in ipairs(SettingsScrolling:GetChildren()) do
+            if child:IsA("Frame") then
+                for _, sub in ipairs(child:GetChildren()) do
+                    if sub:IsA("TextLabel") then
+                        sub.TextColor3 = Color3.fromRGB(30, 30, 40)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- ===== تحديث ارتفاع القائمة =====
+task.wait(0.1)
+SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, SettingsLayout.AbsoluteContentSize.Y + 20)
+
+-- ===== دوال التحكم بالإعدادات =====
+SettingsButton.MouseButton1Click:Connect(function()
+    SettingsFrame.Visible = not SettingsFrame.Visible
+    MainFrame.Visible = true
+    isVisible = true
+    ToggleButton.Text = "━"
+end)
+
+CloseSettings.MouseButton1Click:Connect(function()
+    SettingsFrame.Visible = false
+end)
+
+-- 7. كود تحريك الواجهة
 local dragging, dragInput, dragStart, startPos
 
 local function update(input)
@@ -165,7 +571,6 @@ local function update(input)
     )
 end
 
--- للماوس
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or
        input.UserInputType == Enum.UserInputType.Touch then
@@ -194,7 +599,7 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- 8. دالة لجلب صورة اللاعب (مع تحسين للهاتف)
+-- 8. دالة لجلب صورة اللاعب
 local function getPlayerAvatar(player)
     local userId = player.UserId
     local success, thumbnail = pcall(function()
@@ -207,10 +612,10 @@ local function getPlayerAvatar(player)
     end
 end
 
--- 9. دالة لإنشاء صورة اللاعب (مكبرة للهاتف)
+-- 9. دالة لإنشاء صورة اللاعب
 local function createAvatarImage(player)
     local ImageLabel = Instance.new("ImageLabel")
-    ImageLabel.Size = UDim2.new(0, 40, 0, 40) -- أكبر للهاتف
+    ImageLabel.Size = UDim2.new(0, 40, 0, 40)
     ImageLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
     ImageLabel.BorderSizePixel = 0
     
@@ -218,9 +623,13 @@ local function createAvatarImage(player)
     ImageCorner.CornerRadius = UDim.new(1, 0)
     ImageCorner.Parent = ImageLabel
     
-    local avatarUrl = getPlayerAvatar(player)
-    if avatarUrl then
-        ImageLabel.Image = avatarUrl
+    if Settings.ShowAvatars then
+        local avatarUrl = getPlayerAvatar(player)
+        if avatarUrl then
+            ImageLabel.Image = avatarUrl
+        else
+            ImageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        end
     else
         ImageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
     end
@@ -228,14 +637,56 @@ local function createAvatarImage(player)
     return ImageLabel
 end
 
--- 10. وظيفة إضافة الرسائل (بدون حد)
+-- 10. دالة عرض الرسائل
+function displayAllMessages()
+    -- مسح كل الرسائل الحالية
+    for _, child in ipairs(ScrollingFrame:GetChildren()) do
+        if child:IsA("Frame") then
+            child:Destroy()
+        end
+    end
+    
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    
+    -- تحديد عدد الرسائل للعرض
+    local startIndex = 1
+    if Settings.MaxMessages > 0 and #AllMessages > Settings.MaxMessages then
+        startIndex = #AllMessages - Settings.MaxMessages + 1
+    end
+    
+    for i = startIndex, #AllMessages do
+        local data = AllMessages[i]
+        -- التحقق من الفلتر
+        if not isFiltered(data.message) then
+            local newFrame = data.frame:Clone()
+            newFrame.Parent = ScrollingFrame
+            newFrame.BackgroundTransparency = 1
+        end
+    end
+    
+    task.wait(0.1)
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+    ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
+end
+
+-- 11. وظيفة إضافة الرسائل
 local function addMessageToGui(sender, messageText, isSearchResult)
+    -- التحقق من الفلتر
+    if isFiltered(messageText) then
+        return
+    end
+    
+    -- التحقق من إظهار رسائلك أنت
+    if sender == LocalPlayer and not Settings.ShowMyMessages then
+        return
+    end
+    
     local MessageFrame = Instance.new("Frame")
-    MessageFrame.Size = UDim2.new(1, -10, 0, 50) -- أكبر للهاتف
+    MessageFrame.Size = UDim2.new(1, -10, 0, 50)
     MessageFrame.BackgroundTransparency = 1
     MessageFrame.Parent = ScrollingFrame
     
-    -- صورة اللاعب (أكبر)
+    -- صورة اللاعب
     local avatarImage = createAvatarImage(sender)
     avatarImage.Position = UDim2.new(0, 5, 0, 5)
     avatarImage.Parent = MessageFrame
@@ -252,18 +703,17 @@ local function addMessageToGui(sender, messageText, isSearchResult)
     NameLabel.TextXAlignment = Enum.TextXAlignment.Left
     NameLabel.Parent = MessageFrame
     
-    -- نص الرسالة (مع إمكانية اللف)
+    -- نص الرسالة
     local TextLabel = Instance.new("TextLabel")
     TextLabel.Size = UDim2.new(0.8, 0, 0, 24)
     TextLabel.Position = UDim2.new(0, 50, 0, 22)
     TextLabel.BackgroundTransparency = 1
     TextLabel.Text = messageText
     TextLabel.TextColor3 = Color3.fromRGB(230, 230, 240)
-    TextLabel.TextSize = 15
+    TextLabel.TextSize = Settings.FontSize
     TextLabel.Font = Enum.Font.SourceSans
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextLabel.TextWrapped = true
-    TextLabel.TextScaled = false
     TextLabel.Parent = MessageFrame
     
     -- إذا كانت نتيجة بحث، نغير لون الخلفية
@@ -282,6 +732,24 @@ local function addMessageToGui(sender, messageText, isSearchResult)
             message = messageText,
             frame = MessageFrame:Clone()
         })
+        
+        -- التحكم بعدد الرسائل
+        if Settings.MaxMessages > 0 and #AllMessages > Settings.MaxMessages then
+            table.remove(AllMessages, 1)
+        end
+    end
+    
+    -- تشغيل الصوت
+    if Settings.SoundEnabled and not isSearchResult then
+        pcall(function()
+            local sound = Instance.new("Sound")
+            sound.SoundId = SoundId
+            sound.Volume = 0.3
+            sound.Parent = MainFrame
+            sound:Play()
+            task.wait(0.5)
+            sound:Destroy()
+        end)
     end
     
     -- تحديث حجم الصندوق
@@ -289,32 +757,8 @@ local function addMessageToGui(sender, messageText, isSearchResult)
     ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
 end
 
--- 11. دالة عرض الرسائل (العرض الطبيعي)
-local function displayAllMessages()
-    -- مسح كل الرسائل الحالية
-    for _, child in ipairs(ScrollingFrame:GetChildren()) do
-        if child:IsA("Frame") then
-            child:Destroy()
-        end
-    end
-    
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    
-    -- إعادة عرض كل الرسائل المخزنة
-    for _, data in ipairs(AllMessages) do
-        local newFrame = data.frame:Clone()
-        newFrame.Parent = ScrollingFrame
-        newFrame.BackgroundTransparency = 1
-    end
-    
-    task.wait(0.1)
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
-    ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
-end
-
 -- 12. وظيفة البحث
 local function searchMessages(searchText)
-    -- مسح الرسائل الحالية
     for _, child in ipairs(ScrollingFrame:GetChildren()) do
         if child:IsA("Frame") then
             child:Destroy()
@@ -324,7 +768,6 @@ local function searchMessages(searchText)
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     
     if searchText == "" then
-        -- الرجوع للقائمة الرئيسية
         isSearching = false
         BackButton.Visible = false
         SearchBox.PlaceholderText = "🔍 ابحث عن كلمة..."
@@ -332,7 +775,6 @@ local function searchMessages(searchText)
         return
     end
     
-    -- تفعيل وضع البحث
     isSearching = true
     BackButton.Visible = true
     SearchBox.PlaceholderText = "🔍 جاري البحث..."
@@ -340,51 +782,11 @@ local function searchMessages(searchText)
     local found = false
     local searchLower = string.lower(searchText)
     
-    -- البحث من الأحدث للأقدم
     for i = #AllMessages, 1, -1 do
         local data = AllMessages[i]
         if string.find(string.lower(data.message), searchLower) then
             found = true
-            -- نضيف الرسالة مع تمييز
-            local MessageFrame = Instance.new("Frame")
-            MessageFrame.Size = UDim2.new(1, -10, 0, 50)
-            MessageFrame.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
-            MessageFrame.BackgroundTransparency = 0.3
-            MessageFrame.Parent = ScrollingFrame
-            
-            local highlightCorner = Instance.new("UICorner")
-            highlightCorner.CornerRadius = UDim.new(0, 8)
-            highlightCorner.Parent = MessageFrame
-            
-            -- صورة اللاعب
-            local avatarImage = createAvatarImage(data.player)
-            avatarImage.Position = UDim2.new(0, 5, 0, 5)
-            avatarImage.Parent = MessageFrame
-            
-            -- اسم اللاعب
-            local NameLabel = Instance.new("TextLabel")
-            NameLabel.Size = UDim2.new(0.8, 0, 0, 20)
-            NameLabel.Position = UDim2.new(0, 50, 0, 2)
-            NameLabel.BackgroundTransparency = 1
-            NameLabel.Text = data.player.DisplayName or data.player.Name
-            NameLabel.TextColor3 = getPlayerColor(data.player.Name)
-            NameLabel.TextSize = 14
-            NameLabel.Font = Enum.Font.SourceSansBold
-            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-            NameLabel.Parent = MessageFrame
-            
-            -- نص الرسالة
-            local TextLabel = Instance.new("TextLabel")
-            TextLabel.Size = UDim2.new(0.8, 0, 0, 24)
-            TextLabel.Position = UDim2.new(0, 50, 0, 22)
-            TextLabel.BackgroundTransparency = 1
-            TextLabel.Text = data.message
-            TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel.TextSize = 15
-            TextLabel.Font = Enum.Font.SourceSans
-            TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-            TextLabel.TextWrapped = true
-            TextLabel.Parent = MessageFrame
+            addMessageToGui(data.player, data.message, true)
         end
     end
     
@@ -416,7 +818,6 @@ SearchBox.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- زر الرجوع للقائمة الرئيسية
 BackButton.MouseButton1Click:Connect(function()
     SearchBox.Text = ""
     BackButton.Visible = false
@@ -429,7 +830,6 @@ end)
 local function handleMessage(player, message)
     if player and message and message ~= "" then
         addMessageToGui(player, message, false)
-        -- إذا كان في وضع البحث، نحدث النتائج تلقائياً
         if isSearching and SearchBox.Text ~= "" then
             searchMessages(SearchBox.Text)
         end
@@ -441,18 +841,16 @@ if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
         local source = textMessage.TextSource
         if source then
             local sender = Players:GetPlayerByUserId(source.UserId)
-            if sender and sender ~= LocalPlayer then
+            if sender then
                 handleMessage(sender, textMessage.Text)
             end
         end
     end)
 else
     local function hookPlayer(player)
-        if player ~= LocalPlayer then
-            player.Chatted:Connect(function(message)
-                handleMessage(player, message)
-            end)
-        end
+        player.Chatted:Connect(function(message)
+            handleMessage(player, message)
+        end)
     end
     
     for _, player in ipairs(Players:GetPlayers()) do
@@ -473,5 +871,5 @@ end
 
 addSystemMessage("✅ تم تشغيل الواجهة بنجاح!")
 addSystemMessage("👥 عدد اللاعبين: " .. #Players:GetPlayers())
-addSystemMessage("📱 الواجهة متوافقة مع الهاتف")
-addSystemMessage("💡 ابحث عن كلمة ثم اضغط ↩ للرجوع")
+addSystemMessage("⚙️ اضغط ⚙️ للإعدادات")
+addSystemMessage("📱 متوافقة مع الهاتف")
