@@ -1,26 +1,5 @@
 -- ================================================================
---          DELTA CHAT SPY ULTIMATE - DESIGN v4.0
---                Premium UI Design (100x Better)
--- ================================================================
-
--- ================================================================
---                    DESIGN PHILOSOPHY
--- ================================================================
--- ✅ Glassmorphism Effect
--- ✅ Smooth Animations
--- ✅ Neon Glow Effects
--- ✅ Gradient Colors
--- ✅ Rounded Corners
--- ✅ Shadow Effects
--- ✅ Hover Effects
--- ✅ Click Animations
--- ✅ Modern Typography
--- ✅ Color Harmony
--- ✅ Responsive Design
--- ✅ Mobile Optimized
--- ✅ Dark/Light Themes
--- ✅ Elegant Transitions
--- ✅ Professional Look
+--                    ABC CHAT SPY - PREMIUM v5.0
 -- ================================================================
 
 local Players = game:GetService("Players")
@@ -28,32 +7,6 @@ local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
-
--- ================================================================
---                    DESIGN SETTINGS
--- ================================================================
-local DESIGN = {
-    -- Colors (Premium Palette)
-    Primary = Color3.fromRGB(88, 101, 242),      -- Discord Blue
-    Secondary = Color3.fromRGB(114, 137, 218),    -- Lighter Blue
-    Accent = Color3.fromRGB(255, 70, 70),         -- Red Accent
-    Success = Color3.fromRGB(87, 242, 135),       -- Green
-    Warning = Color3.fromRGB(250, 166, 26),       -- Orange
-    Background = Color3.fromRGB(15, 15, 25),      -- Dark BG
-    Surface = Color3.fromRGB(30, 30, 45),         -- Card BG
-    Surface2 = Color3.fromRGB(45, 45, 65),        -- Card BG 2
-    Text = Color3.fromRGB(255, 255, 255),         -- White
-    Text2 = Color3.fromRGB(180, 180, 200),        -- Grey Text
-    Border = Color3.fromRGB(60, 60, 85),          -- Border
-    
-    -- Effects
-    GlassOpacity = 0.85,
-    BlurAmount = 20,
-    GlowIntensity = 0.3,
-    ShadowSize = 15,
-    CornerRadius = 16,
-    AnimationSpeed = 0.3,
-}
 
 -- ================================================================
 --                    SETTINGS
@@ -114,16 +67,16 @@ local function getPlayerColor(playerName)
     end
     
     local colors = {
-        Color3.fromRGB(255, 107, 107),  -- Red
-        Color3.fromRGB(78, 205, 196),   -- Teal
-        Color3.fromRGB(255, 159, 67),   -- Orange
-        Color3.fromRGB(255, 235, 59),   -- Yellow
-        Color3.fromRGB(130, 177, 255),  -- Light Blue
-        Color3.fromRGB(206, 147, 216),  -- Purple
-        Color3.fromRGB(255, 138, 101),  -- Coral
-        Color3.fromRGB(100, 255, 218),  -- Mint
-        Color3.fromRGB(255, 204, 128),  -- Peach
-        Color3.fromRGB(200, 200, 255),  -- Lavender
+        Color3.fromRGB(255, 107, 107),
+        Color3.fromRGB(78, 205, 196),
+        Color3.fromRGB(255, 159, 67),
+        Color3.fromRGB(255, 235, 59),
+        Color3.fromRGB(130, 177, 255),
+        Color3.fromRGB(206, 147, 216),
+        Color3.fromRGB(255, 138, 101),
+        Color3.fromRGB(100, 255, 218),
+        Color3.fromRGB(255, 204, 128),
+        Color3.fromRGB(200, 200, 255),
     }
     
     local index = #Cache.Colors % #colors + 1
@@ -176,92 +129,53 @@ local function containsMention(message)
 end
 
 -- ================================================================
---                    TWEEN HELPERS (Animations)
+--                    TWEEN HELPERS
 -- ================================================================
 local function tweenObject(object, properties, duration)
-    duration = duration or DESIGN.AnimationSpeed
+    duration = duration or 0.3
     local tween = TweenService:Create(object, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), properties)
     tween:Play()
     return tween
-end
-
-local function createGlowEffect(parent, color, size)
-    local glow = Instance.new("ImageLabel")
-    glow.Size = UDim2.new(1, size * 2, 1, size * 2)
-    glow.Position = UDim2.new(0.5, -size, 0.5, -size)
-    glow.BackgroundTransparency = 1
-    glow.Image = "rbxasset://textures/particles/sparkles_main.dds"
-    glow.ImageColor3 = color
-    glow.ImageTransparency = 0.7
-    glow.Parent = parent
-    return glow
 end
 
 -- ================================================================
 --                    MAIN GUI
 -- ================================================================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SpyChatGui"
+ScreenGui.Name = "ABC_Spy"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
 -- ================================================================
---                    BACKGROUND EFFECT
--- ================================================================
-local BGEffect = Instance.new("Frame")
-BGEffect.Size = UDim2.new(1, 0, 1, 0)
-BGEffect.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-BGEffect.BackgroundTransparency = 0.3
-BGEffect.Parent = ScreenGui
-
--- ================================================================
---                    MAIN FRAME (Glassmorphism)
+--                    MAIN FRAME
 -- ================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 480, 0, 640)
 MainFrame.Position = UDim2.new(0.5, -240, 0.05, 0)
-MainFrame.BackgroundColor3 = DESIGN.Surface
-MainFrame.BackgroundTransparency = 0.15
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+MainFrame.BackgroundTransparency = 0.05
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
--- Glass Blur Effect
-local GlassBlur = Instance.new("BlurEffect")
-GlassBlur.Size = DESIGN.BlurAmount
-GlassBlur.Parent = MainFrame
-
--- Main Corner
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius)
+MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Shadow
-local Shadow = Instance.new("ImageLabel")
-Shadow.Size = UDim2.new(1, 20, 1, 20)
-Shadow.Position = UDim2.new(0, -10, 0, -10)
-Shadow.BackgroundTransparency = 1
-Shadow.Image = "rbxassetid://1316045357" -- Shadow texture
-Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-Shadow.ImageTransparency = 0.5
-Shadow.ZIndex = 0
-Shadow.Parent = MainFrame
+-- Border
+local Border = Instance.new("Frame")
+Border.Size = UDim2.new(1, 2, 1, 2)
+Border.Position = UDim2.new(0, -1, 0, -1)
+Border.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+Border.BackgroundTransparency = 0.7
+Border.BorderSizePixel = 0
+Border.Parent = MainFrame
 
--- Border Glow
-local BorderGlow = Instance.new("Frame")
-BorderGlow.Size = UDim2.new(1, 2, 1, 2)
-BorderGlow.Position = UDim2.new(0, -1, 0, -1)
-BorderGlow.BackgroundColor3 = DESIGN.Primary
-BorderGlow.BackgroundTransparency = 0.8
-BorderGlow.BorderSizePixel = 0
-BorderGlow.Parent = MainFrame
-
-local BorderGlowCorner = Instance.new("UICorner")
-BorderGlowCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius + 1)
-BorderGlowCorner.Parent = BorderGlow
+local BorderCorner = Instance.new("UICorner")
+BorderCorner.CornerRadius = UDim.new(0, 17)
+BorderCorner.Parent = Border
 
 -- ================================================================
 --                    HEADER
@@ -269,44 +183,34 @@ BorderGlowCorner.Parent = BorderGlow
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 65)
-Header.BackgroundColor3 = DESIGN.Surface2
-Header.BackgroundTransparency = 0.3
+Header.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+Header.BackgroundTransparency = 0.2
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 
 local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius)
+HeaderCorner.CornerRadius = UDim.new(0, 16)
 HeaderCorner.Parent = Header
 
--- Gradient Overlay
-local HeaderGradient = Instance.new("ImageLabel")
-HeaderGradient.Size = UDim2.new(1, 0, 1, 0)
-HeaderGradient.BackgroundTransparency = 1
-HeaderGradient.Image = "rbxassetid://1316039869" -- Gradient texture
-HeaderGradient.ImageColor3 = DESIGN.Primary
-HeaderGradient.ImageTransparency = 0.2
-HeaderGradient.Parent = Header
-
--- Logo/Title
+-- Title
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.6, 0, 1, 0)
 Title.Position = UDim2.new(0.02, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "🔮  Delta Spy"
-Title.TextColor3 = DESIGN.Text
+Title.Text = "📡  ABC Spy"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 22
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.TextYAlignment = Enum.TextYAlignment.Center
 Title.Parent = Header
 
--- Subtitle
 local Subtitle = Instance.new("TextLabel")
 Subtitle.Size = UDim2.new(0.6, 0, 0, 20)
 Subtitle.Position = UDim2.new(0.02, 0, 0.6, 0)
 Subtitle.BackgroundTransparency = 1
 Subtitle.Text = "Premium Chat Monitor"
-Subtitle.TextColor3 = DESIGN.Text2
+Subtitle.TextColor3 = Color3.fromRGB(180, 180, 200)
 Subtitle.TextSize = 12
 Subtitle.Font = Enum.Font.Gotham
 Subtitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -314,16 +218,16 @@ Subtitle.TextYAlignment = Enum.TextYAlignment.Top
 Subtitle.Parent = Header
 
 -- ================================================================
---                    HEADER BUTTONS (Premium)
+--                    HEADER BUTTONS
 -- ================================================================
 local function createHeaderButton(parent, icon, position, color, tooltip, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 40, 0, 40)
     btn.Position = position
     btn.BackgroundColor3 = color
-    btn.BackgroundTransparency = 0.8
+    btn.BackgroundTransparency = 0.7
     btn.Text = icon
-    btn.TextColor3 = DESIGN.Text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 18
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
@@ -333,7 +237,6 @@ local function createHeaderButton(parent, icon, position, color, tooltip, callba
     btnCorner.CornerRadius = UDim.new(1, 0)
     btnCorner.Parent = btn
     
-    -- Hover Effect
     btn.MouseEnter:Connect(function()
         tweenObject(btn, {
             BackgroundTransparency = 0.3,
@@ -344,13 +247,12 @@ local function createHeaderButton(parent, icon, position, color, tooltip, callba
     
     btn.MouseLeave:Connect(function()
         tweenObject(btn, {
-            BackgroundTransparency = 0.8,
+            BackgroundTransparency = 0.7,
             Size = UDim2.new(0, 40, 0, 40),
             Position = position,
         }, 0.15)
     end)
     
-    -- Click Animation
     btn.MouseButton1Click:Connect(function()
         tweenObject(btn, {
             Size = UDim2.new(0, 35, 0, 35),
@@ -362,81 +264,49 @@ local function createHeaderButton(parent, icon, position, color, tooltip, callba
         callback()
     end)
     
-    -- Tooltip
-    local tooltipObj = Instance.new("TextLabel")
-    tooltipObj.Size = UDim2.new(0, 80, 0, 25)
-    tooltipObj.Position = UDim2.new(0.5, -40, 1, 5)
-    tooltipObj.BackgroundColor3 = DESIGN.Surface2
-    tooltipObj.BackgroundTransparency = 0.2
-    tooltipObj.Text = tooltip
-    tooltipObj.TextColor3 = DESIGN.Text2
-    tooltipObj.TextSize = 10
-    tooltipObj.Font = Enum.Font.Gotham
-    tooltipObj.Visible = false
-    tooltipObj.Parent = btn
-    
-    local tooltipCorner = Instance.new("UICorner")
-    tooltipCorner.CornerRadius = UDim.new(0, 6)
-    tooltipCorner.Parent = tooltipObj
-    
-    btn.MouseEnter:Connect(function()
-        tooltipObj.Visible = true
-    end)
-    
-    btn.MouseLeave:Connect(function()
-        tooltipObj.Visible = false
-    end)
-    
     return btn
 end
 
 local isVisible = true
 
-local ToggleBtn = createHeaderButton(Header, "🗕", UDim2.new(1, -50, 0, 12), DESIGN.Primary, "Toggle", function()
+local ToggleBtn = createHeaderButton(Header, "🗕", UDim2.new(1, -185, 0, 12), Color3.fromRGB(88, 101, 242), "Toggle", function()
     isVisible = not isVisible
     MainFrame.Visible = isVisible
 end)
 
-local SettingsBtn = createHeaderButton(Header, "⚙", UDim2.new(1, -95, 0, 12), DESIGN.Surface2, "Settings", function()
+local SettingsBtn = createHeaderButton(Header, "⚙", UDim2.new(1, -140, 0, 12), Color3.fromRGB(60, 60, 80), "Settings", function()
     SettingsFrame.Visible = not SettingsFrame.Visible
     MainFrame.Visible = true
     isVisible = true
 end)
 
-local DNDBtn = createHeaderButton(Header, "🔕", UDim2.new(1, -140, 0, 12), DESIGN.Warning, "DND Mode", function()
+local DNDBtn = createHeaderButton(Header, "🔕", UDim2.new(1, -95, 0, 12), Color3.fromRGB(250, 166, 26), "DND Mode", function()
     Settings.DNDMode = not Settings.DNDMode
     if Settings.DNDMode then
         Settings.SoundEnabled = false
         DNDBtn.Text = "🔇"
-        DNDBtn.BackgroundColor3 = DESIGN.Accent
-        addSystemMessage("🔇 DND Mode activated!")
+        DNDBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
     else
         DNDBtn.Text = "🔕"
-        DNDBtn.BackgroundColor3 = DESIGN.Warning
-        addSystemMessage("🔕 DND Mode deactivated!")
+        DNDBtn.BackgroundColor3 = Color3.fromRGB(250, 166, 26)
     end
-end)
-
-local ExportBtn = createHeaderButton(Header, "📋", UDim2.new(1, -185, 0, 12), DESIGN.Success, "Export Chat", function()
-    local text = "=== CHAT LOG ===\n"
-    for i = 1, #Cache.Messages do
-        local data = Cache.Messages[i]
-        local name = data.player.DisplayName or data.player.Name
-        text = text .. name .. ": " .. data.message .. "\n"
-    end
-    text = text .. "=== END ==="
-    setclipboard(text)
-    addSystemMessage("📋 Chat exported! (" .. #Cache.Messages .. " messages)")
 end)
 
 -- ================================================================
---                    SEARCH BAR (Premium)
+--                    EXIT BUTTON (Toggle On/Off)
+-- ================================================================
+local ExitBtn = createHeaderButton(Header, "⏻", UDim2.new(1, -50, 0, 12), Color3.fromRGB(255, 70, 70), "Exit Script", function()
+    ScreenGui:Destroy()
+end)
+
+-- ================================================================
+--                    SEARCH BAR
 -- ================================================================
 local SearchContainer = Instance.new("Frame")
 SearchContainer.Size = UDim2.new(0.9, 0, 0, 45)
 SearchContainer.Position = UDim2.new(0.05, 0, 0.12, 0)
-SearchContainer.BackgroundColor3 = DESIGN.Surface2
-SearchContainer.BackgroundTransparency = 0.5
+SearchContainer.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+SearchContainer.BackgroundTransparency = 0.4
 SearchContainer.BorderSizePixel = 0
 SearchContainer.Parent = MainFrame
 
@@ -444,37 +314,34 @@ local SearchCorner = Instance.new("UICorner")
 SearchCorner.CornerRadius = UDim.new(0, 12)
 SearchCorner.Parent = SearchContainer
 
--- Search Icon
 local SearchIcon = Instance.new("TextLabel")
 SearchIcon.Size = UDim2.new(0, 30, 0, 30)
 SearchIcon.Position = UDim2.new(0, 10, 0.5, -15)
 SearchIcon.BackgroundTransparency = 1
 SearchIcon.Text = "🔍"
-SearchIcon.TextColor3 = DESIGN.Text2
+SearchIcon.TextColor3 = Color3.fromRGB(180, 180, 200)
 SearchIcon.TextSize = 16
 SearchIcon.Font = Enum.Font.Gotham
 SearchIcon.Parent = SearchContainer
 
--- Search Input
 local SearchBox = Instance.new("TextBox")
-SearchBox.Size = UDim2.new(0.7, 0, 1, 0)
+SearchBox.Size = UDim2.new(0.65, 0, 1, 0)
 SearchBox.Position = UDim2.new(0.1, 0, 0, 0)
 SearchBox.BackgroundTransparency = 1
-SearchBox.TextColor3 = DESIGN.Text
+SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 SearchBox.PlaceholderText = "Search messages..."
-SearchBox.PlaceholderColor3 = DESIGN.Text2
+SearchBox.PlaceholderColor3 = Color3.fromRGB(180, 180, 200)
 SearchBox.Font = Enum.Font.Gotham
 SearchBox.TextSize = 15
 SearchBox.ClearTextOnFocus = false
 SearchBox.Parent = SearchContainer
 
--- Search Button
 local SearchBtn = Instance.new("TextButton")
 SearchBtn.Size = UDim2.new(0, 60, 0, 35)
 SearchBtn.Position = UDim2.new(1, -70, 0.5, -17.5)
-SearchBtn.BackgroundColor3 = DESIGN.Primary
+SearchBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
 SearchBtn.Text = "Search"
-SearchBtn.TextColor3 = DESIGN.Text
+SearchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SearchBtn.TextSize = 13
 SearchBtn.Font = Enum.Font.GothamBold
 SearchBtn.BorderSizePixel = 0
@@ -484,26 +351,24 @@ local SearchBtnCorner = Instance.new("UICorner")
 SearchBtnCorner.CornerRadius = UDim.new(0, 8)
 SearchBtnCorner.Parent = SearchBtn
 
--- Search Button Hover
 SearchBtn.MouseEnter:Connect(function()
     tweenObject(SearchBtn, {
-        BackgroundColor3 = DESIGN.Secondary,
+        BackgroundColor3 = Color3.fromRGB(114, 137, 218),
     }, 0.2)
 end)
 
 SearchBtn.MouseLeave:Connect(function()
     tweenObject(SearchBtn, {
-        BackgroundColor3 = DESIGN.Primary,
+        BackgroundColor3 = Color3.fromRGB(88, 101, 242),
     }, 0.2)
 end)
 
--- Back Button (Search results)
 local BackBtn = Instance.new("TextButton")
 BackBtn.Size = UDim2.new(0, 40, 0, 35)
 BackBtn.Position = UDim2.new(1, -115, 0.5, -17.5)
-BackBtn.BackgroundColor3 = DESIGN.Accent
+BackBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 BackBtn.Text = "✕"
-BackBtn.TextColor3 = DESIGN.Text
+BackBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 BackBtn.TextSize = 16
 BackBtn.Font = Enum.Font.GothamBold
 BackBtn.BorderSizePixel = 0
@@ -514,26 +379,14 @@ local BackBtnCorner = Instance.new("UICorner")
 BackBtnCorner.CornerRadius = UDim.new(0, 8)
 BackBtnCorner.Parent = BackBtn
 
-BackBtn.MouseEnter:Connect(function()
-    tweenObject(BackBtn, {
-        BackgroundColor3 = Color3.fromRGB(200, 50, 50),
-    }, 0.2)
-end)
-
-BackBtn.MouseLeave:Connect(function()
-    tweenObject(BackBtn, {
-        BackgroundColor3 = DESIGN.Accent,
-    }, 0.2)
-end)
-
 -- ================================================================
---                    MESSAGE LIST (Premium)
+--                    MESSAGE LIST
 -- ================================================================
 local MessagesContainer = Instance.new("Frame")
 MessagesContainer.Size = UDim2.new(0.95, 0, 0.7, 0)
 MessagesContainer.Position = UDim2.new(0.025, 0, 0.2, 0)
-MessagesContainer.BackgroundColor3 = DESIGN.Surface
-MessagesContainer.BackgroundTransparency = 0.2
+MessagesContainer.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+MessagesContainer.BackgroundTransparency = 0.15
 MessagesContainer.BorderSizePixel = 0
 MessagesContainer.ClipsDescendants = true
 MessagesContainer.Parent = MainFrame
@@ -542,7 +395,6 @@ local MessagesCorner = Instance.new("UICorner")
 MessagesCorner.CornerRadius = UDim.new(0, 12)
 MessagesCorner.Parent = MessagesContainer
 
--- Scrolling Frame
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Name = "ChatLog"
 ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -550,7 +402,7 @@ ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollingFrame.ScrollBarThickness = 4
-ScrollingFrame.ScrollBarImageColor3 = DESIGN.Primary
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(88, 101, 242)
 ScrollingFrame.ScrollBarImageTransparency = 0.5
 ScrollingFrame.Parent = MessagesContainer
 
@@ -566,10 +418,10 @@ local function createScrollButton(parent, icon, position)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 40, 0, 40)
     btn.Position = position
-    btn.BackgroundColor3 = DESIGN.Surface2
+    btn.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
     btn.BackgroundTransparency = 0.3
     btn.Text = icon
-    btn.TextColor3 = DESIGN.Text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 20
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
@@ -617,13 +469,13 @@ end)
 local StatusBar = Instance.new("Frame")
 StatusBar.Size = UDim2.new(1, 0, 0, 30)
 StatusBar.Position = UDim2.new(0, 0, 1, -30)
-StatusBar.BackgroundColor3 = DESIGN.Surface2
-StatusBar.BackgroundTransparency = 0.5
+StatusBar.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+StatusBar.BackgroundTransparency = 0.4
 StatusBar.BorderSizePixel = 0
 StatusBar.Parent = MainFrame
 
 local StatusBarCorner = Instance.new("UICorner")
-StatusBarCorner.CornerRadius = UDim.new(0, 0, 0, DESIGN.CornerRadius)
+StatusBarCorner.CornerRadius = UDim.new(0, 0, 0, 16)
 StatusBarCorner.Parent = StatusBar
 
 local StatusText = Instance.new("TextLabel")
@@ -631,39 +483,39 @@ StatusText.Size = UDim2.new(1, -20, 1, 0)
 StatusText.Position = UDim2.new(0, 10, 0, 0)
 StatusText.BackgroundTransparency = 1
 StatusText.Text = "🟢 Online • 0 messages • 0 players"
-StatusText.TextColor3 = DESIGN.Text2
+StatusText.TextColor3 = Color3.fromRGB(180, 180, 200)
 StatusText.TextSize = 12
 StatusText.Font = Enum.Font.Gotham
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 StatusText.Parent = StatusBar
 
 -- ================================================================
---                    SETTINGS FRAME (Premium)
+--                    SETTINGS FRAME
 -- ================================================================
 local SettingsFrame = Instance.new("Frame")
 SettingsFrame.Size = UDim2.new(0.92, 0, 0.72, 0)
 SettingsFrame.Position = UDim2.new(0.04, 0, 0.14, 0)
-SettingsFrame.BackgroundColor3 = DESIGN.Surface2
-SettingsFrame.BackgroundTransparency = 0.15
+SettingsFrame.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+SettingsFrame.BackgroundTransparency = 0.1
 SettingsFrame.BorderSizePixel = 0
 SettingsFrame.ClipsDescendants = true
 SettingsFrame.Visible = false
 SettingsFrame.Parent = MainFrame
 
 local SettingsCorner = Instance.new("UICorner")
-SettingsCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius)
+SettingsCorner.CornerRadius = UDim.new(0, 16)
 SettingsCorner.Parent = SettingsFrame
 
 -- Settings Header
 local SettingsHeader = Instance.new("Frame")
 SettingsHeader.Size = UDim2.new(1, 0, 0, 45)
-SettingsHeader.BackgroundColor3 = DESIGN.Surface2
-SettingsHeader.BackgroundTransparency = 0.3
+SettingsHeader.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+SettingsHeader.BackgroundTransparency = 0.2
 SettingsHeader.BorderSizePixel = 0
 SettingsHeader.Parent = SettingsFrame
 
 local SettingsHeaderCorner = Instance.new("UICorner")
-SettingsHeaderCorner.CornerRadius = UDim.new(0, DESIGN.CornerRadius, 0, 0)
+SettingsHeaderCorner.CornerRadius = UDim.new(0, 16, 0, 0)
 SettingsHeaderCorner.Parent = SettingsHeader
 
 local SettingsTitle = Instance.new("TextLabel")
@@ -671,7 +523,7 @@ SettingsTitle.Size = UDim2.new(0.8, 0, 1, 0)
 SettingsTitle.Position = UDim2.new(0.05, 0, 0, 0)
 SettingsTitle.BackgroundTransparency = 1
 SettingsTitle.Text = "⚙️ Settings"
-SettingsTitle.TextColor3 = DESIGN.Text
+SettingsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 SettingsTitle.TextSize = 18
 SettingsTitle.Font = Enum.Font.GothamBold
 SettingsTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -680,9 +532,9 @@ SettingsTitle.Parent = SettingsHeader
 local CloseSettingsBtn = Instance.new("TextButton")
 CloseSettingsBtn.Size = UDim2.new(0, 30, 0, 30)
 CloseSettingsBtn.Position = UDim2.new(1, -40, 0.5, -15)
-CloseSettingsBtn.BackgroundColor3 = DESIGN.Accent
+CloseSettingsBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 CloseSettingsBtn.Text = "✕"
-CloseSettingsBtn.TextColor3 = DESIGN.Text
+CloseSettingsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseSettingsBtn.TextSize = 16
 CloseSettingsBtn.Font = Enum.Font.GothamBold
 CloseSettingsBtn.BorderSizePixel = 0
@@ -704,7 +556,7 @@ SettingsScrolling.BackgroundTransparency = 1
 SettingsScrolling.BorderSizePixel = 0
 SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
 SettingsScrolling.ScrollBarThickness = 3
-SettingsScrolling.ScrollBarImageColor3 = DESIGN.Primary
+SettingsScrolling.ScrollBarImageColor3 = Color3.fromRGB(88, 101, 242)
 SettingsScrolling.Parent = SettingsFrame
 
 local SettingsLayout = Instance.new("UIListLayout")
@@ -713,7 +565,7 @@ SettingsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 SettingsLayout.Padding = UDim.new(0, 4)
 
 -- ================================================================
---                    SETTINGS UI (Premium)
+--                    SETTINGS UI
 -- ================================================================
 local function createToggle(parent, label, icon, default, callback)
     local frame = Instance.new("Frame")
@@ -726,7 +578,7 @@ local function createToggle(parent, label, icon, default, callback)
     labelObj.Position = UDim2.new(0.05, 0, 0, 0)
     labelObj.BackgroundTransparency = 1
     labelObj.Text = icon .. " " .. label
-    labelObj.TextColor3 = DESIGN.Text
+    labelObj.TextColor3 = Color3.fromRGB(255, 255, 255)
     labelObj.TextSize = 13
     labelObj.Font = Enum.Font.Gotham
     labelObj.TextXAlignment = Enum.TextXAlignment.Left
@@ -735,9 +587,9 @@ local function createToggle(parent, label, icon, default, callback)
     local toggle = Instance.new("TextButton")
     toggle.Size = UDim2.new(0, 55, 0, 26)
     toggle.Position = UDim2.new(1, -60, 0.5, -13)
-    toggle.BackgroundColor3 = default and DESIGN.Primary or DESIGN.Surface2
+    toggle.BackgroundColor3 = default and Color3.fromRGB(88, 101, 242) or Color3.fromRGB(45, 50, 65)
     toggle.Text = default and "ON" or "OFF"
-    toggle.TextColor3 = DESIGN.Text
+    toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     toggle.TextSize = 11
     toggle.Font = Enum.Font.GothamBold
     toggle.BorderSizePixel = 0
@@ -751,24 +603,10 @@ local function createToggle(parent, label, icon, default, callback)
     toggle.MouseButton1Click:Connect(function()
         state = not state
         tweenObject(toggle, {
-            BackgroundColor3 = state and DESIGN.Primary or DESIGN.Surface2,
+            BackgroundColor3 = state and Color3.fromRGB(88, 101, 242) or Color3.fromRGB(45, 50, 65),
         }, 0.2)
         toggle.Text = state and "ON" or "OFF"
         callback(state)
-    end)
-    
-    toggle.MouseEnter:Connect(function()
-        tweenObject(toggle, {
-            Size = UDim2.new(0, 58, 0, 28),
-            Position = UDim2.new(1, -62, 0.5, -14),
-        }, 0.15)
-    end)
-    
-    toggle.MouseLeave:Connect(function()
-        tweenObject(toggle, {
-            Size = UDim2.new(0, 55, 0, 26),
-            Position = UDim2.new(1, -60, 0.5, -13),
-        }, 0.15)
     end)
     
     return toggle
@@ -791,23 +629,15 @@ end)
 createToggle(SettingsScrolling, "Dark Mode", "🌙", Settings.DarkMode, function(s)
     Settings.DarkMode = s
     if s then
-        MainFrame.BackgroundColor3 = DESIGN.Surface
-        MainFrame.BackgroundTransparency = 0.15
-        SearchContainer.BackgroundColor3 = DESIGN.Surface2
-        SearchContainer.BackgroundTransparency = 0.5
-        MessagesContainer.BackgroundColor3 = DESIGN.Surface
-        MessagesContainer.BackgroundTransparency = 0.2
-        SettingsFrame.BackgroundColor3 = DESIGN.Surface2
-        SettingsFrame.BackgroundTransparency = 0.15
+        MainFrame.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+        SearchContainer.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+        MessagesContainer.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+        SettingsFrame.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
     else
         MainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 245)
-        MainFrame.BackgroundTransparency = 0.1
         SearchContainer.BackgroundColor3 = Color3.fromRGB(220, 220, 230)
-        SearchContainer.BackgroundTransparency = 0.3
         MessagesContainer.BackgroundColor3 = Color3.fromRGB(230, 230, 240)
-        MessagesContainer.BackgroundTransparency = 0.1
         SettingsFrame.BackgroundColor3 = Color3.fromRGB(220, 220, 230)
-        SettingsFrame.BackgroundTransparency = 0.1
     end
 end)
 
@@ -869,7 +699,7 @@ LimitLabel.Size = UDim2.new(0.5, 0, 1, 0)
 LimitLabel.Position = UDim2.new(0.05, 0, 0, 0)
 LimitLabel.BackgroundTransparency = 1
 LimitLabel.Text = "📊 Max Messages"
-LimitLabel.TextColor3 = DESIGN.Text
+LimitLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 LimitLabel.TextSize = 13
 LimitLabel.Font = Enum.Font.Gotham
 LimitLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -878,11 +708,11 @@ LimitLabel.Parent = LimitFrame
 local LimitInput = Instance.new("TextBox")
 LimitInput.Size = UDim2.new(0.12, 0, 0, 28)
 LimitInput.Position = UDim2.new(1, -110, 0.5, -14)
-LimitInput.BackgroundColor3 = DESIGN.Surface2
-LimitInput.TextColor3 = DESIGN.Text
+LimitInput.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+LimitInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 LimitInput.Text = "0"
 LimitInput.PlaceholderText = "0"
-LimitInput.PlaceholderColor3 = DESIGN.Text2
+LimitInput.PlaceholderColor3 = Color3.fromRGB(180, 180, 200)
 LimitInput.Font = Enum.Font.Gotham
 LimitInput.TextSize = 14
 LimitInput.BorderSizePixel = 0
@@ -913,7 +743,7 @@ FilterLabel.Size = UDim2.new(1, 0, 0, 18)
 FilterLabel.Position = UDim2.new(0.05, 0, 0, 0)
 FilterLabel.BackgroundTransparency = 1
 FilterLabel.Text = "🚫 Filter Words"
-FilterLabel.TextColor3 = DESIGN.Text
+FilterLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 FilterLabel.TextSize = 13
 FilterLabel.Font = Enum.Font.Gotham
 FilterLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -922,10 +752,10 @@ FilterLabel.Parent = FilterFrame
 local FilterInput = Instance.new("TextBox")
 FilterInput.Size = UDim2.new(0.6, 0, 0, 28)
 FilterInput.Position = UDim2.new(0.05, 0, 0.55, 0)
-FilterInput.BackgroundColor3 = DESIGN.Surface2
-FilterInput.TextColor3 = DESIGN.Text
+FilterInput.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+FilterInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 FilterInput.PlaceholderText = "word..."
-FilterInput.PlaceholderColor3 = DESIGN.Text2
+FilterInput.PlaceholderColor3 = Color3.fromRGB(180, 180, 200)
 FilterInput.Font = Enum.Font.Gotham
 FilterInput.TextSize = 14
 FilterInput.BorderSizePixel = 0
@@ -940,7 +770,7 @@ FilteredWordsDisplay.Size = UDim2.new(0.3, 0, 1, 0)
 FilteredWordsDisplay.Position = UDim2.new(0.7, 0, 0, 0)
 FilteredWordsDisplay.BackgroundTransparency = 1
 FilteredWordsDisplay.Text = ""
-FilteredWordsDisplay.TextColor3 = DESIGN.Text2
+FilteredWordsDisplay.TextColor3 = Color3.fromRGB(180, 180, 200)
 FilteredWordsDisplay.TextSize = 11
 FilteredWordsDisplay.Font = Enum.Font.Gotham
 FilteredWordsDisplay.TextXAlignment = Enum.TextXAlignment.Left
@@ -970,7 +800,7 @@ task.wait(0.1)
 SettingsScrolling.CanvasSize = UDim2.new(0, 0, 0, SettingsLayout.AbsoluteContentSize.Y + 20)
 
 -- ================================================================
---                    DRAG (Smooth)
+--                    DRAG
 -- ================================================================
 local dragging, dragInput, dragStart, startPos
 
@@ -990,16 +820,10 @@ MainFrame.InputBegan:Connect(function(input)
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
-        tweenObject(MainFrame, {
-            BackgroundTransparency = 0.3,
-        }, 0.2)
         
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
-                tweenObject(MainFrame, {
-                    BackgroundTransparency = 0.15,
-                }, 0.2)
             end
         end)
     end
@@ -1019,9 +843,10 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ================================================================
---                    MESSAGE UI (Premium)
+--                    MESSAGE UI
 -- ================================================================
 function renderAllMessages()
+    -- Clear existing messages
     for _, child in ipairs(ScrollingFrame:GetChildren()) do
         if child:IsA("Frame") then
             child:Destroy()
@@ -1035,22 +860,31 @@ function renderAllMessages()
         startIndex = #Cache.Messages - Settings.MaxMessages + 1
     end
     
+    local count = 0
     for i = startIndex, #Cache.Messages do
         local data = Cache.Messages[i]
         if not isFiltered(data.message) and not (Settings.BadWordFilter and isBadWord(data.message)) then
             local frame = createMessageUI(data.player, data.message, false)
             frame.Parent = ScrollingFrame
+            count = count + 1
         end
     end
     
+    -- Update canvas size
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+    
+    -- Auto scroll to bottom for new messages
+    if count > 0 then
+        task.wait(0.05)
+        ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
+    end
 end
 
 function createMessageUI(sender, messageText, isSearchResult)
     local MessageFrame = Instance.new("Frame")
     MessageFrame.Size = UDim2.new(1, -10, 0, 55)
-    MessageFrame.BackgroundColor3 = DESIGN.Surface2
-    MessageFrame.BackgroundTransparency = 0.4
+    MessageFrame.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+    MessageFrame.BackgroundTransparency = 0.35
     MessageFrame.BorderSizePixel = 0
     MessageFrame.Parent = ScrollingFrame
     
@@ -1062,7 +896,7 @@ function createMessageUI(sender, messageText, isSearchResult)
     local avatar = Instance.new("ImageLabel")
     avatar.Size = UDim2.new(0, 38, 0, 38)
     avatar.Position = UDim2.new(0, 8, 0.5, -19)
-    avatar.BackgroundColor3 = DESIGN.Surface
+    avatar.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
     avatar.BorderSizePixel = 0
     avatar.Parent = MessageFrame
     
@@ -1084,10 +918,6 @@ function createMessageUI(sender, messageText, isSearchResult)
     avatarCorner.CornerRadius = UDim.new(1, 0)
     avatarCorner.Parent = avatar
     
-    -- Avatar Glow
-    local avatarGlow = createGlowEffect(avatar, getPlayerColor(sender.Name), 5)
-    avatarGlow.ZIndex = 0
-    
     -- Name
     local nameLabel = Instance.new("TextLabel")
     nameLabel.Size = UDim2.new(0.6, 0, 0, 20)
@@ -1106,7 +936,7 @@ function createMessageUI(sender, messageText, isSearchResult)
     msgLabel.Position = UDim2.new(0, 55, 0, 24)
     msgLabel.BackgroundTransparency = 1
     msgLabel.Text = messageText
-    msgLabel.TextColor3 = DESIGN.Text
+    msgLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     msgLabel.TextSize = Settings.FontSize
     msgLabel.Font = Enum.Font.Gotham
     msgLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -1119,7 +949,7 @@ function createMessageUI(sender, messageText, isSearchResult)
     timeLabel.Position = UDim2.new(0.9, 0, 0, 4)
     timeLabel.BackgroundTransparency = 1
     timeLabel.Text = os.date("%H:%M")
-    timeLabel.TextColor3 = DESIGN.Text2
+    timeLabel.TextColor3 = Color3.fromRGB(180, 180, 200)
     timeLabel.TextSize = 10
     timeLabel.Font = Enum.Font.Gotham
     timeLabel.TextXAlignment = Enum.TextXAlignment.Right
@@ -1128,27 +958,27 @@ function createMessageUI(sender, messageText, isSearchResult)
     -- Hover Effect
     MessageFrame.MouseEnter:Connect(function()
         tweenObject(MessageFrame, {
-            BackgroundTransparency = 0.2,
+            BackgroundTransparency = 0.15,
         }, 0.15)
     end)
     
     MessageFrame.MouseLeave:Connect(function()
         tweenObject(MessageFrame, {
-            BackgroundTransparency = 0.4,
+            BackgroundTransparency = 0.35,
         }, 0.15)
     end)
     
     -- Search result highlight
     if isSearchResult then
-        MessageFrame.BackgroundColor3 = DESIGN.Accent
-        MessageFrame.BackgroundTransparency = 0.3
+        MessageFrame.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+        MessageFrame.BackgroundTransparency = 0.25
     end
     
     return MessageFrame
 end
 
 -- ================================================================
---                    NOTIFICATION SYSTEM (Premium)
+--                    NOTIFICATION SYSTEM
 -- ================================================================
 function showNotification(player, message)
     if not Settings.NotificationsEnabled or Settings.DNDMode then return end
@@ -1156,7 +986,7 @@ function showNotification(player, message)
     local notif = Instance.new("Frame")
     notif.Size = UDim2.new(0, 320, 0, 55)
     notif.Position = UDim2.new(1, 10, 0, 10)
-    notif.BackgroundColor3 = DESIGN.Surface2
+    notif.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
     notif.BackgroundTransparency = 0.1
     notif.BorderSizePixel = 0
     notif.Parent = ScreenGui
@@ -1165,24 +995,11 @@ function showNotification(player, message)
     notifCorner.CornerRadius = UDim.new(0, 12)
     notifCorner.Parent = notif
     
-    -- Glow border
-    local notifBorder = Instance.new("Frame")
-    notifBorder.Size = UDim2.new(1, 2, 1, 2)
-    notifBorder.Position = UDim2.new(0, -1, 0, -1)
-    notifBorder.BackgroundColor3 = DESIGN.Primary
-    notifBorder.BackgroundTransparency = 0.7
-    notifBorder.BorderSizePixel = 0
-    notifBorder.Parent = notif
-    
-    local notifBorderCorner = Instance.new("UICorner")
-    notifBorderCorner.CornerRadius = UDim.new(0, 13)
-    notifBorderCorner.Parent = notifBorder
-    
     -- Avatar
     local notifAvatar = Instance.new("ImageLabel")
     notifAvatar.Size = UDim2.new(0, 32, 0, 32)
     notifAvatar.Position = UDim2.new(0, 10, 0.5, -16)
-    notifAvatar.BackgroundColor3 = DESIGN.Surface
+    notifAvatar.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
     notifAvatar.BorderSizePixel = 0
     notifAvatar.Parent = notif
     
@@ -1215,14 +1032,13 @@ function showNotification(player, message)
     notifMsg.Position = UDim2.new(0, 50, 0, 24)
     notifMsg.BackgroundTransparency = 1
     notifMsg.Text = message
-    notifMsg.TextColor3 = DESIGN.Text2
+    notifMsg.TextColor3 = Color3.fromRGB(180, 180, 200)
     notifMsg.TextSize = 12
     notifMsg.Font = Enum.Font.Gotham
     notifMsg.TextXAlignment = Enum.TextXAlignment.Left
     notifMsg.TextWrapped = true
     notifMsg.Parent = notif
     
-    -- Animate in
     tweenObject(notif, {
         Position = UDim2.new(1, -330, 0, 10),
     }, 0.3)
@@ -1294,11 +1110,11 @@ function addMessageToGui(sender, messageText, isSearchResult)
         task.spawn(function()
             for i = 1, 3 do
                 tweenObject(MainFrame, {
-                    BackgroundColor3 = DESIGN.Accent,
+                    BackgroundColor3 = Color3.fromRGB(255, 70, 70),
                 }, 0.1)
                 task.wait(0.08)
                 tweenObject(MainFrame, {
-                    BackgroundColor3 = DESIGN.Surface,
+                    BackgroundColor3 = Color3.fromRGB(30, 35, 45),
                 }, 0.1)
                 task.wait(0.08)
             end
@@ -1328,9 +1144,12 @@ function addMessageToGui(sender, messageText, isSearchResult)
         showNotification(sender, messageText)
     end
     
-    -- Render
+    -- Render - FIX: Auto scroll to bottom
     if not isSearching then
         renderAllMessages()
+        -- Force scroll to bottom
+        task.wait(0.05)
+        ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
     end
     
     -- Update status
@@ -1381,7 +1200,7 @@ function searchMessages(searchText)
         noResult.Position = UDim2.new(0, 0, 0, 20)
         noResult.BackgroundTransparency = 1
         noResult.Text = "🔍 No results for '" .. searchText .. "'"
-        noResult.TextColor3 = DESIGN.Text2
+        noResult.TextColor3 = Color3.fromRGB(180, 180, 200)
         noResult.TextSize = 14
         noResult.Font = Enum.Font.Gotham
         noResult.TextXAlignment = Enum.TextXAlignment.Center
@@ -1446,35 +1265,20 @@ else
 end
 
 -- ================================================================
---                    STARTUP ANIMATION
+--                    STARTUP
 -- ================================================================
-MainFrame.Size = UDim2.new(0, 400, 0, 500)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
-MainFrame.BackgroundTransparency = 1
-
-task.wait(0.1)
-
-tweenObject(MainFrame, {
-    Size = UDim2.new(0, 480, 0, 640),
-    Position = UDim2.new(0.5, -240, 0.05, 0),
-    BackgroundTransparency = 0.15,
-}, 0.5)
-
-task.wait(0.3)
-
--- ================================================================
---                    STARTUP MESSAGES
--- ================================================================
-addSystemMessage("✨ Delta Chat Spy Premium Loaded!")
-addSystemMessage("🎨 Premium UI Design v4.0")
+addSystemMessage("📡 ABC Spy Loaded Successfully!")
 addSystemMessage("👥 Players Online: " .. #Players:GetPlayers())
 addSystemMessage("💡 Click ⚙️ for settings")
+addSystemMessage("⏻ Click Exit button to close")
 
-print("=" .. string.rep("=", 60))
-print("          DELTA CHAT SPY - PREMIUM EDITION")
-print("=" .. string.rep("=", 60))
-print("✨ Glassmorphism UI")
-print("🎨 Premium Color Palette")
-print("⚡ Smooth Animations")
-print("💎 100x Better Design")
-print("=" .. string.rep("=", 60))
+print("=" .. string.rep("=", 50))
+print("          ABC CHAT SPY v5.0")
+print("=" .. string.rep("=", 50))
+print("✅ All Issues Fixed:")
+print("   - Removed black background")
+print("   - Renamed to ABC Spy")
+print("   - Added Exit/Enter button")
+print("   - Fixed settings buttons")
+print("   - Fixed auto-scroll to bottom")
+print("=" .. string.rep("=", 50))
