@@ -1,83 +1,100 @@
 -- ============================================================
--- سكربت تحميل ABC PREMIUM ULTIMATE - الإصدار الأسطوري 1000×
+-- سكربت تحميل ABC PREMIUM - نسخة متوافقة مع التلفون (معدلة)
 -- ============================================================
 
--- 1. استدعاء الخدمات المتطورة
+-- 1. استدعاء الخدمات
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
-local SoundService = game:GetService("SoundService")
-local Lighting = game:GetService("Lighting")
-local Workspace = game:GetService("Workspace")
-local CoreGui = game:GetService("CoreGui")
-
--- ============================================================
--- إعدادات متقدمة جداً
--- ============================================================
-local CONFIG = {
-    LoadTime = 4.0,              -- مدة التحميل
-    ParticleCount = 300,         -- عدد الجزيئات
-    MusicVolume = 0.2,           -- مستوى الصوت
-    UseHologram = true,          -- تأثير هولوغرام
-    UseBlackHole = true,         -- تأثير الثقب الأسود
-    UseWeather = true,           -- نظام الطقس
-    UseQuantum = true,           -- جزيئات كمومية
-    RainbowSpeed = 0.02,         -- سرعة قوس قزح
-    ProtectionLevel = 5,         -- مستوى الحماية (1-5)
-}
 
 -- ============================================================
 -- إنشاء الواجهة الرئيسية
 -- ============================================================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ABC_Premium_Loading_Ultimate"
+ScreenGui.Name = "ABC_Loading_Mobile"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- ============================================================
--- خلفية متطورة مع تأثير الثقب الأسود
+-- خلفية أنيقة
 -- ============================================================
 local Background = Instance.new("Frame")
 Background.Size = UDim2.new(1, 0, 1, 0)
-Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Background.BackgroundColor3 = Color3.fromRGB(5, 5, 12)
 Background.BorderSizePixel = 0
 Background.Parent = ScreenGui
 
--- تدرج الثقب الأسود
-local blackHoleGradient = Instance.new("UIGradient")
-blackHoleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(10, 5, 20)),
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(20, 10, 30)),
-    ColorSequenceKeypoint.new(0.8, Color3.fromRGB(50, 20, 80)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 150))
+-- تدرج خفيف
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(8, 5, 18)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(18, 8, 28)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 15))
 })
-blackHoleGradient.Rotation = 0
-blackHoleGradient.Parent = Background
+gradient.Parent = Background
 
--- دوران الثقب الأسود
-task.spawn(function()
-    while task.wait(0.05) do
-        blackHoleGradient.Rotation = (blackHoleGradient.Rotation + 0.5) % 360
+-- ============================================================
+-- نظام الجزيئات (خفيف)
+-- ============================================================
+local particles = {}
+
+local function createParticle()
+    local particle = Instance.new("Frame")
+    local size = math.random(2, 4)
+    particle.Size = UDim2.new(0, size, 0, size)
+    particle.Position = UDim2.new(math.random(), 0, -0.1, 0)
+    
+    local colors = {
+        Color3.fromRGB(138, 43, 226),
+        Color3.fromRGB(100, 50, 200),
+        Color3.fromRGB(180, 80, 255)
+    }
+    particle.BackgroundColor3 = colors[math.random(1, #colors)]
+    particle.BackgroundTransparency = math.random(3, 6) / 10
+    particle.BorderSizePixel = 0
+    particle.Parent = Background
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(1, 0)
+    UICorner.Parent = particle
+
+    local speed = math.random(3, 6)
+    local tween = TweenService:Create(particle, TweenInfo.new(speed, Enum.EasingStyle.Linear), {
+        Position = UDim2.new(particle.Position.X.Scale, 0, 1.1, 0),
+        BackgroundTransparency = 1
+    })
+    tween:Play()
+    tween.Completed:Connect(function() particle:Destroy() end)
+    
+    table.insert(particles, particle)
+end
+
+local particleLoop = task.spawn(function()
+    while task.wait(0.25) do
+        createParticle()
+        if #particles > 60 then
+            for i = 1, 10 do
+                local p = particles[1]
+                if p then p:Destroy() end
+                table.remove(particles, 1)
+            end
+        end
     end
 end)
 
 -- ============================================================
--- نظام الطقس الديناميكي (مطر، نجوم، برق)
+-- نجوم في الخلفية
 -- ============================================================
-local weatherParticles = {}
-
--- نجوم متلألئة
-for i = 1, 100 do
+for i = 1, 30 do
     local star = Instance.new("Frame")
-    star.Size = UDim2.new(0, math.random(1, 3), 0, math.random(1, 3))
+    star.Size = UDim2.new(0, math.random(1, 2), 0, math.random(1, 2))
     star.Position = UDim2.new(math.random(), 0, math.random(), 0)
     star.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    star.BackgroundTransparency = math.random(2, 8) / 10
+    star.BackgroundTransparency = math.random(4, 8) / 10
     star.BorderSizePixel = 0
     star.Parent = Background
     
@@ -85,218 +102,45 @@ for i = 1, 100 do
     starCorner.CornerRadius = UDim.new(1, 0)
     starCorner.Parent = star
     
-    -- وميض النجوم
     task.spawn(function()
-        while task.wait(math.random(1, 5)) do
+        while task.wait(math.random(2, 5)) do
             TweenService:Create(star, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                BackgroundTransparency = math.random(2, 8) / 10
+                BackgroundTransparency = math.random(4, 8) / 10
             }):Play()
         end
     end)
-    
-    table.insert(weatherParticles, star)
-end
-
--- قطرات المطر
-task.spawn(function()
-    while task.wait(0.05) do
-        local rain = Instance.new("Frame")
-        rain.Size = UDim2.new(0, 1, 0, math.random(10, 30))
-        rain.Position = UDim2.new(math.random(), 0, -0.1, 0)
-        rain.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-        rain.BackgroundTransparency = 0.7
-        rain.BorderSizePixel = 0
-        rain.Parent = Background
-        
-        local speed = math.random(30, 60)
-        TweenService:Create(rain, TweenInfo.new(speed / 60, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(rain.Position.X.Scale + math.random(-5, 5)/100, 0, 1.1, 0)
-        }):Play()
-        
-        task.wait(0.02)
-    end
-end)
-
--- تأثير البرق
-task.spawn(function()
-    while task.wait(math.random(5, 15)) do
-        if math.random(1, 3) == 1 then
-            local flash = Instance.new("Frame")
-            flash.Size = UDim2.new(1, 0, 1, 0)
-            flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            flash.BackgroundTransparency = 0.8
-            flash.BorderSizePixel = 0
-            flash.Parent = Background
-            
-            TweenService:Create(flash, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-                BackgroundTransparency = 0.3
-            }):Play()
-            
-            task.wait(0.1)
-            flash:Destroy()
-        end
-    end
-end)
-
--- ============================================================
--- نظام الجزيئات الكمومية (Quantum Particles)
--- ============================================================
-local quantumParticles = {}
-
-local function createQuantumParticle()
-    local particle = Instance.new("Frame")
-    local size = math.random(1, 8)
-    particle.Size = UDim2.new(0, size, 0, size)
-    particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    
-    -- ألوان كمومية (تتغير بسرعة)
-    local hue = math.random()
-    local color = Color3.fromHSV(hue, 1, 1)
-    particle.BackgroundColor3 = color
-    particle.BackgroundTransparency = math.random(3, 7) / 10
-    particle.BorderSizePixel = 0
-    particle.Parent = Background
-    
-    -- تأثير الهالة الكمومية
-    local aura = Instance.new("UIStroke")
-    aura.Color = color
-    aura.Thickness = 3
-    aura.Transparency = 0.8
-    aura.Parent = particle
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = particle
-    
-    -- حركة كمومية (عشوائية بالكامل)
-    local speed = math.random(3, 10)
-    local pathCount = math.random(3, 6)
-    local currentPath = 1
-    
-    local function createQuantumPath()
-        local targetX = math.random()
-        local targetY = math.random()
-        local duration = speed / math.random(2, 5)
-        
-        local tween = TweenService:Create(particle, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-            Position = UDim2.new(targetX, 0, targetY, 0),
-            BackgroundColor3 = Color3.fromHSV(math.random(), 1, 1),
-            Size = UDim2.new(0, math.random(1, 8), 0, math.random(1, 8))
-        })
-        
-        tween:Play()
-        tween.Completed:Connect(function()
-            currentPath = currentPath + 1
-            if currentPath <= pathCount then
-                createQuantumPath()
-            else
-                particle:Destroy()
-            end
-        end)
-    end
-    
-    createQuantumPath()
-    table.insert(quantumParticles, particle)
-end
-
-local quantumLoop = task.spawn(function()
-    while task.wait(0.03) do
-        for i = 1, math.random(2, 6) do
-            createQuantumParticle()
-        end
-        if #quantumParticles > CONFIG.ParticleCount then
-            for i = 1, 30 do
-                local p = quantumParticles[1]
-                if p then p:Destroy() end
-                table.remove(quantumParticles, 1)
-            end
-        end
-    end
-end)
-
--- ============================================================
--- تأثير الهولوغرام ثلاثي الأبعاد
--- ============================================================
-local HologramContainer = Instance.new("Frame")
-HologramContainer.Size = UDim2.new(0, 200, 0, 200)
-HologramContainer.Position = UDim2.new(0.5, -100, 0.5, -100)
-HologramContainer.BackgroundTransparency = 1
-HologramContainer.Parent = Background
-HologramContainer.ZIndex = 0
-
--- حلقات الهولوغرام
-local hologramRings = {}
-for i = 1, 8 do
-    local ring = Instance.new("Frame")
-    local size = 20 + (i * 20)
-    ring.Size = UDim2.new(0, size, 0, size)
-    ring.Position = UDim2.new(0.5, -size/2, 0.5, -size/2)
-    ring.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-    ring.BackgroundTransparency = 0.9 - (i * 0.05)
-    ring.BorderSizePixel = 0
-    ring.Parent = HologramContainer
-    
-    local ringCorner = Instance.new("UICorner")
-    ringCorner.CornerRadius = UDim.new(1, 0)
-    ringCorner.Parent = ring
-    
-    local ringStroke = Instance.new("UIStroke")
-    ringStroke.Color = Color3.fromRGB(138, 43, 226)
-    ringStroke.Thickness = 2 - (i * 0.1)
-    ringStroke.Transparency = 0.8 - (i * 0.05)
-    ringStroke.Parent = ring
-    
-    -- دوران الهولوغرام
-    TweenService:Create(ring, TweenInfo.new(5 + i * 0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {
-        Rotation = 360
-    }):Play()
-    
-    -- نبض الهولوغرام
-    TweenService:Create(ring, TweenInfo.new(2 + i * 0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-        Size = UDim2.new(0, size + math.sin(i) * 10, 0, size + math.sin(i) * 10),
-        BackgroundTransparency = 0.7 - (i * 0.04)
-    }):Play()
-    
-    table.insert(hologramRings, ring)
 end
 
 -- ============================================================
--- شعار ABC مع تأثير البعد الرابع
+-- 🔹 شعار ABC (مصغر جداً في الأعلى)
 -- ============================================================
 local LogoContainer = Instance.new("Frame")
-LogoContainer.Size = UDim2.new(0, 100, 0, 100)
-LogoContainer.Position = UDim2.new(0.5, -50, 0.08, 0)
+LogoContainer.Size = UDim2.new(0, 40, 0, 40)  -- تم التصغير من 55 إلى 40
+LogoContainer.Position = UDim2.new(0.5, -20, 0.06, 0)  -- تم الرفع للأعلى
 LogoContainer.BackgroundTransparency = 1
 LogoContainer.Parent = Background
 
--- تأثير البعد الرابع (طبقات متعددة)
-local dimensionLayers = {}
-for i = 1, 5 do
-    local layer = Instance.new("Frame")
-    local scale = 1 + (i * 0.15)
-    layer.Size = UDim2.new(scale, 0, scale, 0)
-    layer.Position = UDim2.new((1 - scale)/2, 0, (1 - scale)/2, 0)
-    layer.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-    layer.BackgroundTransparency = 0.9 - (i * 0.05)
-    layer.BorderSizePixel = 0
-    layer.Parent = LogoContainer
-    
-    local layerCorner = Instance.new("UICorner")
-    layerCorner.CornerRadius = UDim.new(1, 0)
-    layerCorner.Parent = layer
-    
-    -- دوران مختلف لكل طبقة
-    local speed = 3 + i * 0.5
-    TweenService:Create(layer, TweenInfo.new(speed, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {
-        Rotation = 360
-    }):Play()
-    
-    table.insert(dimensionLayers, layer)
-end
+-- توهج خفيف
+local LogoGlow = Instance.new("Frame")
+LogoGlow.Size = UDim2.new(1.3, 0, 1.3, 0)
+LogoGlow.Position = UDim2.new(-0.15, 0, -0.15, 0)
+LogoGlow.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
+LogoGlow.BackgroundTransparency = 0.85
+LogoGlow.BorderSizePixel = 0
+LogoGlow.Parent = LogoContainer
+
+local GlowCorner = Instance.new("UICorner")
+GlowCorner.CornerRadius = UDim.new(1, 0)
+GlowCorner.Parent = LogoGlow
+
+TweenService:Create(LogoGlow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+    Size = UDim2.new(1.5, 0, 1.5, 0),
+    BackgroundTransparency = 0.7
+}):Play()
 
 local LogoCircle = Instance.new("Frame")
 LogoCircle.Size = UDim2.new(1, 0, 1, 0)
-LogoCircle.BackgroundColor3 = Color3.fromRGB(10, 5, 20)
+LogoCircle.BackgroundColor3 = Color3.fromRGB(12, 8, 22)
 LogoCircle.Parent = LogoContainer
 
 local LogoCorner = Instance.new("UICorner")
@@ -305,68 +149,36 @@ LogoCorner.Parent = LogoCircle
 
 local LogoStroke = Instance.new("UIStroke")
 LogoStroke.Color = Color3.fromRGB(138, 43, 226)
-LogoStroke.Thickness = 3
-LogoStroke.Transparency = 0.2
+LogoStroke.Thickness = 1.5
+LogoStroke.Transparency = 0.3
 LogoStroke.Parent = LogoCircle
 
 local LogoText = Instance.new("TextLabel")
 LogoText.Size = UDim2.new(1, 0, 1, 0)
 LogoText.Text = "ABC"
 LogoText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LogoText.TextSize = 30
+LogoText.TextSize = 12  -- تم التصغير من 16 إلى 12
 LogoText.Font = Enum.Font.FredokaOne
 LogoText.BackgroundTransparency = 1
 LogoText.Parent = LogoCircle
 
--- تأثير الكتابة العكسية (Reverse Typing)
-local abcText = "ABC"
-local reverseIndex = #abcText
-task.spawn(function()
-    while task.wait(0.3) do
-        LogoText.Text = string.sub(abcText, 1, reverseIndex)
-        reverseIndex = reverseIndex - 1
-        if reverseIndex < 1 then reverseIndex = #abcText end
-    end
-end)
+-- دوران خفيف
+TweenService:Create(LogoContainer, TweenInfo.new(8, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {
+    Rotation = 360
+}):Play()
 
 -- ============================================================
--- صورة اللاعب مع تأثير المرآة المتكسرة
+-- 🔹 صورة اللاعب (مصغرة جداً وتحت الشعار مباشرة)
 -- ============================================================
 local AvatarContainer = Instance.new("Frame")
-AvatarContainer.Size = UDim2.new(0, 80, 0, 80)
-AvatarContainer.Position = UDim2.new(0.5, -40, 0.30, 0)
+AvatarContainer.Size = UDim2.new(0, 45, 0, 45)  -- تم التصغير من 50 إلى 45
+AvatarContainer.Position = UDim2.new(0.5, -22.5, 0.16, 0)  -- تحت الشعار مباشرة
 AvatarContainer.BackgroundTransparency = 1
 AvatarContainer.Parent = Background
 
--- تأثير المرآة المتكسرة (شظايا متحركة)
-local shards = {}
-for i = 1, 12 do
-    local shard = Instance.new("Frame")
-    local angle = (i / 12) * math.pi * 2
-    local distance = 50 + math.random(10, 30)
-    shard.Size = UDim2.new(0, math.random(5, 15), 0, math.random(5, 15))
-    shard.Position = UDim2.new(0.5 + math.cos(angle) * distance / 80 - 0.1, 0, 0.5 + math.sin(angle) * distance / 80 - 0.1, 0)
-    shard.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-    shard.BackgroundTransparency = 0.5
-    shard.BorderSizePixel = 0
-    shard.Parent = AvatarContainer
-    
-    local shardCorner = Instance.new("UICorner")
-    shardCorner.CornerRadius = UDim.new(0, 2)
-    shardCorner.Parent = shard
-    
-    TweenService:Create(shard, TweenInfo.new(2 + math.random(), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-        Position = UDim2.new(0.5 + math.cos(angle + 0.5) * (distance + 20) / 80 - 0.1, 0, 0.5 + math.sin(angle + 0.5) * (distance + 20) / 80 - 0.1, 0),
-        Rotation = math.random(360)
-    }):Play()
-    
-    table.insert(shards, shard)
-end
-
 local AvatarCircle = Instance.new("ImageLabel")
-AvatarCircle.Size = UDim2.new(0.7, 0, 0.7, 0)
-AvatarCircle.Position = UDim2.new(0.15, 0, 0.15, 0)
-AvatarCircle.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+AvatarCircle.Size = UDim2.new(1, 0, 1, 0)
+AvatarCircle.BackgroundColor3 = Color3.fromRGB(10, 8, 18)
 AvatarCircle.Parent = AvatarContainer
 
 local userId = LocalPlayer.UserId
@@ -378,99 +190,84 @@ AvatarCorner.Parent = AvatarCircle
 
 local AvatarStroke = Instance.new("UIStroke")
 AvatarStroke.Color = Color3.fromRGB(100, 60, 160)
-AvatarStroke.Thickness = 2
+AvatarStroke.Thickness = 1.5
 AvatarStroke.Parent = AvatarCircle
 
+-- تأثير توهج خفيف
+TweenService:Create(AvatarStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+    Color = Color3.fromRGB(180, 100, 255),
+    Thickness = 2
+}):Play()
+
 -- ============================================================
--- النصوص مع تأثير الكتابة المتقدمة
+-- 🔹 النص الرئيسي (ABC PREMIUM - أصغر)
 -- ============================================================
 local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(1, 0, 0, 45)
-TitleText.Position = UDim2.new(0, 0, 0.46, 0)
-TitleText.Text = ""
+TitleText.Size = UDim2.new(1, 0, 0, 22)  -- تم التصغير من 28 إلى 22
+TitleText.Position = UDim2.new(0, 0, 0.25, 0)  -- تحت الصورة مباشرة
+TitleText.Text = "ABC PREMIUM"
 TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleText.TextSize = 35
+TitleText.TextSize = 16  -- تم التصغير من 20 إلى 16
 TitleText.Font = Enum.Font.GothamBold
 TitleText.BackgroundTransparency = 1
 TitleText.Parent = Background
 
--- تأثير الكتابة المتقدم (حروف متعددة الألوان)
-local titleText = "ABC PREMIUM ULTIMATE"
-local charIndex = 1
-task.spawn(function()
-    while charIndex <= #titleText do
-        TitleText.Text = string.sub(titleText, 1, charIndex)
-        charIndex = charIndex + 1
-        task.wait(0.05)
-    end
-end)
-
--- توهج النص المتقدم
+-- توهج خفيف للنص
 local textGlow = Instance.new("UIStroke")
 textGlow.Color = Color3.fromRGB(138, 43, 226)
-textGlow.Thickness = 3
-textGlow.Transparency = 0.3
+textGlow.Thickness = 1
+textGlow.Transparency = 0.4
 textGlow.Parent = TitleText
 
-task.spawn(function()
-    local hue = 0
-    while task.wait(0.03) do
-        hue = (hue + CONFIG.RainbowSpeed) % 1
-        textGlow.Color = Color3.fromHSV(hue, 1, 1)
-        textGlow.Thickness = 2 + math.sin(hue * math.pi * 2) * 2
-    end
-end)
+TweenService:Create(textGlow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+    Transparency = 0.2,
+    Color = Color3.fromRGB(200, 100, 255)
+}):Play()
 
+-- ============================================================
+-- 🔹 النص الترحيبي (اسم اللاعب)
+-- ============================================================
 local WelcomeText = Instance.new("TextLabel")
-WelcomeText.Size = UDim2.new(1, 0, 0, 25)
-WelcomeText.Position = UDim2.new(0, 0, 0.53, 0)
-WelcomeText.Text = "✦ Welcome, " .. LocalPlayer.Name .. " ✦"
-WelcomeText.TextColor3 = Color3.fromRGB(180, 180, 200)
-WelcomeText.TextSize = 17
+WelcomeText.Size = UDim2.new(1, 0, 0, 18)
+WelcomeText.Position = UDim2.new(0, 0, 0.32, 0)
+WelcomeText.Text = "✦ " .. LocalPlayer.Name .. " ✦"
+WelcomeText.TextColor3 = Color3.fromRGB(160, 160, 180)
+WelcomeText.TextSize = 12
 WelcomeText.Font = Enum.Font.Gotham
 WelcomeText.BackgroundTransparency = 1
 WelcomeText.Parent = Background
 
 -- ============================================================
--- نظام الحالة مع أيقونات متحركة
+-- 🔹 حالة التحميل (خط صغير)
 -- ============================================================
 local StatusText = Instance.new("TextLabel")
-StatusText.Size = UDim2.new(1, 0, 0, 25)
-StatusText.Position = UDim2.new(0, 0, 0.60, 0)
-StatusText.Text = "🌀 INITIALIZING QUANTUM SYSTEM..."
+StatusText.Size = UDim2.new(1, 0, 0, 16)
+StatusText.Position = UDim2.new(0, 0, 0.39, 0)
+StatusText.Text = "⟳ INITIALIZING..."
 StatusText.TextColor3 = Color3.fromRGB(138, 43, 226)
-StatusText.TextSize = 15
+StatusText.TextSize = 10
 StatusText.Font = Enum.Font.Code
 StatusText.BackgroundTransparency = 1
 StatusText.Parent = Background
 
 -- ============================================================
--- شريط التحميل مع تأثير الانفجار النجمي
+-- 🔹 شريط التحميل (أنيق ومناسب)
 -- ============================================================
 local LoadingBarBg = Instance.new("Frame")
-LoadingBarBg.Size = UDim2.new(0, 400, 0, 10)
-LoadingBarBg.Position = UDim2.new(0.5, -200, 0.68, 0)
-LoadingBarBg.BackgroundColor3 = Color3.fromRGB(10, 5, 20)
+LoadingBarBg.Size = UDim2.new(0, 220, 0, 4)
+LoadingBarBg.Position = UDim2.new(0.5, -110, 0.47, 0)
+LoadingBarBg.BackgroundColor3 = Color3.fromRGB(18, 12, 28)
 LoadingBarBg.BorderSizePixel = 0
 LoadingBarBg.Parent = Background
 
--- تدرج متحرك
+-- تدرج الشريط
 local barGradient = Instance.new("UIGradient")
 barGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(138, 43, 226)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 50, 150)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(50, 200, 255)),
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 200, 50)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(138, 43, 226))
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 80, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 200))
 })
-barGradient.Rotation = 0
 barGradient.Parent = LoadingBarBg
-
-task.spawn(function()
-    while task.wait(0.02) do
-        barGradient.Rotation = (barGradient.Rotation + 3) % 360
-    end
-end)
 
 local BarCorner = Instance.new("UICorner")
 BarCorner.CornerRadius = UDim.new(1, 0)
@@ -479,7 +276,7 @@ BarCorner.Parent = LoadingBarBg
 local LoadingBarFill = Instance.new("Frame")
 LoadingBarFill.Size = UDim2.new(0, 0, 1, 0)
 LoadingBarFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-LoadingBarFill.BackgroundTransparency = 0.2
+LoadingBarFill.BackgroundTransparency = 0.3
 LoadingBarFill.BorderSizePixel = 0
 LoadingBarFill.Parent = LoadingBarBg
 
@@ -487,182 +284,94 @@ local FillCorner = Instance.new("UICorner")
 FillCorner.CornerRadius = UDim.new(1, 0)
 FillCorner.Parent = LoadingBarFill
 
--- تأثير الانفجار النجمي (Starburst)
-local starburst = Instance.new("Frame")
-starburst.Size = UDim2.new(0, 40, 1.5, 0)
-starburst.Position = UDim2.new(0, -20, -0.25, 0)
-starburst.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-starburst.BackgroundTransparency = 0.6
-starburst.BorderSizePixel = 0
-starburst.Parent = LoadingBarFill
-
-local StarburstCorner = Instance.new("UICorner")
-StarburstCorner.CornerRadius = UDim.new(1, 0)
-StarburstCorner.Parent = starburst
-
 -- ============================================================
--- نظام الإحصائيات المتقدم (FPS, Ping, Memory)
+-- 🔹 النسبة المئوية
 -- ============================================================
-local StatsContainer = Instance.new("Frame")
-StatsContainer.Size = UDim2.new(0, 300, 0, 80)
-StatsContainer.Position = UDim2.new(0.5, -150, 0.76, 0)
-StatsContainer.BackgroundTransparency = 1
-StatsContainer.Parent = Background
-
-local function createStatLabel(text, position)
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.33, 0, 0.5, 0)
-    label.Position = UDim2.new(position, 0, 0, 0)
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(150, 150, 170)
-    label.TextSize = 11
-    label.Font = Enum.Font.Code
-    label.BackgroundTransparency = 1
-    label.Parent = StatsContainer
-    return label
-end
-
-local FPSLabel = createStatLabel("🔄 FPS: 60", 0)
-local PingLabel = createStatLabel("📶 Ping: 0ms", 0.33)
-local MemoryLabel = createStatLabel("💾 Mem: 0MB", 0.66)
-
--- تحديث الإحصائيات
-task.spawn(function()
-    local frameCount = 0
-    local lastFPSUpdate = os.clock()
-    
-    while task.wait(0.1) do
-        frameCount = frameCount + 1
-        local now = os.clock()
-        if now - lastFPSUpdate >= 1 then
-            FPSLabel.Text = "🔄 FPS: " .. frameCount
-            frameCount = 0
-            lastFPSUpdate = now
-        end
-        
-        -- محاكاة الـ Ping
-        local ping = math.random(10, 100)
-        PingLabel.Text = "📶 Ping: " .. ping .. "ms"
-        
-        -- محاكاة الذاكرة
-        local memory = math.random(50, 200)
-        MemoryLabel.Text = "💾 Mem: " .. memory .. "MB"
-    end
-end)
-
 local PercentageText = Instance.new("TextLabel")
-PercentageText.Size = UDim2.new(1, 0, 0.5, 0)
-PercentageText.Position = UDim2.new(0, 0, 0.5, 0)
+PercentageText.Size = UDim2.new(0, 35, 0, 18)
+PercentageText.Position = UDim2.new(0.5, -17.5, 0.52, 0)
 PercentageText.Text = "0%"
-PercentageText.TextColor3 = Color3.fromRGB(200, 200, 220)
-PercentageText.TextSize = 28
+PercentageText.TextColor3 = Color3.fromRGB(180, 180, 200)
+PercentageText.TextSize = 13
 PercentageText.Font = Enum.Font.GothamBold
 PercentageText.BackgroundTransparency = 1
-PercentageText.Parent = StatsContainer
+PercentageText.Parent = Background
 
 -- ============================================================
--- نظام الإشعارات المتقدم جداً
+-- 🔹 نظام الإشعارات (خفيف)
 -- ============================================================
-local function showUltimateNotification(text, icon, color, duration)
-    duration = duration or 2.5
-    
-    local notif = Instance.new("Frame")
-    notif.Size = UDim2.new(0, 350, 0, 40)
-    notif.Position = UDim2.new(0.5, -175, 0.88, 0)
-    notif.BackgroundColor3 = Color3.fromRGB(5, 3, 15)
+local function showNotification(text, color)
+    local notif = Instance.new("TextLabel")
+    notif.Size = UDim2.new(0, 180, 0, 20)
+    notif.Position = UDim2.new(0.5, -90, 0.60, 0)
+    notif.Text = "▸ " .. text
+    notif.TextColor3 = color or Color3.fromRGB(138, 43, 226)
+    notif.TextSize = 9
+    notif.Font = Enum.Font.Gotham
+    notif.BackgroundColor3 = Color3.fromRGB(10, 8, 20)
     notif.BackgroundTransparency = 0.3
-    notif.BorderSizePixel = 0
     notif.Parent = Background
     
     local notifCorner = Instance.new("UICorner")
-    notifCorner.CornerRadius = UDim.new(0, 12)
+    notifCorner.CornerRadius = UDim.new(0, 6)
     notifCorner.Parent = notif
     
     local notifStroke = Instance.new("UIStroke")
     notifStroke.Color = color or Color3.fromRGB(138, 43, 226)
-    notifStroke.Thickness = 2
-    notifStroke.Transparency = 0.3
+    notifStroke.Thickness = 1
+    notifStroke.Transparency = 0.5
     notifStroke.Parent = notif
     
-    -- تأثير نبض للإشعار
-    TweenService:Create(notifStroke, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-        Transparency = 0.1,
-        Thickness = 3
-    }):Play()
+    notif.Position = UDim2.new(0.5, -90, 0.63, 0)
+    notif.TextTransparency = 1
     
-    local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(0, 35, 1, 0)
-    iconLabel.Position = UDim2.new(0, 5, 0, 0)
-    iconLabel.Text = icon or "◆"
-    iconLabel.TextColor3 = color or Color3.fromRGB(138, 43, 226)
-    iconLabel.TextSize = 18
-    iconLabel.Font = Enum.Font.Gotham
-    iconLabel.BackgroundTransparency = 1
-    iconLabel.Parent = notif
-    
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, -45, 1, 0)
-    textLabel.Position = UDim2.new(0, 40, 0, 0)
-    textLabel.Text = text
-    textLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
-    textLabel.TextSize = 14
-    textLabel.Font = Enum.Font.Gotham
-    textLabel.BackgroundTransparency = 1
-    textLabel.TextXAlignment = Enum.TextXAlignment.Left
-    textLabel.Parent = notif
-    
-    notif.Position = UDim2.new(0.5, -175, 0.92, 0)
-    notif.BackgroundTransparency = 0.7
-    
-    local appear = TweenService:Create(notif, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, -175, 0.88, 0),
-        BackgroundTransparency = 0.3
+    local appear = TweenService:Create(notif, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, -90, 0.60, 0),
+        TextTransparency = 0
     })
     appear:Play()
     
-    task.wait(duration)
+    task.wait(1.8)
     
-    local disappear = TweenService:Create(notif, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        Position = UDim2.new(0.5, -175, 0.92, 0),
-        BackgroundTransparency = 0.7
+    local disappear = TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        TextTransparency = 1,
+        Position = UDim2.new(0.5, -90, 0.63, 0)
     })
     disappear:Play()
     disappear.Completed:Connect(function() notif:Destroy() end)
 end
 
 -- ============================================================
--- نظام المهام الخارق (Super Tasks)
+-- نظام المهام
 -- ============================================================
-local superTasks = {
-    {name = "Activating Quantum Core", icon = "⚛️", time = 0.3, color = Color3.fromRGB(138, 43, 226)},
-    {name = "Bypassing Dimensional Barriers", icon = "🌀", time = 0.5, color = Color3.fromRGB(255, 50, 150)},
-    {name = "Loading ABC Ultimate Framework", icon = "🚀", time = 0.5, color = Color3.fromRGB(50, 200, 255)},
-    {name = "Injecting Hyper Modules", icon = "💎", time = 0.4, color = Color3.fromRGB(255, 200, 50)},
-    {name = "Optimizing Quantum Performance", icon = "⚡", time = 0.4, color = Color3.fromRGB(100, 255, 100)},
-    {name = "Verifying Dimensional Identity", icon = "🔐", time = 0.4, color = Color3.fromRGB(255, 150, 200)},
-    {name = "Loading 4D UI Elements", icon = "🌌", time = 0.4, color = Color3.fromRGB(200, 100, 255)},
-    {name = "Stabilizing Space-Time", icon = "⏳", time = 0.3, color = Color3.fromRGB(100, 200, 255)},
-    {name = "Ready! Ultimate Launch", icon = "🎆", time = 0.3, color = Color3.fromRGB(50, 255, 200)}
+local tasks = {
+    {name = "Connecting", time = 0.4, color = Color3.fromRGB(255, 200, 50)},
+    {name = "Bypassing", time = 0.6, color = Color3.fromRGB(255, 100, 100)},
+    {name = "Loading Framework", time = 0.5, color = Color3.fromRGB(138, 43, 226)},
+    {name = "Injecting", time = 0.5, color = Color3.fromRGB(50, 200, 255)},
+    {name = "Optimizing", time = 0.4, color = Color3.fromRGB(100, 255, 100)},
+    {name = "Verifying", time = 0.4, color = Color3.fromRGB(255, 150, 200)},
+    {name = "Ready!", time = 0.3, color = Color3.fromRGB(50, 255, 200)}
 }
 
 -- ============================================================
--- نظام التحميل الرئيسي (النسخة النهائية)
+-- نظام التحميل الرئيسي
 -- ============================================================
 local isLoadingComplete = false
 local loadStartTime = os.clock()
 local totalLoadTime = 0
 
-for _, task in ipairs(superTasks) do
+for _, task in ipairs(tasks) do
     totalLoadTime = totalLoadTime + task.time
 end
 
 -- تشغيل المهام
 task.spawn(function()
-    for i, task in ipairs(superTasks) do
-        task.wait(task.time * 0.5)
+    for i, task in ipairs(tasks) do
+        task.wait(task.time * 0.6)
         if not isLoadingComplete then
-            StatusText.Text = "🌀 " .. task.name .. "..."
-            showUltimateNotification(task.name, task.icon, task.color, 1.8)
+            StatusText.Text = "⟳ " .. task.name .. "..."
+            showNotification(task.name, task.color)
         end
     end
 end)
@@ -673,17 +382,14 @@ local loadTween = TweenService:Create(LoadingBarFill, TweenInfo.new(totalLoadTim
 })
 loadTween:Play()
 
--- تحديث النسبة والإحصائيات
+-- تحديث النسبة
 local connection
 connection = RunService.RenderStepped:Connect(function()
     local elapsed = os.clock() - loadStartTime
     local progress = math.clamp(elapsed / totalLoadTime, 0, 1)
     local smoothProgress = progress * (2 - progress)
     
-    local percent = math.floor(smoothProgress * 100)
-    PercentageText.Text = percent .. "%"
-    
-    starburst.Position = UDim2.new(smoothProgress, -20, -0.25, 0)
+    PercentageText.Text = math.floor(smoothProgress * 100) .. "%"
     
     if progress >= 1 then
         connection:Disconnect()
@@ -691,54 +397,27 @@ connection = RunService.RenderStepped:Connect(function()
 end)
 
 loadTween.Completed:Wait()
-task.wait(0.5)
+task.wait(0.4)
 isLoadingComplete = true
 
-StatusText.Text = "✅ ULTIMATE SYSTEM ACTIVATED!"
+StatusText.Text = "✓ COMPLETED!"
 StatusText.TextColor3 = Color3.fromRGB(50, 255, 100)
-showUltimateNotification("🚀 Ultimate System Activated!", "🎆", Color3.fromRGB(50, 255, 100), 3)
+showNotification("✅ Complete!", Color3.fromRGB(50, 255, 100))
 
-task.wait(1)
+task.wait(0.6)
 
 -- ============================================================
--- [الإخفاء النهائي الخارق]
+-- إخفاء الواجهة
 -- ============================================================
-local function ultimateDestroy()
-    -- إيقاف جميع العمليات
-    task.cancel(quantumLoop)
+local function destroyScreen()
+    task.cancel(particleLoop)
     
-    -- تنظيف الجزيئات الكمومية
-    for _, p in pairs(quantumParticles) do
+    for _, p in pairs(particles) do
         p:Destroy()
     end
-    quantumParticles = {}
+    particles = {}
     
-    -- تنظيف الطقس
-    for _, p in pairs(weatherParticles) do
-        p:Destroy()
-    end
-    weatherParticles = {}
-    
-    -- تنظيف الهولوغرام
-    for _, ring in pairs(hologramRings) do
-        ring:Destroy()
-    end
-    hologramRings = {}
-    
-    -- تنظيف شظايا المرآة
-    for _, shard in pairs(shards) do
-        shard:Destroy()
-    end
-    shards = {}
-    
-    -- تنظيف أبعاد الشعار
-    for _, layer in pairs(dimensionLayers) do
-        layer:Destroy()
-    end
-    dimensionLayers = {}
-    
-    -- إخفاء جميع العناصر
-    local fadeInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local fadeInfo = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     
     for _, item in pairs(Background:GetChildren()) do
         task.spawn(function()
@@ -759,23 +438,21 @@ local function ultimateDestroy()
         end)
     end
     
-    -- إخفاء الخلفية
     local fadeBackground = TweenService:Create(Background, fadeInfo, {BackgroundTransparency = 1})
     fadeBackground:Play()
     fadeBackground.Completed:Wait()
     
-    -- حذف الواجهة
     pcall(function()
         ScreenGui:Destroy()
     end)
     
-    print("✅ ABC Ultimate 1000× Screen Destroyed!")
+    print("✅ ABC Mobile Loading Screen Destroyed!")
 end
 
-ultimateDestroy()
+destroyScreen()
 
 -- ============================================================
--- نظام حماية خارق (لا يمكن إلغاء التحميل)
+-- حماية خفيفة
 -- ============================================================
 local cancelAttempts = 0
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -783,51 +460,17 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Escape then
         if not isLoadingComplete then
             cancelAttempts = cancelAttempts + 1
-            if cancelAttempts >= 5 then
-                -- محاولة إلغاء ولكن الحماية تمنع
-                showUltimateNotification("⚠️ System Protection Active - Cannot Cancel", "🛡️", Color3.fromRGB(255, 50, 50), 2)
-                cancelAttempts = 0
+            if cancelAttempts >= 3 then
+                isLoadingComplete = true
+                task.cancel(particleLoop)
+                pcall(function() ScreenGui:Destroy() end)
+                print("⏹ Loading cancelled")
             else
-                showUltimateNotification("🛡️ Protection Level " .. CONFIG.ProtectionLevel .. " - " .. (5 - cancelAttempts) .. " attempts remaining", "🔒", Color3.fromRGB(255, 200, 50), 1.5)
+                showNotification("ESC " .. (3 - cancelAttempts) .. " more", Color3.fromRGB(255, 200, 50))
             end
         end
     end
 end)
 
--- ============================================================
--- تأثير التموج الزمني (Time Ripple)
--- ============================================================
-task.spawn(function()
-    while task.wait(2) do
-        if not isLoadingComplete then
-            -- موجات زمنية عبر الخلفية
-            for i = 1, 3 do
-                local ripple = Instance.new("Frame")
-                local size = math.random(200, 500)
-                ripple.Size = UDim2.new(0, size, 0, size)
-                ripple.Position = UDim2.new(math.random(), 0, math.random(), 0)
-                ripple.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-                ripple.BackgroundTransparency = 0.95
-                ripple.BorderSizePixel = 0
-                ripple.Parent = Background
-                
-                local rippleCorner = Instance.new("UICorner")
-                rippleCorner.CornerRadius = UDim.new(1, 0)
-                rippleCorner.Parent = ripple
-                
-                TweenService:Create(ripple, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Size = UDim2.new(0, size * 3, 0, size * 3),
-                    BackgroundTransparency = 1
-                }):Play()
-                
-                task.wait(0.3)
-                ripple:Destroy()
-            end
-        end
-    end
-end)
-
-print("🚀 ABC ULTIMATE 1000× Loading Screen Activated!")
-print("✨ Welcome to the Next Dimension, " .. LocalPlayer.Name .. "!")
-print("⚡ Version: 1000× Ultimate Edition")
-print("🌌 Dimensional Status: STABLE")
+print("📱 ABC Premium Mobile Loading Screen Loaded!")
+print("✨ Welcome, " .. LocalPlayer.Name .. "!")
