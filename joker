@@ -1,1080 +1,1341 @@
-local Players = game:GetService("Players")
-local TextChatService = game:GetService("TextChatService")
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- ============================================
+-- شاشة التحميل (Loading Screen)
+-- ============================================
+
+-- 1. استدعاء الخدمات الأساسية وإعداد الحاوية
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 -- منع إعادة التشغيل
-if _G.DeltaSpyRunning then return end
-_G.DeltaSpyRunning = true
+if _G.ABCLoadingRunning then return end
+_G.ABCLoadingRunning = true
 
--- متغيرات الإعدادات
-local settings = {
-    themeColor = Color3.fromRGB(138, 43, 226),
-    particlesEnabled = true,
-    particleCount = "medium", -- low, medium, high
-    particleColor = Color3.fromRGB(138, 43, 226),
-    searchEnabled = true,
-    loadingEnabled = true,
-    loadingDuration = 4,
-    soundEnabled = true,
-    soundType = "default",
-    notificationsEnabled = true,
-    whisperNotifications = true,
-    mentionNotifications = true,
-    autoSaveEnabled = false,
-    autoSaveInterval = 5,
-    maxSaves = 20,
-    uiSize = "medium", -- small, medium, large
-    uiTransparency = 0,
-    dragEnabled = true,
-    filterEnabled = false,
-    filterWords = {},
-    filterUsers = {},
-    developerMode = false,
-    showTimestamps = false,
-    showUserIds = false,
-    hideYourName = false,
-    hideYourAvatar = false,
-    statsEnabled = true,
-}
-
--- متغيرات تخزين المحفوظات
-local savedChats = {}
-local savedChatsCount = 0
-
--- إحصائيات
-local stats = {
-    messagesReceived = 0,
-    savedCount = 0,
-    startTime = os.time(),
-}
-
--- 1. Main Gui Setup
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ABC_Spy_Pro"
+ScreenGui.Name = "ABC_Premium_Loading"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
 
--- ============================================
--- الواجهة الرئيسية
--- ============================================
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 420, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -175)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Parent = ScreenGui
-MainFrame.Visible = false
+-- 2. الخلفية السينمائية الداكنة مع تدرج لوني
+local Background = Instance.new("Frame")
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+Background.BorderSizePixel = 0
+Background.Parent = ScreenGui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
-MainCorner.Parent = MainFrame
+-- إضافة تدرج لوني فاخر
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(5, 5, 8)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 10, 30))
+})
+gradient.Parent = Background
 
-local MainBorder = Instance.new("UIStroke")
-MainBorder.Color = settings.themeColor
-MainBorder.Thickness = 2.5
-MainBorder.Transparency = 0.3
-MainBorder.Parent = MainFrame
-
--- ============================================
--- نافذة الإعدادات (Settings Window)
--- ============================================
-local SettingsFrame = Instance.new("Frame")
-SettingsFrame.Name = "SettingsFrame"
-SettingsFrame.Size = UDim2.new(0, 450, 0, 400)
-SettingsFrame.Position = UDim2.new(0.5, -225, 0.5, -200)
-SettingsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-SettingsFrame.BorderSizePixel = 0
-SettingsFrame.Visible = false
-SettingsFrame.Parent = ScreenGui
-
-local SettingsCorner = Instance.new("UICorner")
-SettingsCorner.CornerRadius = UDim.new(0, 10)
-SettingsCorner.Parent = SettingsFrame
-
-local SettingsBorder = Instance.new("UIStroke")
-SettingsBorder.Color = settings.themeColor
-SettingsBorder.Thickness = 2
-SettingsBorder.Transparency = 0.3
-SettingsBorder.Parent = SettingsFrame
-
--- عنوان الإعدادات
-local SettingsTitle = Instance.new("TextLabel")
-SettingsTitle.Size = UDim2.new(1, 0, 0, 40)
-SettingsTitle.Position = UDim2.new(0, 0, 0, 0)
-SettingsTitle.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-SettingsTitle.Text = "⚙️ Settings"
-SettingsTitle.TextColor3 = settings.themeColor
-SettingsTitle.TextSize = 18
-SettingsTitle.Font = Enum.Font.GothamBold
-SettingsTitle.Parent = SettingsFrame
-
-local SettingsTitleCorner = Instance.new("UICorner")
-SettingsTitleCorner.CornerRadius = UDim.new(0, 10)
-SettingsTitleCorner.Parent = SettingsTitle
-
--- زر إغلاق الإعدادات
-local SettingsCloseBtn = Instance.new("TextButton")
-SettingsCloseBtn.Size = UDim2.new(0, 30, 0, 30)
-SettingsCloseBtn.Position = UDim2.new(0.93, 0, 0.05, 0)
-SettingsCloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-SettingsCloseBtn.Text = "✕"
-SettingsCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SettingsCloseBtn.Font = Enum.Font.GothamBold
-SettingsCloseBtn.TextSize = 18
-SettingsCloseBtn.Parent = SettingsTitle
-
-local SettingsCloseCorner = Instance.new("UICorner")
-SettingsCloseCorner.CornerRadius = UDim.new(1, 0)
-SettingsCloseCorner.Parent = SettingsCloseBtn
-
--- ScrollingFrame للإعدادات
-local SettingsScrollingFrame = Instance.new("ScrollingFrame")
-SettingsScrollingFrame.Size = UDim2.new(0.96, 0, 0.82, 0)
-SettingsScrollingFrame.Position = UDim2.new(0.02, 0, 0.12, 0)
-SettingsScrollingFrame.BackgroundTransparency = 1
-SettingsScrollingFrame.BorderSizePixel = 0
-SettingsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-SettingsScrollingFrame.ScrollBarThickness = 4
-SettingsScrollingFrame.ScrollBarImageColor3 = settings.themeColor
-SettingsScrollingFrame.Parent = SettingsFrame
-
-local SettingsUIListLayout = Instance.new("UIListLayout")
-SettingsUIListLayout.Parent = SettingsScrollingFrame
-SettingsUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SettingsUIListLayout.Padding = UDim.new(0, 8)
-
--- ============================================
--- نافذة المحفوظات (Saved Chats)
--- ============================================
-local SavedFrame = Instance.new("Frame")
-SavedFrame.Name = "SavedFrame"
-SavedFrame.Size = UDim2.new(0, 380, 0, 300)
-SavedFrame.Position = UDim2.new(0.5, -190, 0.5, -150)
-SavedFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-SavedFrame.BorderSizePixel = 0
-SavedFrame.Visible = false
-SavedFrame.Parent = ScreenGui
-
-local SavedCorner = Instance.new("UICorner")
-SavedCorner.CornerRadius = UDim.new(0, 10)
-SavedCorner.Parent = SavedFrame
-
-local SavedBorder = Instance.new("UIStroke")
-SavedBorder.Color = settings.themeColor
-SavedBorder.Thickness = 2
-SavedBorder.Transparency = 0.3
-SavedBorder.Parent = SavedFrame
-
-local SavedTitle = Instance.new("TextLabel")
-SavedTitle.Size = UDim2.new(1, 0, 0, 40)
-SavedTitle.Position = UDim2.new(0, 0, 0, 0)
-SavedTitle.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-SavedTitle.Text = "📁 Saved Chats"
-SavedTitle.TextColor3 = settings.themeColor
-SavedTitle.TextSize = 18
-SavedTitle.Font = Enum.Font.GothamBold
-SavedTitle.Parent = SavedFrame
-
-local SavedTitleCorner = Instance.new("UICorner")
-SavedTitleCorner.CornerRadius = UDim.new(0, 10)
-SavedTitleCorner.Parent = SavedTitle
-
-local SavedCloseBtn = Instance.new("TextButton")
-SavedCloseBtn.Size = UDim2.new(0, 30, 0, 30)
-SavedCloseBtn.Position = UDim2.new(0.92, 0, 0.05, 0)
-SavedCloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-SavedCloseBtn.Text = "✕"
-SavedCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SavedCloseBtn.Font = Enum.Font.GothamBold
-SavedCloseBtn.TextSize = 18
-SavedCloseBtn.Parent = SavedTitle
-
-local SavedCloseCorner = Instance.new("UICorner")
-SavedCloseCorner.CornerRadius = UDim.new(1, 0)
-SavedCloseCorner.Parent = SavedCloseBtn
-
-local SavedScrollingFrame = Instance.new("ScrollingFrame")
-SavedScrollingFrame.Size = UDim2.new(0.94, 0, 0.75, 0)
-SavedScrollingFrame.Position = UDim2.new(0.03, 0, 0.15, 0)
-SavedScrollingFrame.BackgroundTransparency = 1
-SavedScrollingFrame.BorderSizePixel = 0
-SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-SavedScrollingFrame.ScrollBarThickness = 4
-SavedScrollingFrame.ScrollBarImageColor3 = settings.themeColor
-SavedScrollingFrame.Parent = SavedFrame
-
-local SavedUIListLayout = Instance.new("UIListLayout")
-SavedUIListLayout.Parent = SavedScrollingFrame
-SavedUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SavedUIListLayout.Padding = UDim.new(0, 5)
-
-local ClearSavedBtn = Instance.new("TextButton")
-ClearSavedBtn.Size = UDim2.new(0.3, 0, 0, 30)
-ClearSavedBtn.Position = UDim2.new(0.35, 0, 0.92, 0)
-ClearSavedBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-ClearSavedBtn.Text = "🗑️ Clear All"
-ClearSavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ClearSavedBtn.Font = Enum.Font.GothamBold
-ClearSavedBtn.TextSize = 13
-ClearSavedBtn.Parent = SavedFrame
-
-local ClearSavedCorner = Instance.new("UICorner")
-ClearSavedCorner.CornerRadius = UDim.new(0, 6)
-ClearSavedCorner.Parent = ClearSavedBtn
-
--- ============================================
--- دالة إنشاء عناصر الإعدادات
--- ============================================
-local function createSettingItem(title, description, settingType, ...)
-    local item = Instance.new("Frame")
-    item.Size = UDim2.new(1, -10, 0, 45)
-    item.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-    item.BorderSizePixel = 0
-    item.Parent = SettingsScrollingFrame
-    
-    local itemCorner = Instance.new("UICorner")
-    itemCorner.CornerRadius = UDim.new(0, 6)
-    itemCorner.Parent = item
-    
-    -- العنوان
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(0.5, 0, 0.5, 0)
-    titleLabel.Position = UDim2.new(0.02, 0, 0, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = title
-    titleLabel.TextColor3 = Color3.fromRGB(230, 230, 240)
-    titleLabel.TextSize = 14
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Parent = item
-    
-    -- الوصف
-    local descLabel = Instance.new("TextLabel")
-    descLabel.Size = UDim2.new(0.5, 0, 0.4, 0)
-    descLabel.Position = UDim2.new(0.02, 0, 0.5, 0)
-    descLabel.BackgroundTransparency = 1
-    descLabel.Text = description
-    descLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
-    descLabel.TextSize = 11
-    descLabel.Font = Enum.Font.SourceSans
-    descLabel.TextXAlignment = Enum.TextXAlignment.Left
-    descLabel.Parent = item
-    
-    -- التحكم (حسب النوع)
-    local control
-    
-    if settingType == "toggle" then
-        control = Instance.new("TextButton")
-        control.Size = UDim2.new(0, 60, 0, 25)
-        control.Position = UDim2.new(0.72, 0, 0.15, 0)
-        control.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
-        control.Text = "ON"
-        control.TextColor3 = Color3.fromRGB(255, 255, 255)
-        control.Font = Enum.Font.GothamBold
-        control.TextSize = 12
-        control.Parent = item
-        
-        local controlCorner = Instance.new("UICorner")
-        controlCorner.CornerRadius = UDim.new(0, 4)
-        controlCorner.Parent = control
-        
-        local isOn = true
-        control.MouseButton1Click:Connect(function()
-            isOn = not isOn
-            if isOn then
-                control.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
-                control.Text = "ON"
-            else
-                control.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
-                control.Text = "OFF"
-            end
-        end)
-        
-    elseif settingType == "dropdown" then
-        control = Instance.new("TextBox")
-        control.Size = UDim2.new(0, 100, 0, 25)
-        control.Position = UDim2.new(0.68, 0, 0.15, 0)
-        control.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-        control.BorderSizePixel = 0
-        control.Text = "..."
-        control.TextColor3 = Color3.fromRGB(255, 255, 255)
-        control.Font = Enum.Font.Gotham
-        control.TextSize = 12
-        control.Parent = item
-        
-        local controlCorner = Instance.new("UICorner")
-        controlCorner.CornerRadius = UDim.new(0, 4)
-        controlCorner.Parent = control
-        
-    elseif settingType == "color" then
-        control = Instance.new("TextButton")
-        control.Size = UDim2.new(0, 40, 0, 25)
-        control.Position = UDim2.new(0.78, 0, 0.15, 0)
-        control.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-        control.Text = ""
-        control.Parent = item
-        
-        local controlCorner = Instance.new("UICorner")
-        controlCorner.CornerRadius = UDim.new(0, 4)
-        controlCorner.Parent = control
-        
-    elseif settingType == "slider" then
-        control = Instance.new("TextLabel")
-        control.Size = UDim2.new(0, 60, 0, 20)
-        control.Position = UDim2.new(0.75, 0, 0.2, 0)
-        control.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-        control.Text = "5"
-        control.TextColor3 = Color3.fromRGB(255, 255, 255)
-        control.Font = Enum.Font.GothamBold
-        control.TextSize = 12
-        control.Parent = item
-        
-        local controlCorner = Instance.new("UICorner")
-        controlCorner.CornerRadius = UDim.new(0, 4)
-        controlCorner.Parent = control
-        
-    elseif settingType == "input" then
-        control = Instance.new("TextBox")
-        control.Size = UDim2.new(0, 120, 0, 25)
-        control.Position = UDim2.new(0.65, 0, 0.15, 0)
-        control.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-        control.BorderSizePixel = 0
-        control.Text = ""
-        control.PlaceholderText = "Type here..."
-        control.TextColor3 = Color3.fromRGB(255, 255, 255)
-        control.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
-        control.Font = Enum.Font.Gotham
-        control.TextSize = 12
-        control.Parent = item
-        
-        local controlCorner = Instance.new("UICorner")
-        controlCorner.CornerRadius = UDim.new(0, 4)
-        controlCorner.Parent = control
-    end
-    
-    return item
-end
-
--- ============================================
--- إنشاء جميع عناصر الإعدادات
--- ============================================
-local settingItems = {}
-
--- 1. تخصيص الألوان
-createSettingItem("Theme Color", "Change UI accent color", "color")
-createSettingItem("Background Theme", "Dark / Light mode", "toggle")
-
--- 2. الجزيئات
-createSettingItem("Enable Particles", "Turn particles on/off", "toggle")
-createSettingItem("Particle Count", "Low / Medium / High", "dropdown")
-createSettingItem("Particle Color", "Choose particle color", "color")
-
--- 3. البحث
-createSettingItem("Enable Search", "Turn search on/off", "toggle")
-createSettingItem("Search Results", "Messages to show (10-100)", "slider")
-
--- 4. التحميل
-createSettingItem("Loading Screen", "Show loading when opening", "toggle")
-createSettingItem("Loading Duration", "Seconds (2-10)", "slider")
-
--- 5. الصوت
-createSettingItem("Enable Sound", "Play sounds for messages", "toggle")
-createSettingItem("Sound Type", "Default / Alert / Music", "dropdown")
-
--- 6. الإشعارات
-createSettingItem("Enable Notifications", "Turn notifications on/off", "toggle")
-createSettingItem("Whisper Alerts", "Notify for whispers", "toggle")
-createSettingItem("Mention Alerts", "Notify when mentioned", "toggle")
-
--- 7. الحفظ
-createSettingItem("Auto-Save", "Auto-save every X minutes", "toggle")
-createSettingItem("Auto-Save Interval", "Minutes (1-30)", "slider")
-createSettingItem("Max Saves", "Limit saved chats (5-50)", "slider")
-
--- 8. الواجهة
-createSettingItem("UI Size", "Small / Medium / Large", "dropdown")
-createSettingItem("UI Transparency", "0-50% transparent", "slider")
-createSettingItem("Enable Drag", "Allow dragging the UI", "toggle")
-
--- 9. الفلترة
-createSettingItem("Enable Filter", "Filter words/users", "toggle")
-createSettingItem("Filter Words", "Comma separated (bad,word)", "input")
-createSettingItem("Filter Users", "Comma separated users", "input")
-
--- 10. متقدم
-createSettingItem("Developer Mode", "Show debug info", "toggle")
-createSettingItem("Show Timestamps", "Show message times", "toggle")
-createSettingItem("Show User IDs", "Show player user IDs", "toggle")
-
--- 11. الخصوصية
-createSettingItem("Hide Your Name", "Hide your name in chat", "toggle")
-createSettingItem("Hide Your Avatar", "Hide your profile picture", "toggle")
-
--- 12. الإحصائيات
-createSettingItem("Enable Statistics", "Show chat statistics", "toggle")
-
--- تحديث Canvas
-task.wait(0.1)
-SettingsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SettingsUIListLayout.AbsoluteContentSize.Y + 20)
-
--- ============================================
--- نظام الجزيئات
--- ============================================
+-- نظام الجزيئات المتحركة في الخلفية
 local function createParticle()
-    if not settings.particlesEnabled then return end
-    
     local particle = Instance.new("Frame")
-    local size = math.random(2, 5)
+    local size = math.random(1, 3)
     particle.Size = UDim2.new(0, size, 0, size)
-    particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    particle.Position = UDim2.new(math.random(), 0, -0.1, 0)
     
     local colors = {
-        settings.particleColor,
-        Color3.fromRGB(160, 50, 255),
+        Color3.fromRGB(138, 43, 226),
+        Color3.fromRGB(100, 50, 200),
         Color3.fromRGB(180, 80, 255),
-        Color3.fromRGB(120, 30, 200)
+        Color3.fromRGB(80, 30, 180)
     }
     particle.BackgroundColor3 = colors[math.random(1, #colors)]
     particle.BackgroundTransparency = math.random(2, 6) / 10
     particle.BorderSizePixel = 0
-    particle.Parent = MainFrame
+    particle.Parent = Background
     
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(1, 0)
     UICorner.Parent = particle
 
-    local speed = math.random(5, 15)
-    local targetX = particle.Position.X.Scale + math.random(-30, 30) / 100
-    local targetY = particle.Position.Y.Scale + math.random(-30, 30) / 100
-    
-    targetX = math.clamp(targetX, 0, 1)
-    targetY = math.clamp(targetY, 0, 1)
-    
+    local speed = math.random(5, 10)
     local tween = TweenService:Create(particle, TweenInfo.new(speed, Enum.EasingStyle.Linear), {
-        Position = UDim2.new(targetX, 0, targetY, 0),
+        Position = UDim2.new(particle.Position.X.Scale, 0, 1.1, 0),
         BackgroundTransparency = 1
     })
     tween:Play()
     tween.Completed:Connect(function() particle:Destroy() end)
 end
 
-local particleLoop
-local function startParticles()
-    if particleLoop then return end
-    local count = settings.particleCount == "low" and 0.15 or settings.particleCount == "medium" and 0.08 or 0.04
-    particleLoop = task.spawn(function()
-        while MainFrame.Visible and settings.particlesEnabled do
+-- توليد الجزيئات بكثافة عالية
+local particleLoop = task.spawn(function()
+    while task.wait(0.08) do
+        createParticle()
+        if math.random(1, 3) == 1 then
             createParticle()
-            if settings.particleCount == "high" then
-                createParticle()
-                createParticle()
-            end
-            task.wait(count)
         end
-    end)
-end
+    end
+end)
 
-local function stopParticles()
-    if particleLoop then
-        task.cancel(particleLoop)
-        particleLoop = nil
+-- 3. الشعار العلوي الدائري المصغر (ABC)
+local LogoCircle = Instance.new("Frame")
+LogoCircle.Size = UDim2.new(0, 75, 0, 75)
+LogoCircle.Position = UDim2.new(0.5, -37.5, 0.14, 0)
+LogoCircle.BackgroundColor3 = Color3.fromRGB(15, 10, 25)
+LogoCircle.Parent = Background
+
+local LogoCorner = Instance.new("UICorner")
+LogoCorner.CornerRadius = UDim.new(1, 0)
+LogoCorner.Parent = LogoCircle
+
+local LogoStroke = Instance.new("UIStroke")
+LogoStroke.Color = Color3.fromRGB(138, 43, 226)
+LogoStroke.Thickness = 2.5
+LogoStroke.Parent = LogoCircle
+
+local LogoText = Instance.new("TextLabel")
+LogoText.Size = UDim2.new(1, 0, 1, 0)
+LogoText.Text = "ABC"
+LogoText.TextColor3 = Color3.fromRGB(180, 100, 255)
+LogoText.TextSize = 24
+LogoText.Font = Enum.Font.FredokaOne
+LogoText.BackgroundTransparency = 1
+LogoText.Parent = LogoCircle
+
+-- 4. صورة اللاعب (الأفاتار)
+local AvatarCircle = Instance.new("ImageLabel")
+AvatarCircle.Size = UDim2.new(0, 55, 0, 55)
+AvatarCircle.Position = UDim2.new(0.5, -27.5, 0.36, 0)
+AvatarCircle.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+AvatarCircle.Parent = Background
+
+local userId = LocalPlayer.UserId
+AvatarCircle.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+
+local AvatarCorner = Instance.new("UICorner")
+AvatarCorner.CornerRadius = UDim.new(1, 0)
+AvatarCorner.Parent = AvatarCircle
+
+local AvatarStroke = Instance.new("UIStroke")
+AvatarStroke.Color = Color3.fromRGB(100, 60, 160)
+AvatarStroke.Thickness = 2
+AvatarStroke.Parent = AvatarCircle
+
+-- 5. النصوص
+local TitleText = Instance.new("TextLabel")
+TitleText.Size = UDim2.new(1, 0, 0, 35)
+TitleText.Position = UDim2.new(0, 0, 0.56, 0)
+TitleText.Text = "ABC TOP ON"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextSize = 28
+TitleText.Font = Enum.Font.GothamBold
+TitleText.BackgroundTransparency = 1
+TitleText.Parent = Background
+
+local TitleGlow = Instance.new("UIStroke")
+TitleGlow.Color = Color3.fromRGB(138, 43, 226)
+TitleGlow.Thickness = 1
+TitleGlow.Transparency = 0.5
+TitleGlow.Parent = TitleText
+
+local WelcomeText = Instance.new("TextLabel")
+WelcomeText.Size = UDim2.new(1, 0, 0, 30)
+WelcomeText.Position = UDim2.new(0, 0, 0.63, 0)
+WelcomeText.Text = "Welcome, " .. LocalPlayer.Name
+WelcomeText.TextColor3 = Color3.fromRGB(160, 160, 170)
+WelcomeText.TextSize = 16
+WelcomeText.Font = Enum.Font.Gotham
+WelcomeText.BackgroundTransparency = 1
+WelcomeText.Parent = Background
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(1, 0, 0, 20)
+StatusText.Position = UDim2.new(0, 0, 0.71, 0)
+StatusText.Text = "Initializing..."
+StatusText.TextColor3 = Color3.fromRGB(138, 43, 226)
+StatusText.TextSize = 13
+StatusText.Font = Enum.Font.Code
+StatusText.BackgroundTransparency = 1
+StatusText.Parent = Background
+
+-- 6. شريط التحميل
+local LoadingBarBg = Instance.new("Frame")
+LoadingBarBg.Size = UDim2.new(0, 280, 0, 4)
+LoadingBarBg.Position = UDim2.new(0.5, -140, 0.80, 0)
+LoadingBarBg.BackgroundColor3 = Color3.fromRGB(25, 20, 35)
+LoadingBarBg.BorderSizePixel = 0
+LoadingBarBg.Parent = Background
+
+local LoadingBarFill = Instance.new("Frame")
+LoadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+LoadingBarFill.BackgroundColor3 = Color3.fromRGB(160, 50, 255)
+LoadingBarFill.BorderSizePixel = 0
+LoadingBarFill.Parent = LoadingBarBg
+
+local PercentageText = Instance.new("TextLabel")
+PercentageText.Size = UDim2.new(0, 50, 0, 20)
+PercentageText.Position = UDim2.new(0.5, -25, 0.83, 0)
+PercentageText.Text = "0%"
+PercentageText.TextColor3 = Color3.fromRGB(200, 200, 210)
+PercentageText.TextSize = 14
+PercentageText.Font = Enum.Font.GothamMedium
+PercentageText.BackgroundTransparency = 1
+PercentageText.Parent = Background
+
+-- 7. نظام كتابة النصوص حرف حرف
+local function typeWriter(textLabel, text, speed)
+    textLabel.Text = ""
+    for i = 1, #text do
+        textLabel.Text = string.sub(text, 1, i)
+        task.wait(speed)
     end
 end
 
--- ============================================
--- زر ABC الدائري
--- ============================================
-local ABCToggle = Instance.new("ImageButton")
-ABCToggle.Size = UDim2.new(0, 50, 0, 50)
-ABCToggle.Position = UDim2.new(0, 10, 0.5, -25)
-ABCToggle.BackgroundColor3 = settings.themeColor
-ABCToggle.Image = "rbxassetid://4057423227"
-ABCToggle.Parent = ScreenGui
+-- 8. المؤشر المتحرك
+task.spawn(function()
+    local dots = ""
+    while task.wait(0.3) do
+        dots = (#dots >= 3) and "" or dots .. "."
+        if StatusText.Text:find("...") then
+            StatusText.Text = StatusText.Text:gsub("%.%.%.", "")
+        end
+        StatusText.Text = StatusText.Text .. dots
+    end
+end)
 
-local dragToggle2, dragStart2, startPos2
-ABCToggle.InputBegan:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and settings.dragEnabled then
-        dragToggle2 = true
-        dragStart2 = input.Position
-        startPos2 = ABCToggle.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragToggle2 = false end
+-- 9. تشغيل شاشة التحميل
+task.spawn(function()
+    -- أنيميشن نبض الشعار
+    local pulseInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+    TweenService:Create(LogoStroke, pulseInfo, {Thickness = 4.5, Color = Color3.fromRGB(210, 80, 255)}):Play()
+    TweenService:Create(AvatarStroke, pulseInfo, {Thickness = 3.5, Color = Color3.fromRGB(140, 80, 255)}):Play()
+    
+    -- نصوص الحالة
+    local statuses = {
+        {time = 0.8, text = "Bypassing Anticheat"},
+        {time = 1.8, text = "Loading ABC TOP ON Framework"},
+        {time = 2.8, text = "Injecting Modules & Scripts"},
+        {time = 3.6, text = "Ready! Booting UI"}
+    }
+    
+    task.spawn(function()
+        for _, status in ipairs(statuses) do
+            task.wait(status.time)
+            typeWriter(StatusText, status.text, 0.05)
+        end
+    end)
+    
+    -- شريط التحميل
+    local loadTime = 5
+    local loadInfo = TweenInfo.new(loadTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local loadTween = TweenService:Create(LoadingBarFill, loadInfo, {Size = UDim2.new(1, 0, 1, 0)})
+    loadTween:Play()
+    
+    -- تحديث النسبة المئوية
+    local startTime = os.clock()
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        local elapsed = os.clock() - startTime
+        local progress = math.clamp(elapsed / loadTime, 0, 1)
+        local smoothProgress = progress * (2 - progress) 
+        PercentageText.Text = math.floor(smoothProgress * 100) .. "%"
+        
+        if progress >= 1 then
+            connection:Disconnect()
+        end
+    end)
+    
+    loadTween.Completed:Wait()
+    task.wait(0.4)
+    
+    -- إيقاف الجزيئات
+    task.cancel(particleLoop)
+    
+    -- صوت النجاح
+    local successSound = Instance.new("Sound")
+    successSound.SoundId = "rbxassetid://9120396384"
+    successSound.Volume = 0.3
+    successSound.Parent = Background
+    successSound:Play()
+    
+    -- اختفاء الواجهة
+    local fadeInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local fadeBackground = TweenService:Create(Background, fadeInfo, {BackgroundTransparency = 1})
+    
+    for _, item in pairs(Background:GetChildren()) do
+        if item:IsA("TextLabel") then
+            TweenService:Create(item, fadeInfo, {TextTransparency = 1}):Play()
+            local stroke = item:FindFirstChildOfClass("UIStroke")
+            if stroke then TweenService:Create(stroke, fadeInfo, {Transparency = 1}):Play() end
+        elseif item:IsA("ImageLabel") then
+            TweenService:Create(item, fadeInfo, {ImageTransparency = 1}):Play()
+            local stroke = item:FindFirstChildOfClass("UIStroke")
+            if stroke then TweenService:Create(stroke, fadeInfo, {Transparency = 1}):Play() end
+        elseif item:IsA("Frame") then
+            TweenService:Create(item, fadeInfo, {BackgroundTransparency = 1}):Play()
+            local stroke = item:FindFirstChildOfClass("UIStroke")
+            if stroke then TweenService:Create(stroke, fadeInfo, {Transparency = 1}):Play() end
+        end
+    end
+    
+    fadeBackground:Play()
+    fadeBackground.Completed:Wait()
+    task.wait(0.2)
+    ScreenGui:Destroy()
+    _G.ABCLoadingRunning = false
+    
+    -- ============================================
+    -- تشغيل سكربت ABC Spy Pro
+    -- ============================================
+    
+    -- ============================================
+    -- ABC Spy Pro Script
+    -- ============================================
+    
+    local Players = game:GetService("Players")
+    local TextChatService = game:GetService("TextChatService")
+    local UserInputService = game:GetService("UserInputService")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local HttpService = game:GetService("HttpService")
+    local LocalPlayer = Players.LocalPlayer
+
+    -- منع إعادة التشغيل
+    if _G.DeltaSpyRunning then return end
+    _G.DeltaSpyRunning = true
+
+    -- متغيرات الإعدادات
+    local settings = {
+        themeColor = Color3.fromRGB(138, 43, 226),
+        particlesEnabled = true,
+        particleCount = "medium",
+        particleColor = Color3.fromRGB(138, 43, 226),
+        searchEnabled = true,
+        loadingEnabled = true,
+        loadingDuration = 4,
+        soundEnabled = true,
+        soundType = "default",
+        notificationsEnabled = true,
+        whisperNotifications = true,
+        mentionNotifications = true,
+        autoSaveEnabled = false,
+        autoSaveInterval = 5,
+        maxSaves = 20,
+        uiSize = "medium",
+        uiTransparency = 0,
+        dragEnabled = true,
+        filterEnabled = false,
+        filterWords = {},
+        filterUsers = {},
+        developerMode = false,
+        showTimestamps = false,
+        showUserIds = false,
+        hideYourName = false,
+        hideYourAvatar = false,
+        statsEnabled = true,
+    }
+
+    -- متغيرات تخزين المحفوظات
+    local savedChats = {}
+    local savedChatsCount = 0
+
+    -- إحصائيات
+    local stats = {
+        messagesReceived = 0,
+        savedCount = 0,
+        startTime = os.time(),
+    }
+
+    -- 1. Main Gui Setup
+    local SpyScreenGui = Instance.new("ScreenGui")
+    SpyScreenGui.Name = "ABC_Spy_Pro"
+    SpyScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    SpyScreenGui.ResetOnSpawn = false
+
+    -- ============================================
+    -- الواجهة الرئيسية
+    -- ============================================
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 420, 0, 350)
+    MainFrame.Position = UDim2.new(0.5, -210, 0.5, -175)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Parent = SpyScreenGui
+    MainFrame.Visible = false
+
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 10)
+    MainCorner.Parent = MainFrame
+
+    local MainBorder = Instance.new("UIStroke")
+    MainBorder.Color = settings.themeColor
+    MainBorder.Thickness = 2.5
+    MainBorder.Transparency = 0.3
+    MainBorder.Parent = MainFrame
+
+    -- ============================================
+    -- نافذة الإعدادات (Settings Window)
+    -- ============================================
+    local SettingsFrame = Instance.new("Frame")
+    SettingsFrame.Name = "SettingsFrame"
+    SettingsFrame.Size = UDim2.new(0, 450, 0, 400)
+    SettingsFrame.Position = UDim2.new(0.5, -225, 0.5, -200)
+    SettingsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    SettingsFrame.BorderSizePixel = 0
+    SettingsFrame.Visible = false
+    SettingsFrame.Parent = SpyScreenGui
+
+    local SettingsCorner = Instance.new("UICorner")
+    SettingsCorner.CornerRadius = UDim.new(0, 10)
+    SettingsCorner.Parent = SettingsFrame
+
+    local SettingsBorder = Instance.new("UIStroke")
+    SettingsBorder.Color = settings.themeColor
+    SettingsBorder.Thickness = 2
+    SettingsBorder.Transparency = 0.3
+    SettingsBorder.Parent = SettingsFrame
+
+    -- عنوان الإعدادات
+    local SettingsTitle = Instance.new("TextLabel")
+    SettingsTitle.Size = UDim2.new(1, 0, 0, 40)
+    SettingsTitle.Position = UDim2.new(0, 0, 0, 0)
+    SettingsTitle.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+    SettingsTitle.Text = "⚙️ Settings"
+    SettingsTitle.TextColor3 = settings.themeColor
+    SettingsTitle.TextSize = 18
+    SettingsTitle.Font = Enum.Font.GothamBold
+    SettingsTitle.Parent = SettingsFrame
+
+    local SettingsTitleCorner = Instance.new("UICorner")
+    SettingsTitleCorner.CornerRadius = UDim.new(0, 10)
+    SettingsTitleCorner.Parent = SettingsTitle
+
+    -- زر إغلاق الإعدادات
+    local SettingsCloseBtn = Instance.new("TextButton")
+    SettingsCloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    SettingsCloseBtn.Position = UDim2.new(0.93, 0, 0.05, 0)
+    SettingsCloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    SettingsCloseBtn.Text = "✕"
+    SettingsCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SettingsCloseBtn.Font = Enum.Font.GothamBold
+    SettingsCloseBtn.TextSize = 18
+    SettingsCloseBtn.Parent = SettingsTitle
+
+    local SettingsCloseCorner = Instance.new("UICorner")
+    SettingsCloseCorner.CornerRadius = UDim.new(1, 0)
+    SettingsCloseCorner.Parent = SettingsCloseBtn
+
+    -- ScrollingFrame للإعدادات
+    local SettingsScrollingFrame = Instance.new("ScrollingFrame")
+    SettingsScrollingFrame.Size = UDim2.new(0.96, 0, 0.82, 0)
+    SettingsScrollingFrame.Position = UDim2.new(0.02, 0, 0.12, 0)
+    SettingsScrollingFrame.BackgroundTransparency = 1
+    SettingsScrollingFrame.BorderSizePixel = 0
+    SettingsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SettingsScrollingFrame.ScrollBarThickness = 4
+    SettingsScrollingFrame.ScrollBarImageColor3 = settings.themeColor
+    SettingsScrollingFrame.Parent = SettingsFrame
+
+    local SettingsUIListLayout = Instance.new("UIListLayout")
+    SettingsUIListLayout.Parent = SettingsScrollingFrame
+    SettingsUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    SettingsUIListLayout.Padding = UDim.new(0, 8)
+
+    -- ============================================
+    -- نافذة المحفوظات (Saved Chats)
+    -- ============================================
+    local SavedFrame = Instance.new("Frame")
+    SavedFrame.Name = "SavedFrame"
+    SavedFrame.Size = UDim2.new(0, 380, 0, 300)
+    SavedFrame.Position = UDim2.new(0.5, -190, 0.5, -150)
+    SavedFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    SavedFrame.BorderSizePixel = 0
+    SavedFrame.Visible = false
+    SavedFrame.Parent = SpyScreenGui
+
+    local SavedCorner = Instance.new("UICorner")
+    SavedCorner.CornerRadius = UDim.new(0, 10)
+    SavedCorner.Parent = SavedFrame
+
+    local SavedBorder = Instance.new("UIStroke")
+    SavedBorder.Color = settings.themeColor
+    SavedBorder.Thickness = 2
+    SavedBorder.Transparency = 0.3
+    SavedBorder.Parent = SavedFrame
+
+    local SavedTitle = Instance.new("TextLabel")
+    SavedTitle.Size = UDim2.new(1, 0, 0, 40)
+    SavedTitle.Position = UDim2.new(0, 0, 0, 0)
+    SavedTitle.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+    SavedTitle.Text = "📁 Saved Chats"
+    SavedTitle.TextColor3 = settings.themeColor
+    SavedTitle.TextSize = 18
+    SavedTitle.Font = Enum.Font.GothamBold
+    SavedTitle.Parent = SavedFrame
+
+    local SavedTitleCorner = Instance.new("UICorner")
+    SavedTitleCorner.CornerRadius = UDim.new(0, 10)
+    SavedTitleCorner.Parent = SavedTitle
+
+    local SavedCloseBtn = Instance.new("TextButton")
+    SavedCloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    SavedCloseBtn.Position = UDim2.new(0.92, 0, 0.05, 0)
+    SavedCloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    SavedCloseBtn.Text = "✕"
+    SavedCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SavedCloseBtn.Font = Enum.Font.GothamBold
+    SavedCloseBtn.TextSize = 18
+    SavedCloseBtn.Parent = SavedTitle
+
+    local SavedCloseCorner = Instance.new("UICorner")
+    SavedCloseCorner.CornerRadius = UDim.new(1, 0)
+    SavedCloseCorner.Parent = SavedCloseBtn
+
+    local SavedScrollingFrame = Instance.new("ScrollingFrame")
+    SavedScrollingFrame.Size = UDim2.new(0.94, 0, 0.75, 0)
+    SavedScrollingFrame.Position = UDim2.new(0.03, 0, 0.15, 0)
+    SavedScrollingFrame.BackgroundTransparency = 1
+    SavedScrollingFrame.BorderSizePixel = 0
+    SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SavedScrollingFrame.ScrollBarThickness = 4
+    SavedScrollingFrame.ScrollBarImageColor3 = settings.themeColor
+    SavedScrollingFrame.Parent = SavedFrame
+
+    local SavedUIListLayout = Instance.new("UIListLayout")
+    SavedUIListLayout.Parent = SavedScrollingFrame
+    SavedUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    SavedUIListLayout.Padding = UDim.new(0, 5)
+
+    local ClearSavedBtn = Instance.new("TextButton")
+    ClearSavedBtn.Size = UDim2.new(0.3, 0, 0, 30)
+    ClearSavedBtn.Position = UDim2.new(0.35, 0, 0.92, 0)
+    ClearSavedBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    ClearSavedBtn.Text = "🗑️ Clear All"
+    ClearSavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ClearSavedBtn.Font = Enum.Font.GothamBold
+    ClearSavedBtn.TextSize = 13
+    ClearSavedBtn.Parent = SavedFrame
+
+    local ClearSavedCorner = Instance.new("UICorner")
+    ClearSavedCorner.CornerRadius = UDim.new(0, 6)
+    ClearSavedCorner.Parent = ClearSavedBtn
+
+    -- ============================================
+    -- دالة إنشاء عناصر الإعدادات
+    -- ============================================
+    local function createSettingItem(title, description, settingType, ...)
+        local item = Instance.new("Frame")
+        item.Size = UDim2.new(1, -10, 0, 45)
+        item.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+        item.BorderSizePixel = 0
+        item.Parent = SettingsScrollingFrame
+        
+        local itemCorner = Instance.new("UICorner")
+        itemCorner.CornerRadius = UDim.new(0, 6)
+        itemCorner.Parent = item
+        
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Size = UDim2.new(0.5, 0, 0.5, 0)
+        titleLabel.Position = UDim2.new(0.02, 0, 0, 0)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.Text = title
+        titleLabel.TextColor3 = Color3.fromRGB(230, 230, 240)
+        titleLabel.TextSize = 14
+        titleLabel.Font = Enum.Font.GothamBold
+        titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        titleLabel.Parent = item
+        
+        local descLabel = Instance.new("TextLabel")
+        descLabel.Size = UDim2.new(0.5, 0, 0.4, 0)
+        descLabel.Position = UDim2.new(0.02, 0, 0.5, 0)
+        descLabel.BackgroundTransparency = 1
+        descLabel.Text = description
+        descLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
+        descLabel.TextSize = 11
+        descLabel.Font = Enum.Font.SourceSans
+        descLabel.TextXAlignment = Enum.TextXAlignment.Left
+        descLabel.Parent = item
+        
+        local control
+        
+        if settingType == "toggle" then
+            control = Instance.new("TextButton")
+            control.Size = UDim2.new(0, 60, 0, 25)
+            control.Position = UDim2.new(0.72, 0, 0.15, 0)
+            control.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
+            control.Text = "ON"
+            control.TextColor3 = Color3.fromRGB(255, 255, 255)
+            control.Font = Enum.Font.GothamBold
+            control.TextSize = 12
+            control.Parent = item
+            
+            local controlCorner = Instance.new("UICorner")
+            controlCorner.CornerRadius = UDim.new(0, 4)
+            controlCorner.Parent = control
+            
+            local isOn = true
+            control.MouseButton1Click:Connect(function()
+                isOn = not isOn
+                if isOn then
+                    control.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
+                    control.Text = "ON"
+                else
+                    control.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+                    control.Text = "OFF"
+                end
+            end)
+            
+        elseif settingType == "dropdown" then
+            control = Instance.new("TextBox")
+            control.Size = UDim2.new(0, 100, 0, 25)
+            control.Position = UDim2.new(0.68, 0, 0.15, 0)
+            control.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            control.BorderSizePixel = 0
+            control.Text = "..."
+            control.TextColor3 = Color3.fromRGB(255, 255, 255)
+            control.Font = Enum.Font.Gotham
+            control.TextSize = 12
+            control.Parent = item
+            
+            local controlCorner = Instance.new("UICorner")
+            controlCorner.CornerRadius = UDim.new(0, 4)
+            controlCorner.Parent = control
+            
+        elseif settingType == "color" then
+            control = Instance.new("TextButton")
+            control.Size = UDim2.new(0, 40, 0, 25)
+            control.Position = UDim2.new(0.78, 0, 0.15, 0)
+            control.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
+            control.Text = ""
+            control.Parent = item
+            
+            local controlCorner = Instance.new("UICorner")
+            controlCorner.CornerRadius = UDim.new(0, 4)
+            controlCorner.Parent = control
+            
+        elseif settingType == "slider" then
+            control = Instance.new("TextLabel")
+            control.Size = UDim2.new(0, 60, 0, 20)
+            control.Position = UDim2.new(0.75, 0, 0.2, 0)
+            control.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            control.Text = "5"
+            control.TextColor3 = Color3.fromRGB(255, 255, 255)
+            control.Font = Enum.Font.GothamBold
+            control.TextSize = 12
+            control.Parent = item
+            
+            local controlCorner = Instance.new("UICorner")
+            controlCorner.CornerRadius = UDim.new(0, 4)
+            controlCorner.Parent = control
+            
+        elseif settingType == "input" then
+            control = Instance.new("TextBox")
+            control.Size = UDim2.new(0, 120, 0, 25)
+            control.Position = UDim2.new(0.65, 0, 0.15, 0)
+            control.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            control.BorderSizePixel = 0
+            control.Text = ""
+            control.PlaceholderText = "Type here..."
+            control.TextColor3 = Color3.fromRGB(255, 255, 255)
+            control.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+            control.Font = Enum.Font.Gotham
+            control.TextSize = 12
+            control.Parent = item
+            
+            local controlCorner = Instance.new("UICorner")
+            controlCorner.CornerRadius = UDim.new(0, 4)
+            controlCorner.Parent = control
+        end
+        
+        return item
+    end
+
+    -- ============================================
+    -- إنشاء جميع عناصر الإعدادات
+    -- ============================================
+    createSettingItem("Theme Color", "Change UI accent color", "color")
+    createSettingItem("Background Theme", "Dark / Light mode", "toggle")
+    createSettingItem("Enable Particles", "Turn particles on/off", "toggle")
+    createSettingItem("Particle Count", "Low / Medium / High", "dropdown")
+    createSettingItem("Particle Color", "Choose particle color", "color")
+    createSettingItem("Enable Search", "Turn search on/off", "toggle")
+    createSettingItem("Search Results", "Messages to show (10-100)", "slider")
+    createSettingItem("Loading Screen", "Show loading when opening", "toggle")
+    createSettingItem("Loading Duration", "Seconds (2-10)", "slider")
+    createSettingItem("Enable Sound", "Play sounds for messages", "toggle")
+    createSettingItem("Sound Type", "Default / Alert / Music", "dropdown")
+    createSettingItem("Enable Notifications", "Turn notifications on/off", "toggle")
+    createSettingItem("Whisper Alerts", "Notify for whispers", "toggle")
+    createSettingItem("Mention Alerts", "Notify when mentioned", "toggle")
+    createSettingItem("Auto-Save", "Auto-save every X minutes", "toggle")
+    createSettingItem("Auto-Save Interval", "Minutes (1-30)", "slider")
+    createSettingItem("Max Saves", "Limit saved chats (5-50)", "slider")
+    createSettingItem("UI Size", "Small / Medium / Large", "dropdown")
+    createSettingItem("UI Transparency", "0-50% transparent", "slider")
+    createSettingItem("Enable Drag", "Allow dragging the UI", "toggle")
+    createSettingItem("Enable Filter", "Filter words/users", "toggle")
+    createSettingItem("Filter Words", "Comma separated (bad,word)", "input")
+    createSettingItem("Filter Users", "Comma separated users", "input")
+    createSettingItem("Developer Mode", "Show debug info", "toggle")
+    createSettingItem("Show Timestamps", "Show message times", "toggle")
+    createSettingItem("Show User IDs", "Show player user IDs", "toggle")
+    createSettingItem("Hide Your Name", "Hide your name in chat", "toggle")
+    createSettingItem("Hide Your Avatar", "Hide your profile picture", "toggle")
+    createSettingItem("Enable Statistics", "Show chat statistics", "toggle")
+
+    task.wait(0.1)
+    SettingsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SettingsUIListLayout.AbsoluteContentSize.Y + 20)
+
+    -- ============================================
+    -- نظام الجزيئات
+    -- ============================================
+    local function createSpyParticle()
+        if not settings.particlesEnabled then return end
+        
+        local particle = Instance.new("Frame")
+        local size = math.random(2, 5)
+        particle.Size = UDim2.new(0, size, 0, size)
+        particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        
+        local colors = {
+            settings.particleColor,
+            Color3.fromRGB(160, 50, 255),
+            Color3.fromRGB(180, 80, 255),
+            Color3.fromRGB(120, 30, 200)
+        }
+        particle.BackgroundColor3 = colors[math.random(1, #colors)]
+        particle.BackgroundTransparency = math.random(2, 6) / 10
+        particle.BorderSizePixel = 0
+        particle.Parent = MainFrame
+        
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(1, 0)
+        UICorner.Parent = particle
+
+        local speed = math.random(5, 15)
+        local targetX = particle.Position.X.Scale + math.random(-30, 30) / 100
+        local targetY = particle.Position.Y.Scale + math.random(-30, 30) / 100
+        
+        targetX = math.clamp(targetX, 0, 1)
+        targetY = math.clamp(targetY, 0, 1)
+        
+        local tween = TweenService:Create(particle, TweenInfo.new(speed, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(targetX, 0, targetY, 0),
+            BackgroundTransparency = 1
+        })
+        tween:Play()
+        tween.Completed:Connect(function() particle:Destroy() end)
+    end
+
+    local spyParticleLoop
+    local function startSpyParticles()
+        if spyParticleLoop then return end
+        local count = settings.particleCount == "low" and 0.15 or settings.particleCount == "medium" and 0.08 or 0.04
+        spyParticleLoop = task.spawn(function()
+            while MainFrame.Visible and settings.particlesEnabled do
+                createSpyParticle()
+                if settings.particleCount == "high" then
+                    createSpyParticle()
+                    createSpyParticle()
+                end
+                task.wait(count)
+            end
         end)
     end
-end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggle2 then
-        local deltaX = (input.Position - dragStart2).X
-        local deltaY = (input.Position - dragStart2).Y
-        ABCToggle.Position = UDim2.new(startPos2.X.Scale, startPos2.X.Offset + deltaX, startPos2.Y.Scale, startPos2.Y.Offset + deltaY)
+    local function stopSpyParticles()
+        if spyParticleLoop then
+            task.cancel(spyParticleLoop)
+            spyParticleLoop = nil
+        end
     end
-end)
 
-local ABCCorner = Instance.new("UICorner")
-ABCCorner.CornerRadius = UDim.new(1, 0)
-ABCCorner.Parent = ABCToggle
+    -- ============================================
+    -- زر ABC الدائري
+    -- ============================================
+    local ABCToggle = Instance.new("ImageButton")
+    ABCToggle.Size = UDim2.new(0, 50, 0, 50)
+    ABCToggle.Position = UDim2.new(0, 10, 0.5, -25)
+    ABCToggle.BackgroundColor3 = settings.themeColor
+    ABCToggle.Image = "rbxassetid://4057423227"
+    ABCToggle.Parent = SpyScreenGui
 
-local ABCStroke = Instance.new("UIStroke")
-ABCStroke.Color = settings.themeColor
-ABCStroke.Thickness = 2
-ABCStroke.Parent = ABCToggle
+    local dragToggle2, dragStart2, startPos2
+    ABCToggle.InputBegan:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and settings.dragEnabled then
+            dragToggle2 = true
+            dragStart2 = input.Position
+            startPos2 = ABCToggle.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragToggle2 = false end
+            end)
+        end
+    end)
 
-local ABCLabel = Instance.new("TextLabel")
-ABCLabel.Size = UDim2.new(1, 0, 1, 0)
-ABCLabel.Text = "ABC"
-ABCLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ABCLabel.TextSize = 16
-ABCLabel.Font = Enum.Font.FredokaOne
-ABCLabel.BackgroundTransparency = 1
-ABCLabel.Parent = ABCToggle
+    UserInputService.InputChanged:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggle2 then
+            local deltaX = (input.Position - dragStart2).X
+            local deltaY = (input.Position - dragStart2).Y
+            ABCToggle.Position = UDim2.new(startPos2.X.Scale, startPos2.X.Offset + deltaX, startPos2.Y.Scale, startPos2.Y.Offset + deltaY)
+        end
+    end)
 
-local pulseInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-TweenService:Create(ABCStroke, pulseInfo, {Thickness = 4, Color = Color3.fromRGB(210, 80, 255)}):Play()
+    local ABCCorner = Instance.new("UICorner")
+    ABCCorner.CornerRadius = UDim.new(1, 0)
+    ABCCorner.Parent = ABCToggle
 
--- ============================================
--- Top Title Bar
--- ============================================
-local TitleBar = Instance.new("Frame")
-TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 40)
-TitleBar.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-TitleBar.BorderSizePixel = 0
-TitleBar.Parent = MainFrame
+    local ABCStroke = Instance.new("UIStroke")
+    ABCStroke.Color = settings.themeColor
+    ABCStroke.Thickness = 2
+    ABCStroke.Parent = ABCToggle
 
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 10)
-TitleCorner.Parent = TitleBar
+    local ABCLabel = Instance.new("TextLabel")
+    ABCLabel.Size = UDim2.new(1, 0, 1, 0)
+    ABCLabel.Text = "ABC"
+    ABCLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ABCLabel.TextSize = 16
+    ABCLabel.Font = Enum.Font.FredokaOne
+    ABCLabel.BackgroundTransparency = 1
+    ABCLabel.Parent = ABCToggle
 
-local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(0.25, 0, 1, 0)
-TitleText.Position = UDim2.new(0, 12, 0, 0)
-TitleText.BackgroundTransparency = 1
-TitleText.Text = "⚡ ABC Spy Pro"
-TitleText.TextColor3 = settings.themeColor
-TitleText.TextSize = 14
-TitleText.Font = Enum.Font.GothamBold
-TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.Parent = TitleBar
+    local pulseInfoSpy = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+    TweenService:Create(ABCStroke, pulseInfoSpy, {Thickness = 4, Color = Color3.fromRGB(210, 80, 255)}):Play()
 
--- ============================================
--- الأزرار العلوية
--- ============================================
-local SaveBtn = Instance.new("TextButton")
-SaveBtn.Size = UDim2.new(0, 28, 0, 28)
-SaveBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
-SaveBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
-SaveBtn.Text = "💾"
-SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SaveBtn.Font = Enum.Font.GothamBold
-SaveBtn.TextSize = 14
-SaveBtn.Parent = TitleBar
+    -- ============================================
+    -- Top Title Bar
+    -- ============================================
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Size = UDim2.new(1, 0, 0, 40)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
 
-local SaveCorner = Instance.new("UICorner")
-SaveCorner.CornerRadius = UDim.new(1, 0)
-SaveCorner.Parent = SaveBtn
+    local TitleCorner = Instance.new("UICorner")
+    TitleCorner.CornerRadius = UDim.new(0, 10)
+    TitleCorner.Parent = TitleBar
 
-local SavedBtn = Instance.new("TextButton")
-SavedBtn.Size = UDim2.new(0, 28, 0, 28)
-SavedBtn.Position = UDim2.new(0.62, 0, 0.06, 0)
-SavedBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 180)
-SavedBtn.Text = "📁"
-SavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SavedBtn.Font = Enum.Font.GothamBold
-SavedBtn.TextSize = 14
-SavedBtn.Parent = TitleBar
+    local TitleTextSpy = Instance.new("TextLabel")
+    TitleTextSpy.Size = UDim2.new(0.25, 0, 1, 0)
+    TitleTextSpy.Position = UDim2.new(0, 12, 0, 0)
+    TitleTextSpy.BackgroundTransparency = 1
+    TitleTextSpy.Text = "⚡ ABC Spy Pro"
+    TitleTextSpy.TextColor3 = settings.themeColor
+    TitleTextSpy.TextSize = 14
+    TitleTextSpy.Font = Enum.Font.GothamBold
+    TitleTextSpy.TextXAlignment = Enum.TextXAlignment.Left
+    TitleTextSpy.Parent = TitleBar
 
-local SavedCornerBtn = Instance.new("UICorner")
-SavedCornerBtn.CornerRadius = UDim.new(1, 0)
-SavedCornerBtn.Parent = SavedBtn
+    -- ============================================
+    -- الأزرار العلوية
+    -- ============================================
+    local SaveBtn = Instance.new("TextButton")
+    SaveBtn.Size = UDim2.new(0, 28, 0, 28)
+    SaveBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
+    SaveBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
+    SaveBtn.Text = "💾"
+    SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SaveBtn.Font = Enum.Font.GothamBold
+    SaveBtn.TextSize = 14
+    SaveBtn.Parent = TitleBar
 
-local SettingsBtn = Instance.new("TextButton")
-SettingsBtn.Size = UDim2.new(0, 28, 0, 28)
-SettingsBtn.Position = UDim2.new(0.72, 0, 0.06, 0)
-SettingsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-SettingsBtn.Text = "⚙"
-SettingsBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
-SettingsBtn.Font = Enum.Font.GothamBold
-SettingsBtn.TextSize = 16
-SettingsBtn.Parent = TitleBar
+    local SaveCorner = Instance.new("UICorner")
+    SaveCorner.CornerRadius = UDim.new(1, 0)
+    SaveCorner.Parent = SaveBtn
 
-local SettingsCornerBtn = Instance.new("UICorner")
-SettingsCornerBtn.CornerRadius = UDim.new(1, 0)
-SettingsCornerBtn.Parent = SettingsBtn
+    local SavedBtn = Instance.new("TextButton")
+    SavedBtn.Size = UDim2.new(0, 28, 0, 28)
+    SavedBtn.Position = UDim2.new(0.62, 0, 0.06, 0)
+    SavedBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 180)
+    SavedBtn.Text = "📁"
+    SavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SavedBtn.Font = Enum.Font.GothamBold
+    SavedBtn.TextSize = 14
+    SavedBtn.Parent = TitleBar
 
-local ClearBtn = Instance.new("TextButton")
-ClearBtn.Size = UDim2.new(0, 28, 0, 28)
-ClearBtn.Position = UDim2.new(0.82, 0, 0.06, 0)
-ClearBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-ClearBtn.Text = "🗑"
-ClearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ClearBtn.Font = Enum.Font.GothamBold
-ClearBtn.TextSize = 14
-ClearBtn.Parent = TitleBar
+    local SavedCornerBtn = Instance.new("UICorner")
+    SavedCornerBtn.CornerRadius = UDim.new(1, 0)
+    SavedCornerBtn.Parent = SavedBtn
 
-local ClearCorner = Instance.new("UICorner")
-ClearCorner.CornerRadius = UDim.new(1, 0)
-ClearCorner.Parent = ClearBtn
+    local SettingsBtn = Instance.new("TextButton")
+    SettingsBtn.Size = UDim2.new(0, 28, 0, 28)
+    SettingsBtn.Position = UDim2.new(0.72, 0, 0.06, 0)
+    SettingsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    SettingsBtn.Text = "⚙"
+    SettingsBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
+    SettingsBtn.Font = Enum.Font.GothamBold
+    SettingsBtn.TextSize = 16
+    SettingsBtn.Parent = TitleBar
 
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-CloseBtn.Position = UDim2.new(0.92, 0, 0.06, 0)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-CloseBtn.Text = "✕"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 16
-CloseBtn.Parent = TitleBar
+    local SettingsCornerBtn = Instance.new("UICorner")
+    SettingsCornerBtn.CornerRadius = UDim.new(1, 0)
+    SettingsCornerBtn.Parent = SettingsBtn
 
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(1, 0)
-CloseCorner.Parent = CloseBtn
+    local ClearBtn = Instance.new("TextButton")
+    ClearBtn.Size = UDim2.new(0, 28, 0, 28)
+    ClearBtn.Position = UDim2.new(0.82, 0, 0.06, 0)
+    ClearBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    ClearBtn.Text = "🗑"
+    ClearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ClearBtn.Font = Enum.Font.GothamBold
+    ClearBtn.TextSize = 14
+    ClearBtn.Parent = TitleBar
 
--- ============================================
--- Search Box
--- ============================================
-local SearchBox = Instance.new("TextBox")
-SearchBox.Name = "SearchBox"
-SearchBox.Size = UDim2.new(0.94, 0, 0, 30)
-SearchBox.Position = UDim2.new(0.03, 0, 0, 48)
-SearchBox.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
-SearchBox.BorderSizePixel = 0
-SearchBox.PlaceholderText = "🔍 Search player or word..."
-SearchBox.Text = ""
-SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-SearchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
-SearchBox.Font = Enum.Font.SourceSans
-SearchBox.TextSize = 14
-SearchBox.Parent = MainFrame
+    local ClearCorner = Instance.new("UICorner")
+    ClearCorner.CornerRadius = UDim.new(1, 0)
+    ClearCorner.Parent = ClearBtn
 
-local SearchCorner = Instance.new("UICorner")
-SearchCorner.CornerRadius = UDim.new(0, 6)
-SearchCorner.Parent = SearchBox
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+    CloseBtn.Position = UDim2.new(0.92, 0, 0.06, 0)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    CloseBtn.Text = "✕"
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 16
+    CloseBtn.Parent = TitleBar
 
-local SearchBorder = Instance.new("UIStroke")
-SearchBorder.Color = settings.themeColor
-SearchBorder.Thickness = 1.5
-SearchBorder.Transparency = 0.5
-SearchBorder.Parent = SearchBox
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(1, 0)
+    CloseCorner.Parent = CloseBtn
 
--- ============================================
--- Chat Logs Container
--- ============================================
-local ScrollingFrame = Instance.new("ScrollingFrame")
-ScrollingFrame.Size = UDim2.new(0.94, 0, 0.68, 0)
-ScrollingFrame.Position = UDim2.new(0.03, 0, 0, 88)
-ScrollingFrame.BackgroundTransparency = 1
-ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollingFrame.ScrollBarThickness = 4
-ScrollingFrame.ScrollBarImageColor3 = settings.themeColor
-ScrollingFrame.Parent = MainFrame
+    -- ============================================
+    -- Search Box
+    -- ============================================
+    local SearchBox = Instance.new("TextBox")
+    SearchBox.Name = "SearchBox"
+    SearchBox.Size = UDim2.new(0.94, 0, 0, 30)
+    SearchBox.Position = UDim2.new(0.03, 0, 0, 48)
+    SearchBox.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+    SearchBox.BorderSizePixel = 0
+    SearchBox.PlaceholderText = "🔍 Search player or word..."
+    SearchBox.Text = ""
+    SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SearchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+    SearchBox.Font = Enum.Font.SourceSans
+    SearchBox.TextSize = 14
+    SearchBox.Parent = MainFrame
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Parent = ScrollingFrame
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 5)
+    local SearchCorner = Instance.new("UICorner")
+    SearchCorner.CornerRadius = UDim.new(0, 6)
+    SearchCorner.Parent = SearchBox
 
-local autoScroll = true
+    local SearchBorder = Instance.new("UIStroke")
+    SearchBorder.Color = settings.themeColor
+    SearchBorder.Thickness = 1.5
+    SearchBorder.Transparency = 0.5
+    SearchBorder.Parent = SearchBox
 
--- ============================================
--- دالة جلب صورة اللاعب
--- ============================================
-local function getPlayerAvatar(userId)
-    if settings.hideYourAvatar and userId == LocalPlayer.UserId then
+    -- ============================================
+    -- Chat Logs Container
+    -- ============================================
+    local ScrollingFrame = Instance.new("ScrollingFrame")
+    ScrollingFrame.Size = UDim2.new(0.94, 0, 0.68, 0)
+    ScrollingFrame.Position = UDim2.new(0.03, 0, 0, 88)
+    ScrollingFrame.BackgroundTransparency = 1
+    ScrollingFrame.BorderSizePixel = 0
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ScrollingFrame.ScrollBarThickness = 4
+    ScrollingFrame.ScrollBarImageColor3 = settings.themeColor
+    ScrollingFrame.Parent = MainFrame
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = ScrollingFrame
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 5)
+
+    local autoScroll = true
+
+    -- ============================================
+    -- دالة جلب صورة اللاعب
+    -- ============================================
+    local function getPlayerAvatar(playerId)
+        if settings.hideYourAvatar and playerId == LocalPlayer.UserId then
+            return "rbxassetid://0"
+        end
+        local success, data = pcall(function()
+            return Players:GetUserThumbnailAsync(playerId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+        end)
+        if success and data then
+            return data
+        end
         return "rbxassetid://0"
     end
-    local success, data = pcall(function()
-        return Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
-    end)
-    if success and data then
-        return data
-    end
-    return "rbxassetid://0"
-end
 
--- ============================================
--- دالة إضافة رسالة
--- ============================================
-local function addMessageToGui(sender, messageText, channelTag)
-    if settings.filterEnabled then
-        local lowerMsg = string.lower(messageText)
-        for _, word in ipairs(settings.filterWords) do
-            if string.find(lowerMsg, string.lower(word)) then
-                return
-            end
-        end
-        if sender then
-            for _, user in ipairs(settings.filterUsers) do
-                if string.lower(sender.Name) == string.lower(user) or string.lower(sender.DisplayName) == string.lower(user) then
+    -- ============================================
+    -- دالة إضافة رسالة
+    -- ============================================
+    local function addMessageToGui(sender, messageText, channelTag)
+        if settings.filterEnabled then
+            local lowerMsg = string.lower(messageText)
+            for _, word in ipairs(settings.filterWords) do
+                if string.find(lowerMsg, string.lower(word)) then
                     return
                 end
             end
-        end
-    end
-    
-    stats.messagesReceived = stats.messagesReceived + 1
-    
-    channelTag = channelTag or "GLOBAL"
-    local tagColor = "rgb(138, 43, 226)"
-    
-    if channelTag == "WHISPER" then 
-        tagColor = "rgb(255, 0, 255)"
-        if settings.whisperNotifications and settings.notificationsEnabled then
-            -- تنبيه
-        end
-    elseif channelTag == "TEAM" then 
-        tagColor = "rgb(30, 144, 255)"
-    elseif channelTag == "SYSTEM" then 
-        tagColor = "rgb(255, 215, 0)" 
-    end
-    
-    local MessageContainer = Instance.new("Frame")
-    MessageContainer.Size = UDim2.new(1, -5, 0, 40)
-    MessageContainer.BackgroundTransparency = 1
-    MessageContainer.Parent = ScrollingFrame
-    
-    local AvatarImage = Instance.new("ImageLabel")
-    AvatarImage.Size = UDim2.new(0, 30, 0, 30)
-    AvatarImage.Position = UDim2.new(0, 2, 0, 5)
-    AvatarImage.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    AvatarImage.BorderSizePixel = 0
-    AvatarImage.Parent = MessageContainer
-    
-    local AvatarCorner = Instance.new("UICorner")
-    AvatarCorner.CornerRadius = UDim.new(1, 0)
-    AvatarCorner.Parent = AvatarImage
-    
-    local AvatarStroke = Instance.new("UIStroke")
-    AvatarStroke.Color = settings.themeColor
-    AvatarStroke.Thickness = 1.5
-    AvatarStroke.Parent = AvatarImage
-    
-    if sender and sender.UserId then
-        local avatarUrl = getPlayerAvatar(sender.UserId)
-        AvatarImage.Image = avatarUrl
-    else
-        AvatarImage.Image = "rbxassetid://0"
-    end
-    
-    local MessageText = Instance.new("TextLabel")
-    MessageText.Size = UDim2.new(1, -40, 1, 0)
-    MessageText.Position = UDim2.new(0, 38, 0, 0)
-    MessageText.BackgroundTransparency = 1
-    MessageText.RichText = true
-    
-    local senderName = sender and sender.DisplayName or "Unknown"
-    local nameColor = tagColor    
-    if settings.hideYourName and sender and sender.UserId == LocalPlayer.UserId then
-        senderName = "You"
-    end
-    
-    if channelTag == "WHISPER" then
-        nameColor = "rgb(255, 0, 255)"
-    elseif channelTag == "TEAM" then
-        nameColor = "rgb(30, 144, 255)"
-    elseif channelTag == "SYSTEM" then
-        nameColor = "rgb(255, 215, 0)"
-    end
-    
-    local timeStamp = ""
-    if settings.showTimestamps then
-        timeStamp = "[" .. os.date("%H:%M:%S") .. "] "
-    end
-    
-    local userIdText = ""
-    if settings.showUserIds and sender and sender.UserId then
-        userIdText = " (" .. sender.UserId .. ")"
-    end
-    
-    MessageText.Text = string.format("%s<font color='%s'><b>[%s] %s%s:</b></font> %s", timeStamp, nameColor, channelTag, senderName, userIdText, messageText)
-    MessageText.TextColor3 = Color3.fromRGB(230, 230, 240)
-    MessageText.TextSize = 13
-    MessageText.Font = Enum.Font.SourceSans
-    MessageText.TextXAlignment = Enum.TextXAlignment.Left
-    MessageText.TextWrapped = true
-    MessageText.TextYAlignment = Enum.TextYAlignment.Center
-    MessageText.Parent = MessageContainer
-    
-    MessageContainer.Size = UDim2.new(1, -5, 0, 40)
-    MessageText.Size = UDim2.new(1, -40, 1, 0)
-    
-    local function applyFilter()
-        if not settings.searchEnabled then
-            MessageContainer.Visible = true
-            return
-        end
-        local filterText = string.lower(SearchBox.Text)
-        if filterText == "" or string.find(string.lower(senderName), filterText) or string.find(string.lower(messageText), filterText) then
-            MessageContainer.Visible = true
-        else
-            MessageContainer.Visible = false
-        end
-    end
-    
-    SearchBox.GetPropertyChangedSignal(SearchBox, "Text"):Connect(applyFilter)
-    applyFilter()
-    
-    task.wait(0.02)
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
-    
-    if autoScroll then
-        ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
-    end
-end
-
--- ============================================
--- مراقبة التمرير
--- ============================================
-ScrollingFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        task.wait(0.1)
-        if ScrollingFrame.CanvasPosition.Y < ScrollingFrame.CanvasSize.Y.Offset - 100 then
-            autoScroll = false
-        end
-    end
-end)
-
-ScrollingFrame:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
-    if ScrollingFrame.CanvasPosition.Y >= ScrollingFrame.CanvasSize.Y.Offset - 50 then
-        autoScroll = true
-    end
-end)
-
--- ============================================
--- Deep Packet Capture Core
--- ============================================
-if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-    TextChatService.MessageReceived:Connect(function(textMessage)
-        local source = textMessage.TextSource
-        if source then
-            local sender = Players:GetPlayerByUserId(source.UserId)
             if sender then
-                local channel = "GLOBAL"
-                if textMessage.TextChannel and string.find(string.lower(textMessage.TextChannel.Name), "whisper") then
-                    channel = "WHISPER"
-                elseif textMessage.TextChannel and string.find(string.lower(textMessage.TextChannel.Name), "team") then
-                    channel = "TEAM"
-                end
-                addMessageToGui(sender, textMessage.Text, channel)
-            end
-        end
-    end)
-else
-    local SayMessageEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("OnMessageDoneFiltering")
-    if SayMessageEvent and SayMessageEvent:IsA("RemoteEvent") then
-        SayMessageEvent.OnClientEvent:Connect(function(messageData)
-            if messageData then
-                local sender = messageData.FromPlayer
-                local message = messageData.Message
-                local channel = "GLOBAL"
-                
-                if messageData.MessageType == "Whisper" then channel = "WHISPER"
-                elseif messageData.MessageType == "Team" then channel = "TEAM" end
-                
-                if sender and message then
-                    local player = Players:GetPlayerByUserId(sender)
-                    if player then
-                        addMessageToGui(player, message, channel)
+                for _, user in ipairs(settings.filterUsers) do
+                    if string.lower(sender.Name) == string.lower(user) or string.lower(sender.DisplayName) == string.lower(user) then
+                        return
                     end
                 end
             end
-        end)
-    else
-        local function hookPlayer(player)
-            player.Chatted:Connect(function(message)
-                addMessageToGui(player, message, "GLOBAL")
-            end)
         end
-        for _, player in ipairs(Players:GetPlayers()) do hookPlayer(player) end
-        Players.PlayerAdded:Connect(hookPlayer)
-    end
-end
-
--- ============================================
--- وظيفة حفظ المحادثة
--- ============================================
-local function saveCurrentChat()
-    local messages = {}
-    local count = 0
-    
-    for _, child in pairs(ScrollingFrame:GetChildren()) do
-        if child:IsA("Frame") then
-            local textLabel = child:FindFirstChildOfClass("TextLabel")
-            if textLabel and textLabel.RichText then
-                local rawText = textLabel.Text
-                rawText = rawText:gsub("<[^>]*>", "")
-                messages[#messages + 1] = rawText
-                count = count + 1
+        
+        stats.messagesReceived = stats.messagesReceived + 1
+        
+        channelTag = channelTag or "GLOBAL"
+        local tagColor = "rgb(138, 43, 226)"
+        
+        if channelTag == "WHISPER" then 
+            tagColor = "rgb(255, 0, 255)"
+            if settings.whisperNotifications and settings.notificationsEnabled then
+                -- تنبيه
+            end
+        elseif channelTag == "TEAM" then 
+            tagColor = "rgb(30, 144, 255)"
+        elseif channelTag == "SYSTEM" then 
+            tagColor = "rgb(255, 215, 0)" 
+        end
+        
+        local MessageContainer = Instance.new("Frame")
+        MessageContainer.Size = UDim2.new(1, -5, 0, 40)
+        MessageContainer.BackgroundTransparency = 1
+        MessageContainer.Parent = ScrollingFrame
+        
+        local AvatarImage = Instance.new("ImageLabel")
+        AvatarImage.Size = UDim2.new(0, 30, 0, 30)
+        AvatarImage.Position = UDim2.new(0, 2, 0, 5)
+        AvatarImage.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        AvatarImage.BorderSizePixel = 0
+        AvatarImage.Parent = MessageContainer
+        
+        local AvatarCorner = Instance.new("UICorner")
+        AvatarCorner.CornerRadius = UDim.new(1, 0)
+        AvatarCorner.Parent = AvatarImage
+        
+        local AvatarStroke = Instance.new("UIStroke")
+        AvatarStroke.Color = settings.themeColor
+        AvatarStroke.Thickness = 1.5
+        AvatarStroke.Parent = AvatarImage
+        
+        if sender and sender.UserId then
+            local avatarUrl = getPlayerAvatar(sender.UserId)
+            AvatarImage.Image = avatarUrl
+        else
+            AvatarImage.Image = "rbxassetid://0"
+        end
+        
+        local MessageText = Instance.new("TextLabel")
+        MessageText.Size = UDim2.new(1, -40, 1, 0)
+        MessageText.Position = UDim2.new(0, 38, 0, 0)
+        MessageText.BackgroundTransparency = 1
+        MessageText.RichText = true
+        
+        local senderName = sender and sender.DisplayName or "Unknown"
+        local nameColor = tagColor    
+        if settings.hideYourName and sender and sender.UserId == LocalPlayer.UserId then
+            senderName = "You"
+        end
+        
+        if channelTag == "WHISPER" then
+            nameColor = "rgb(255, 0, 255)"
+        elseif channelTag == "TEAM" then
+            nameColor = "rgb(30, 144, 255)"
+        elseif channelTag == "SYSTEM" then
+            nameColor = "rgb(255, 215, 0)"
+        end
+        
+        local timeStamp = ""
+        if settings.showTimestamps then
+            timeStamp = "[" .. os.date("%H:%M:%S") .. "] "
+        end
+        
+        local userIdText = ""
+        if settings.showUserIds and sender and sender.UserId then
+            userIdText = " (" .. sender.UserId .. ")"
+        end
+        
+        MessageText.Text = string.format("%s<font color='%s'><b>[%s] %s%s:</b></font> %s", timeStamp, nameColor, channelTag, senderName, userIdText, messageText)
+        MessageText.TextColor3 = Color3.fromRGB(230, 230, 240)
+        MessageText.TextSize = 13
+        MessageText.Font = Enum.Font.SourceSans
+        MessageText.TextXAlignment = Enum.TextXAlignment.Left
+        MessageText.TextWrapped = true
+        MessageText.TextYAlignment = Enum.TextYAlignment.Center
+        MessageText.Parent = MessageContainer
+        
+        MessageContainer.Size = UDim2.new(1, -5, 0, 40)
+        MessageText.Size = UDim2.new(1, -40, 1, 0)
+        
+        local function applyFilter()
+            if not settings.searchEnabled then
+                MessageContainer.Visible = true
+                return
+            end
+            local filterText = string.lower(SearchBox.Text)
+            if filterText == "" or string.find(string.lower(senderName), filterText) or string.find(string.lower(messageText), filterText) then
+                MessageContainer.Visible = true
+            else
+                MessageContainer.Visible = false
             end
         end
-    end
-    
-    if count == 0 then
-        addMessageToGui(nil, "No messages to save!", "SYSTEM")
-        return
-    end
-    
-    local fullLog = "=== ABC Spy Pro Chat Log ===\n"
-    fullLog = fullLog .. "Date: " .. os.date("%Y-%m-%d %H:%M:%S") .. "\n"
-    fullLog = fullLog .. "Total Messages: " .. count .. "\n"
-    fullLog = fullLog .. "===============================\n\n"
-    
-    for i, msg in ipairs(messages) do
-        fullLog = fullLog .. msg .. "\n"
-    end
-    
-    savedChatsCount = savedChatsCount + 1
-    local saveName = "Chat #" .. savedChatsCount .. " (" .. os.date("%H:%M") .. ")"
-    savedChats[saveName] = fullLog
-    stats.savedCount = stats.savedCount + 1
-    
-    local savedItem = Instance.new("TextButton")
-    savedItem.Size = UDim2.new(1, -10, 0, 30)
-    savedItem.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    savedItem.Text = saveName .. " (" .. count .. " messages)"
-    savedItem.TextColor3 = Color3.fromRGB(200, 200, 220)
-    savedItem.TextSize = 13
-    savedItem.Font = Enum.Font.Gotham
-    savedItem.TextXAlignment = Enum.TextXAlignment.Left
-    savedItem.Parent = SavedScrollingFrame
-    
-    local savedItemCorner = Instance.new("UICorner")
-    savedItemCorner.CornerRadius = UDim.new(0, 6)
-    savedItemCorner.Parent = savedItem
-    
-    local deleteBtn = Instance.new("TextButton")
-    deleteBtn.Size = UDim2.new(0, 25, 0, 25)
-    deleteBtn.Position = UDim2.new(0.92, 0, 0.025, 0)
-    deleteBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-    deleteBtn.Text = "✕"
-    deleteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    deleteBtn.Font = Enum.Font.GothamBold
-    deleteBtn.TextSize = 13
-    deleteBtn.Parent = savedItem
-    
-    local deleteCorner = Instance.new("UICorner")
-    deleteCorner.CornerRadius = UDim.new(1, 0)
-    deleteCorner.Parent = deleteBtn
-    
-    deleteBtn.MouseButton1Click:Connect(function()
-        savedChats[saveName] = nil
-        savedItem:Destroy()
+        
+        SearchBox.GetPropertyChangedSignal(SearchBox, "Text"):Connect(applyFilter)
+        applyFilter()
+        
         task.wait(0.02)
-        SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
-        addMessageToGui(nil, "🗑️ Deleted: " .. saveName, "SYSTEM")
+        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+        
+        if autoScroll then
+            ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
+        end
+    end
+
+    -- ============================================
+    -- مراقبة التمرير
+    -- ============================================
+    ScrollingFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            task.wait(0.1)
+            if ScrollingFrame.CanvasPosition.Y < ScrollingFrame.CanvasSize.Y.Offset - 100 then
+                autoScroll = false
+            end
+        end
     end)
-    
-    savedItem.MouseButton1Click:Connect(function()
-        local success = pcall(function()
-            setclipboard(savedChats[saveName])
+
+    ScrollingFrame:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+        if ScrollingFrame.CanvasPosition.Y >= ScrollingFrame.CanvasSize.Y.Offset - 50 then
+            autoScroll = true
+        end
+    end)
+
+    -- ============================================
+    -- Deep Packet Capture Core
+    -- ============================================
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        TextChatService.MessageReceived:Connect(function(textMessage)
+            local source = textMessage.TextSource
+            if source then
+                local sender = Players:GetPlayerByUserId(source.UserId)
+                if sender then
+                    local channel = "GLOBAL"
+                    if textMessage.TextChannel and string.find(string.lower(textMessage.TextChannel.Name), "whisper") then
+                        channel = "WHISPER"
+                    elseif textMessage.TextChannel and string.find(string.lower(textMessage.TextChannel.Name), "team") then
+                        channel = "TEAM"
+                    end
+                    addMessageToGui(sender, textMessage.Text, channel)
+                end
+            end
         end)
-        if success then
-            addMessageToGui(nil, "✅ Copied: " .. saveName .. " to clipboard!", "SYSTEM")
-        else
-            addMessageToGui(nil, "❌ Failed to copy!", "SYSTEM")
-        end
-    end)
-    
-    task.wait(0.02)
-    SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
-    
-    addMessageToGui(nil, "💾 Saved: " .. saveName .. " (" .. count .. " messages)", "SYSTEM")
-end
-
--- ============================================
--- التحكم بالأزرار
--- ============================================
-SaveBtn.MouseButton1Click:Connect(function()
-    saveCurrentChat()
-end)
-
-SavedBtn.MouseButton1Click:Connect(function()
-    SavedFrame.Visible = not SavedFrame.Visible
-    if SavedFrame.Visible then
-        task.wait(0.02)
-        SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
-    end
-end)
-
-SettingsBtn.MouseButton1Click:Connect(function()
-    SettingsFrame.Visible = not SettingsFrame.Visible
-    if SettingsFrame.Visible then
-        task.wait(0.02)
-        SettingsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SettingsUIListLayout.AbsoluteContentSize.Y + 20)
-    end
-end)
-
-ClearBtn.MouseButton1Click:Connect(function()
-    for _, item in ipairs(ScrollingFrame:GetChildren()) do
-        if item:IsA("Frame") then
-            item:Destroy()
-        end
-    end
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    autoScroll = true
-    addMessageToGui(nil, "🗑️ Chat log cleared!", "SYSTEM")
-end)
-
-CloseBtn.MouseButton1Click:Connect(function()
-    uiVisible = false
-    MainFrame.Visible = false
-    stopParticles()
-end)
-
-SettingsCloseBtn.MouseButton1Click:Connect(function()
-    SettingsFrame.Visible = false
-end)
-
-SavedCloseBtn.MouseButton1Click:Connect(function()
-    SavedFrame.Visible = false
-end)
-
-ClearSavedBtn.MouseButton1Click:Connect(function()
-    for _, item in ipairs(SavedScrollingFrame:GetChildren()) do
-        if item:IsA("TextButton") then
-            item:Destroy()
-        end
-    end
-    savedChats = {}
-    savedChatsCount = 0
-    SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    addMessageToGui(nil, "🗑️ All saved chats cleared!", "SYSTEM")
-end)
-
--- ============================================
--- زر ABC (فتح/إغلاق)
--- ============================================
-local uiVisible = false
-
-ABCToggle.MouseButton1Click:Connect(function()
-    uiVisible = not uiVisible
-    MainFrame.Visible = uiVisible
-    
-    if uiVisible then
-        startParticles()
-        task.wait(0.1)
-        ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
     else
-        stopParticles()
-        for _, child in pairs(MainFrame:GetChildren()) do
-            if child:IsA("Frame") and child ~= TitleBar and child ~= SearchBox and child ~= ScrollingFrame then
-                local corner = child:FindFirstChildOfClass("UICorner")
-                if corner and child.Size.X.Offset < 10 then
-                    child:Destroy()
+        local SayMessageEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("OnMessageDoneFiltering")
+        if SayMessageEvent and SayMessageEvent:IsA("RemoteEvent") then
+            SayMessageEvent.OnClientEvent:Connect(function(messageData)
+                if messageData then
+                    local sender = messageData.FromPlayer
+                    local message = messageData.Message
+                    local channel = "GLOBAL"
+                    
+                    if messageData.MessageType == "Whisper" then channel = "WHISPER"
+                    elseif messageData.MessageType == "Team" then channel = "TEAM" end
+                    
+                    if sender and message then
+                        local player = Players:GetPlayerByUserId(sender)
+                        if player then
+                            addMessageToGui(player, message, channel)
+                        end
+                    end
+                end
+            end)
+        else
+            local function hookPlayer(player)
+                player.Chatted:Connect(function(message)
+                    addMessageToGui(player, message, "GLOBAL")
+                end)
+            end
+            for _, player in ipairs(Players:GetPlayers()) do hookPlayer(player) end
+            Players.PlayerAdded:Connect(hookPlayer)
+        end
+    end
+
+    -- ============================================
+    -- وظيفة حفظ المحادثة
+    -- ============================================
+    local function saveCurrentChat()
+        local messages = {}
+        local count = 0
+        
+        for _, child in pairs(ScrollingFrame:GetChildren()) do
+            if child:IsA("Frame") then
+                local textLabel = child:FindFirstChildOfClass("TextLabel")
+                if textLabel and textLabel.RichText then
+                    local rawText = textLabel.Text
+                    rawText = rawText:gsub("<[^>]*>", "")
+                    messages[#messages + 1] = rawText
+                    count = count + 1
                 end
             end
         end
+        
+        if count == 0 then
+            addMessageToGui(nil, "No messages to save!", "SYSTEM")
+            return
+        end
+        
+        local fullLog = "=== ABC Spy Pro Chat Log ===\n"
+        fullLog = fullLog .. "Date: " .. os.date("%Y-%m-%d %H:%M:%S") .. "\n"
+        fullLog = fullLog .. "Total Messages: " .. count .. "\n"
+        fullLog = fullLog .. "===============================\n\n"
+        
+        for i, msg in ipairs(messages) do
+            fullLog = fullLog .. msg .. "\n"
+        end
+        
+        savedChatsCount = savedChatsCount + 1
+        local saveName = "Chat #" .. savedChatsCount .. " (" .. os.date("%H:%M") .. ")"
+        savedChats[saveName] = fullLog
+        stats.savedCount = stats.savedCount + 1
+        
+        local savedItem = Instance.new("TextButton")
+        savedItem.Size = UDim2.new(1, -10, 0, 30)
+        savedItem.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+        savedItem.Text = saveName .. " (" .. count .. " messages)"
+        savedItem.TextColor3 = Color3.fromRGB(200, 200, 220)
+        savedItem.TextSize = 13
+        savedItem.Font = Enum.Font.Gotham
+        savedItem.TextXAlignment = Enum.TextXAlignment.Left
+        savedItem.Parent = SavedScrollingFrame
+        
+        local savedItemCorner = Instance.new("UICorner")
+        savedItemCorner.CornerRadius = UDim.new(0, 6)
+        savedItemCorner.Parent = savedItem
+        
+        local deleteBtn = Instance.new("TextButton")
+        deleteBtn.Size = UDim2.new(0, 25, 0, 25)
+        deleteBtn.Position = UDim2.new(0.92, 0, 0.025, 0)
+        deleteBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        deleteBtn.Text = "✕"
+        deleteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        deleteBtn.Font = Enum.Font.GothamBold
+        deleteBtn.TextSize = 13
+        deleteBtn.Parent = savedItem
+        
+        local deleteCorner = Instance.new("UICorner")
+        deleteCorner.CornerRadius = UDim.new(1, 0)
+        deleteCorner.Parent = deleteBtn
+        
+        deleteBtn.MouseButton1Click:Connect(function()
+            savedChats[saveName] = nil
+            savedItem:Destroy()
+            task.wait(0.02)
+            SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
+            addMessageToGui(nil, "🗑️ Deleted: " .. saveName, "SYSTEM")
+        end)
+        
+        savedItem.MouseButton1Click:Connect(function()
+            local success = pcall(function()
+                setclipboard(savedChats[saveName])
+            end)
+            if success then
+                addMessageToGui(nil, "✅ Copied: " .. saveName .. " to clipboard!", "SYSTEM")
+            else
+                addMessageToGui(nil, "❌ Failed to copy!", "SYSTEM")
+            end
+        end)
+        
+        task.wait(0.02)
+        SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
+        
+        addMessageToGui(nil, "💾 Saved: " .. saveName .. " (" .. count .. " messages)", "SYSTEM")
     end
-end)
 
--- رسالة ترحيب
-addMessageToGui(nil, "ABC Spy Pro v1.0 activated with ALL features!", "SYSTEM")
-addMessageToGui(nil, "💾 Save | 📁 Saved | ⚙️ Settings (12 categories)", "SYSTEM")
+    -- ============================================
+    -- التحكم بالأزرار
+    -- ============================================
+    SaveBtn.MouseButton1Click:Connect(function()
+        saveCurrentChat()
+    end)
+
+    SavedBtn.MouseButton1Click:Connect(function()
+        SavedFrame.Visible = not SavedFrame.Visible
+        if SavedFrame.Visible then
+            task.wait(0.02)
+            SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
+        end
+    end)
+
+    SettingsBtn.MouseButton1Click:Connect(function()
+        SettingsFrame.Visible = not SettingsFrame.Visible
+        if SettingsFrame.Visible then
+            task.wait(0.02)
+            SettingsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SettingsUIListLayout.AbsoluteContentSize.Y + 20)
+        end
+    end)
+
+    ClearBtn.MouseButton1Click:Connect(function()
+        for _, item in ipairs(ScrollingFrame:GetChildren()) do
+            if item:IsA("Frame") then
+                item:Destroy()
+            end
+        end
+        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        autoScroll = true
+        addMessageToGui(nil, "🗑️ Chat log cleared!", "SYSTEM")
+    end)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        uiVisible = false
+        MainFrame.Visible = false
+        stopSpyParticles()
+    end)
+
+    SettingsCloseBtn.MouseButton1Click:Connect(function()
+        SettingsFrame.Visible = false
+    end)
+
+    SavedCloseBtn.MouseButton1Click:Connect(function()
+        SavedFrame.Visible = false
+    end)
+
+    ClearSavedBtn.MouseButton1Click:Connect(function()
+        for _, item in ipairs(SavedScrollingFrame:GetChildren()) do
+            if item:IsA("TextButton") then
+                item:Destroy()
+            end
+        end
+        savedChats = {}
+        savedChatsCount = 0
+        SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        addMessageToGui(nil, "🗑️ All saved chats cleared!", "SYSTEM")
+    end)
+
+    -- ============================================
+    -- زر ABC (فتح/إغلاق)
+    -- ============================================
+    local uiVisible = false
+
+    ABCToggle.MouseButton1Click:Connect(function()
+        uiVisible = not uiVisible
+        MainFrame.Visible = uiVisible
+        
+        if uiVisible then
+            startSpyParticles()
+            task.wait(0.1)
+            ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
+        else
+            stopSpyParticles()
+            for _, child in pairs(MainFrame:GetChildren()) do
+                if child:IsA("Frame") and child ~= TitleBar and child ~= SearchBox and child ~= ScrollingFrame then
+                    local corner = child:FindFirstChildOfClass("UICorner")
+                    if corner and child.Size.X.Offset < 10 then
+                        child:Destroy()
+                    end
+                end
+            end
+        end
+    end)
+
+    -- رسالة ترحيب
+    addMessageToGui(nil, "ABC Spy Pro v1.0 activated with ALL features!", "SYSTEM")
+    addMessageToGui(nil, "💾 Save | 📁 Saved | ⚙️ Settings (29 options)", "SYSTEM")
+    
+end)
