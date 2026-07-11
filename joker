@@ -1,476 +1,580 @@
--- ============================================================
--- سكربت تحميل ABC PREMIUM - نسخة متوافقة مع التلفون (معدلة)
--- ============================================================
-
--- 1. استدعاء الخدمات
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
+local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
 
--- ============================================================
--- إنشاء الواجهة الرئيسية
--- ============================================================
+-- منع إعادة التشغيل
+if _G.DeltaSpyRunning then return end
+_G.DeltaSpyRunning = true
+
+-- 1. Main Gui Setup
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ABC_Loading_Mobile"
+ScreenGui.Name = "ABC_Spy_Pro"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- ============================================================
--- خلفية أنيقة
--- ============================================================
-local Background = Instance.new("Frame")
-Background.Size = UDim2.new(1, 0, 1, 0)
-Background.BackgroundColor3 = Color3.fromRGB(5, 5, 12)
-Background.BorderSizePixel = 0
-Background.Parent = ScreenGui
+-- ============================================
+-- 2. Modernized Frame with Purple Borders
+-- ============================================
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 420, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -175)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Parent = ScreenGui
+MainFrame.Visible = false
 
--- تدرج خفيف
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(8, 5, 18)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(18, 8, 28)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 15))
-})
-gradient.Parent = Background
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
 
--- ============================================================
--- نظام الجزيئات (خفيف)
--- ============================================================
-local particles = {}
+-- إطار بنفسجي خارجي
+local PurpleBorder = Instance.new("UIStroke")
+PurpleBorder.Color = Color3.fromRGB(138, 43, 226)
+PurpleBorder.Thickness = 2.5
+PurpleBorder.Transparency = 0.3
+PurpleBorder.Parent = MainFrame
 
+-- ============================================
+-- نظام الجزيئات البنفسجية (داخل الواجهة فقط)
+-- ============================================
 local function createParticle()
     local particle = Instance.new("Frame")
-    local size = math.random(2, 4)
+    local size = math.random(2, 5)
     particle.Size = UDim2.new(0, size, 0, size)
-    particle.Position = UDim2.new(math.random(), 0, -0.1, 0)
+    particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
     
     local colors = {
         Color3.fromRGB(138, 43, 226),
-        Color3.fromRGB(100, 50, 200),
-        Color3.fromRGB(180, 80, 255)
+        Color3.fromRGB(160, 50, 255),
+        Color3.fromRGB(180, 80, 255),
+        Color3.fromRGB(120, 30, 200)
     }
     particle.BackgroundColor3 = colors[math.random(1, #colors)]
-    particle.BackgroundTransparency = math.random(3, 6) / 10
+    particle.BackgroundTransparency = math.random(2, 6) / 10
     particle.BorderSizePixel = 0
-    particle.Parent = Background
+    particle.Parent = MainFrame
     
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(1, 0)
     UICorner.Parent = particle
 
-    local speed = math.random(3, 6)
+    local speed = math.random(5, 15)
+    local targetX = particle.Position.X.Scale + math.random(-30, 30) / 100
+    local targetY = particle.Position.Y.Scale + math.random(-30, 30) / 100
+    
+    targetX = math.clamp(targetX, 0, 1)
+    targetY = math.clamp(targetY, 0, 1)
+    
     local tween = TweenService:Create(particle, TweenInfo.new(speed, Enum.EasingStyle.Linear), {
-        Position = UDim2.new(particle.Position.X.Scale, 0, 1.1, 0),
+        Position = UDim2.new(targetX, 0, targetY, 0),
         BackgroundTransparency = 1
     })
     tween:Play()
     tween.Completed:Connect(function() particle:Destroy() end)
-    
-    table.insert(particles, particle)
 end
 
-local particleLoop = task.spawn(function()
-    while task.wait(0.25) do
-        createParticle()
-        if #particles > 60 then
-            for i = 1, 10 do
-                local p = particles[1]
-                if p then p:Destroy() end
-                table.remove(particles, 1)
+local particleLoop
+local function startParticles()
+    if particleLoop then return end
+    particleLoop = task.spawn(function()
+        while MainFrame.Visible do
+            createParticle()
+            if math.random(1, 2) == 1 then
+                createParticle()
             end
-        end
-    end
-end)
-
--- ============================================================
--- نجوم في الخلفية
--- ============================================================
-for i = 1, 30 do
-    local star = Instance.new("Frame")
-    star.Size = UDim2.new(0, math.random(1, 2), 0, math.random(1, 2))
-    star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    star.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    star.BackgroundTransparency = math.random(4, 8) / 10
-    star.BorderSizePixel = 0
-    star.Parent = Background
-    
-    local starCorner = Instance.new("UICorner")
-    starCorner.CornerRadius = UDim.new(1, 0)
-    starCorner.Parent = star
-    
-    task.spawn(function()
-        while task.wait(math.random(2, 5)) do
-            TweenService:Create(star, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                BackgroundTransparency = math.random(4, 8) / 10
-            }):Play()
+            task.wait(0.08)
         end
     end)
 end
 
--- ============================================================
--- 🔹 شعار ABC (مصغر جداً في الأعلى)
--- ============================================================
-local LogoContainer = Instance.new("Frame")
-LogoContainer.Size = UDim2.new(0, 40, 0, 40)  -- تم التصغير من 55 إلى 40
-LogoContainer.Position = UDim2.new(0.5, -20, 0.06, 0)  -- تم الرفع للأعلى
-LogoContainer.BackgroundTransparency = 1
-LogoContainer.Parent = Background
-
--- توهج خفيف
-local LogoGlow = Instance.new("Frame")
-LogoGlow.Size = UDim2.new(1.3, 0, 1.3, 0)
-LogoGlow.Position = UDim2.new(-0.15, 0, -0.15, 0)
-LogoGlow.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-LogoGlow.BackgroundTransparency = 0.85
-LogoGlow.BorderSizePixel = 0
-LogoGlow.Parent = LogoContainer
-
-local GlowCorner = Instance.new("UICorner")
-GlowCorner.CornerRadius = UDim.new(1, 0)
-GlowCorner.Parent = LogoGlow
-
-TweenService:Create(LogoGlow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Size = UDim2.new(1.5, 0, 1.5, 0),
-    BackgroundTransparency = 0.7
-}):Play()
-
-local LogoCircle = Instance.new("Frame")
-LogoCircle.Size = UDim2.new(1, 0, 1, 0)
-LogoCircle.BackgroundColor3 = Color3.fromRGB(12, 8, 22)
-LogoCircle.Parent = LogoContainer
-
-local LogoCorner = Instance.new("UICorner")
-LogoCorner.CornerRadius = UDim.new(1, 0)
-LogoCorner.Parent = LogoCircle
-
-local LogoStroke = Instance.new("UIStroke")
-LogoStroke.Color = Color3.fromRGB(138, 43, 226)
-LogoStroke.Thickness = 1.5
-LogoStroke.Transparency = 0.3
-LogoStroke.Parent = LogoCircle
-
-local LogoText = Instance.new("TextLabel")
-LogoText.Size = UDim2.new(1, 0, 1, 0)
-LogoText.Text = "ABC"
-LogoText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LogoText.TextSize = 12  -- تم التصغير من 16 إلى 12
-LogoText.Font = Enum.Font.FredokaOne
-LogoText.BackgroundTransparency = 1
-LogoText.Parent = LogoCircle
-
--- دوران خفيف
-TweenService:Create(LogoContainer, TweenInfo.new(8, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {
-    Rotation = 360
-}):Play()
-
--- ============================================================
--- 🔹 صورة اللاعب (مصغرة جداً وتحت الشعار مباشرة)
--- ============================================================
-local AvatarContainer = Instance.new("Frame")
-AvatarContainer.Size = UDim2.new(0, 45, 0, 45)  -- تم التصغير من 50 إلى 45
-AvatarContainer.Position = UDim2.new(0.5, -22.5, 0.16, 0)  -- تحت الشعار مباشرة
-AvatarContainer.BackgroundTransparency = 1
-AvatarContainer.Parent = Background
-
-local AvatarCircle = Instance.new("ImageLabel")
-AvatarCircle.Size = UDim2.new(1, 0, 1, 0)
-AvatarCircle.BackgroundColor3 = Color3.fromRGB(10, 8, 18)
-AvatarCircle.Parent = AvatarContainer
-
-local userId = LocalPlayer.UserId
-AvatarCircle.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
-
-local AvatarCorner = Instance.new("UICorner")
-AvatarCorner.CornerRadius = UDim.new(1, 0)
-AvatarCorner.Parent = AvatarCircle
-
-local AvatarStroke = Instance.new("UIStroke")
-AvatarStroke.Color = Color3.fromRGB(100, 60, 160)
-AvatarStroke.Thickness = 1.5
-AvatarStroke.Parent = AvatarCircle
-
--- تأثير توهج خفيف
-TweenService:Create(AvatarStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Color = Color3.fromRGB(180, 100, 255),
-    Thickness = 2
-}):Play()
-
--- ============================================================
--- 🔹 النص الرئيسي (ABC PREMIUM - أصغر)
--- ============================================================
-local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(1, 0, 0, 22)  -- تم التصغير من 28 إلى 22
-TitleText.Position = UDim2.new(0, 0, 0.25, 0)  -- تحت الصورة مباشرة
-TitleText.Text = "ABC PREMIUM"
-TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleText.TextSize = 16  -- تم التصغير من 20 إلى 16
-TitleText.Font = Enum.Font.GothamBold
-TitleText.BackgroundTransparency = 1
-TitleText.Parent = Background
-
--- توهج خفيف للنص
-local textGlow = Instance.new("UIStroke")
-textGlow.Color = Color3.fromRGB(138, 43, 226)
-textGlow.Thickness = 1
-textGlow.Transparency = 0.4
-textGlow.Parent = TitleText
-
-TweenService:Create(textGlow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Transparency = 0.2,
-    Color = Color3.fromRGB(200, 100, 255)
-}):Play()
-
--- ============================================================
--- 🔹 النص الترحيبي (اسم اللاعب)
--- ============================================================
-local WelcomeText = Instance.new("TextLabel")
-WelcomeText.Size = UDim2.new(1, 0, 0, 18)
-WelcomeText.Position = UDim2.new(0, 0, 0.32, 0)
-WelcomeText.Text = "✦ " .. LocalPlayer.Name .. " ✦"
-WelcomeText.TextColor3 = Color3.fromRGB(160, 160, 180)
-WelcomeText.TextSize = 12
-WelcomeText.Font = Enum.Font.Gotham
-WelcomeText.BackgroundTransparency = 1
-WelcomeText.Parent = Background
-
--- ============================================================
--- 🔹 حالة التحميل (خط صغير)
--- ============================================================
-local StatusText = Instance.new("TextLabel")
-StatusText.Size = UDim2.new(1, 0, 0, 16)
-StatusText.Position = UDim2.new(0, 0, 0.39, 0)
-StatusText.Text = "⟳ INITIALIZING..."
-StatusText.TextColor3 = Color3.fromRGB(138, 43, 226)
-StatusText.TextSize = 10
-StatusText.Font = Enum.Font.Code
-StatusText.BackgroundTransparency = 1
-StatusText.Parent = Background
-
--- ============================================================
--- 🔹 شريط التحميل (أنيق ومناسب)
--- ============================================================
-local LoadingBarBg = Instance.new("Frame")
-LoadingBarBg.Size = UDim2.new(0, 220, 0, 4)
-LoadingBarBg.Position = UDim2.new(0.5, -110, 0.47, 0)
-LoadingBarBg.BackgroundColor3 = Color3.fromRGB(18, 12, 28)
-LoadingBarBg.BorderSizePixel = 0
-LoadingBarBg.Parent = Background
-
--- تدرج الشريط
-local barGradient = Instance.new("UIGradient")
-barGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(138, 43, 226)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 80, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 200))
-})
-barGradient.Parent = LoadingBarBg
-
-local BarCorner = Instance.new("UICorner")
-BarCorner.CornerRadius = UDim.new(1, 0)
-BarCorner.Parent = LoadingBarBg
-
-local LoadingBarFill = Instance.new("Frame")
-LoadingBarFill.Size = UDim2.new(0, 0, 1, 0)
-LoadingBarFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-LoadingBarFill.BackgroundTransparency = 0.3
-LoadingBarFill.BorderSizePixel = 0
-LoadingBarFill.Parent = LoadingBarBg
-
-local FillCorner = Instance.new("UICorner")
-FillCorner.CornerRadius = UDim.new(1, 0)
-FillCorner.Parent = LoadingBarFill
-
--- ============================================================
--- 🔹 النسبة المئوية
--- ============================================================
-local PercentageText = Instance.new("TextLabel")
-PercentageText.Size = UDim2.new(0, 35, 0, 18)
-PercentageText.Position = UDim2.new(0.5, -17.5, 0.52, 0)
-PercentageText.Text = "0%"
-PercentageText.TextColor3 = Color3.fromRGB(180, 180, 200)
-PercentageText.TextSize = 13
-PercentageText.Font = Enum.Font.GothamBold
-PercentageText.BackgroundTransparency = 1
-PercentageText.Parent = Background
-
--- ============================================================
--- 🔹 نظام الإشعارات (خفيف)
--- ============================================================
-local function showNotification(text, color)
-    local notif = Instance.new("TextLabel")
-    notif.Size = UDim2.new(0, 180, 0, 20)
-    notif.Position = UDim2.new(0.5, -90, 0.60, 0)
-    notif.Text = "▸ " .. text
-    notif.TextColor3 = color or Color3.fromRGB(138, 43, 226)
-    notif.TextSize = 9
-    notif.Font = Enum.Font.Gotham
-    notif.BackgroundColor3 = Color3.fromRGB(10, 8, 20)
-    notif.BackgroundTransparency = 0.3
-    notif.Parent = Background
-    
-    local notifCorner = Instance.new("UICorner")
-    notifCorner.CornerRadius = UDim.new(0, 6)
-    notifCorner.Parent = notif
-    
-    local notifStroke = Instance.new("UIStroke")
-    notifStroke.Color = color or Color3.fromRGB(138, 43, 226)
-    notifStroke.Thickness = 1
-    notifStroke.Transparency = 0.5
-    notifStroke.Parent = notif
-    
-    notif.Position = UDim2.new(0.5, -90, 0.63, 0)
-    notif.TextTransparency = 1
-    
-    local appear = TweenService:Create(notif, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, -90, 0.60, 0),
-        TextTransparency = 0
-    })
-    appear:Play()
-    
-    task.wait(1.8)
-    
-    local disappear = TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        TextTransparency = 1,
-        Position = UDim2.new(0.5, -90, 0.63, 0)
-    })
-    disappear:Play()
-    disappear.Completed:Connect(function() notif:Destroy() end)
+local function stopParticles()
+    if particleLoop then
+        task.cancel(particleLoop)
+        particleLoop = nil
+    end
 end
 
--- ============================================================
--- نظام المهام
--- ============================================================
-local tasks = {
-    {name = "Connecting", time = 0.4, color = Color3.fromRGB(255, 200, 50)},
-    {name = "Bypassing", time = 0.6, color = Color3.fromRGB(255, 100, 100)},
-    {name = "Loading Framework", time = 0.5, color = Color3.fromRGB(138, 43, 226)},
-    {name = "Injecting", time = 0.5, color = Color3.fromRGB(50, 200, 255)},
-    {name = "Optimizing", time = 0.4, color = Color3.fromRGB(100, 255, 100)},
-    {name = "Verifying", time = 0.4, color = Color3.fromRGB(255, 150, 200)},
-    {name = "Ready!", time = 0.3, color = Color3.fromRGB(50, 255, 200)}
-}
+-- ============================================
+-- زر ABC الدائري (على جنب الشاشة)
+-- ============================================
+local ABCToggle = Instance.new("ImageButton")
+ABCToggle.Size = UDim2.new(0, 50, 0, 50)
+ABCToggle.Position = UDim2.new(0, 10, 0.5, -25)
+ABCToggle.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
+ABCToggle.Image = "rbxassetid://4057423227"
+ABCToggle.Parent = ScreenGui
 
--- ============================================================
--- نظام التحميل الرئيسي
--- ============================================================
-local isLoadingComplete = false
-local loadStartTime = os.clock()
-local totalLoadTime = 0
-
-for _, task in ipairs(tasks) do
-    totalLoadTime = totalLoadTime + task.time
-end
-
--- تشغيل المهام
-task.spawn(function()
-    for i, task in ipairs(tasks) do
-        task.wait(task.time * 0.6)
-        if not isLoadingComplete then
-            StatusText.Text = "⟳ " .. task.name .. "..."
-            showNotification(task.name, task.color)
-        end
-    end
-end)
-
--- تحديث شريط التحميل
-local loadTween = TweenService:Create(LoadingBarFill, TweenInfo.new(totalLoadTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Size = UDim2.new(1, 0, 1, 0)
-})
-loadTween:Play()
-
--- تحديث النسبة
-local connection
-connection = RunService.RenderStepped:Connect(function()
-    local elapsed = os.clock() - loadStartTime
-    local progress = math.clamp(elapsed / totalLoadTime, 0, 1)
-    local smoothProgress = progress * (2 - progress)
-    
-    PercentageText.Text = math.floor(smoothProgress * 100) .. "%"
-    
-    if progress >= 1 then
-        connection:Disconnect()
-    end
-end)
-
-loadTween.Completed:Wait()
-task.wait(0.4)
-isLoadingComplete = true
-
-StatusText.Text = "✓ COMPLETED!"
-StatusText.TextColor3 = Color3.fromRGB(50, 255, 100)
-showNotification("✅ Complete!", Color3.fromRGB(50, 255, 100))
-
-task.wait(0.6)
-
--- ============================================================
--- إخفاء الواجهة
--- ============================================================
-local function destroyScreen()
-    task.cancel(particleLoop)
-    
-    for _, p in pairs(particles) do
-        p:Destroy()
-    end
-    particles = {}
-    
-    local fadeInfo = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    
-    for _, item in pairs(Background:GetChildren()) do
-        task.spawn(function()
-            pcall(function()
-                if item:IsA("TextLabel") then
-                    TweenService:Create(item, fadeInfo, {TextTransparency = 1}):Play()
-                elseif item:IsA("ImageLabel") then
-                    TweenService:Create(item, fadeInfo, {ImageTransparency = 1}):Play()
-                elseif item:IsA("Frame") and item ~= Background then
-                    TweenService:Create(item, fadeInfo, {BackgroundTransparency = 1}):Play()
-                end
-                
-                local stroke = item:FindFirstChildOfClass("UIStroke")
-                if stroke then
-                    TweenService:Create(stroke, fadeInfo, {Transparency = 1}):Play()
-                end
-            end)
+-- جعل الزر قابل للسحب
+local dragToggle2, dragStart2, startPos2
+ABCToggle.InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+        dragToggle2 = true
+        dragStart2 = input.Position
+        startPos2 = ABCToggle.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragToggle2 = false end
         end)
     end
-    
-    local fadeBackground = TweenService:Create(Background, fadeInfo, {BackgroundTransparency = 1})
-    fadeBackground:Play()
-    fadeBackground.Completed:Wait()
-    
-    pcall(function()
-        ScreenGui:Destroy()
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggle2 then
+        local deltaX = (input.Position - dragStart2).X
+        local deltaY = (input.Position - dragStart2).Y
+        ABCToggle.Position = UDim2.new(startPos2.X.Scale, startPos2.X.Offset + deltaX, startPos2.Y.Scale, startPos2.Y.Offset + deltaY)
+    end
+end)
+
+local ABCCorner = Instance.new("UICorner")
+ABCCorner.CornerRadius = UDim.new(1, 0)
+ABCCorner.Parent = ABCToggle
+
+local ABCStroke = Instance.new("UIStroke")
+ABCStroke.Color = Color3.fromRGB(160, 50, 255)
+ABCStroke.Thickness = 2
+ABCStroke.Parent = ABCToggle
+
+local ABCLabel = Instance.new("TextLabel")
+ABCLabel.Size = UDim2.new(1, 0, 1, 0)
+ABCLabel.Text = "ABC"
+ABCLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ABCLabel.TextSize = 16
+ABCLabel.Font = Enum.Font.FredokaOne
+ABCLabel.BackgroundTransparency = 1
+ABCLabel.Parent = ABCToggle
+
+-- تأثير نبض زر ABC
+local pulseInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+TweenService:Create(ABCStroke, pulseInfo, {Thickness = 4, Color = Color3.fromRGB(210, 80, 255)}):Play()
+
+-- ============================================
+-- Top Title Bar
+-- ============================================
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = TitleBar
+
+local TitleText = Instance.new("TextLabel")
+TitleText.Size = UDim2.new(0.4, 0, 1, 0)
+TitleText.Position = UDim2.new(0, 12, 0, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "⚡ ABC Spy Pro v1.0"
+TitleText.TextColor3 = Color3.fromRGB(138, 43, 226)
+TitleText.Font = Enum.Font.GothamBold
+TitleText.TextSize = 15
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Parent = TitleBar
+
+-- ============================================
+-- الأزرار الأربعة (Save, Settings, Clear, X) جنب بعض
+-- ============================================
+
+-- 1. زر Save (💾)
+local SaveBtn = Instance.new("TextButton")
+SaveBtn.Size = UDim2.new(0, 30, 0, 30)
+SaveBtn.Position = UDim2.new(0.62, 0, 0.05, 0)
+SaveBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
+SaveBtn.Text = "💾"
+SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveBtn.Font = Enum.Font.GothamBold
+SaveBtn.TextSize = 16
+SaveBtn.Parent = TitleBar
+
+local SaveCorner = Instance.new("UICorner")
+SaveCorner.CornerRadius = UDim.new(1, 0)
+SaveCorner.Parent = SaveBtn
+
+-- 2. زر Settings (⚙️)
+local SettingsBtn = Instance.new("TextButton")
+SettingsBtn.Size = UDim2.new(0, 30, 0, 30)
+SettingsBtn.Position = UDim2.new(0.72, 0, 0.05, 0)
+SettingsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+SettingsBtn.Text = "⚙"
+SettingsBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
+SettingsBtn.Font = Enum.Font.GothamBold
+SettingsBtn.TextSize = 18
+SettingsBtn.Parent = TitleBar
+
+local SettingsCorner = Instance.new("UICorner")
+SettingsCorner.CornerRadius = UDim.new(1, 0)
+SettingsCorner.Parent = SettingsBtn
+
+-- 3. زر Clear (🗑️)
+local ClearBtn = Instance.new("TextButton")
+ClearBtn.Size = UDim2.new(0, 30, 0, 30)
+ClearBtn.Position = UDim2.new(0.82, 0, 0.05, 0)
+ClearBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+ClearBtn.Text = "🗑"
+ClearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClearBtn.Font = Enum.Font.GothamBold
+ClearBtn.TextSize = 16
+ClearBtn.Parent = TitleBar
+
+local ClearCorner = Instance.new("UICorner")
+ClearCorner.CornerRadius = UDim.new(1, 0)
+ClearCorner.Parent = ClearBtn
+
+-- 4. زر X (✕)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(0.92, 0, 0.05, 0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(1, 0)
+CloseCorner.Parent = CloseBtn
+
+-- ============================================
+-- Real-time Search/Filter Input Box
+-- ============================================
+local SearchBox = Instance.new("TextBox")
+SearchBox.Name = "SearchBox"
+SearchBox.Size = UDim2.new(0.94, 0, 0, 30)
+SearchBox.Position = UDim2.new(0.03, 0, 0, 48)
+SearchBox.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+SearchBox.BorderSizePixel = 0
+SearchBox.PlaceholderText = "🔍 Search player or word..."
+SearchBox.Text = ""
+SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SearchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+SearchBox.Font = Enum.Font.SourceSans
+SearchBox.TextSize = 14
+SearchBox.Parent = MainFrame
+
+local SearchCorner = Instance.new("UICorner")
+SearchCorner.CornerRadius = UDim.new(0, 6)
+SearchCorner.Parent = SearchBox
+
+-- إطار بنفسجي للبحث
+local SearchBorder = Instance.new("UIStroke")
+SearchBorder.Color = Color3.fromRGB(138, 43, 226)
+SearchBorder.Thickness = 1.5
+SearchBorder.Transparency = 0.5
+SearchBorder.Parent = SearchBox
+
+-- ============================================
+-- Chat Logs Container
+-- ============================================
+local ScrollingFrame = Instance.new("ScrollingFrame")
+ScrollingFrame.Size = UDim2.new(0.94, 0, 0.68, 0)
+ScrollingFrame.Position = UDim2.new(0.03, 0, 0, 88)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollingFrame.ScrollBarThickness = 4
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(138, 43, 226)
+ScrollingFrame.Parent = MainFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = ScrollingFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 5)
+
+-- متغير لمنع النزول التلقائي
+local autoScroll = true
+
+-- ============================================
+-- دالة لجلب صورة اللاعب
+-- ============================================
+local function getPlayerAvatar(userId)
+    local success, data = pcall(function()
+        return Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
     end)
-    
-    print("✅ ABC Mobile Loading Screen Destroyed!")
+    if success and data then
+        return data
+    end
+    return "rbxassetid://0"
 end
 
-destroyScreen()
+-- ============================================
+-- 4. Message Generator UI Engine with Avatar
+-- ============================================
+local function addMessageToGui(sender, messageText, channelTag)
+    channelTag = channelTag or "GLOBAL"
+    local tagColor = "rgb(138, 43, 226)"
+    
+    if channelTag == "WHISPER" then tagColor = "rgb(255, 0, 255)"
+    elseif channelTag == "TEAM" then tagColor = "rgb(30, 144, 255)"
+    elseif channelTag == "SYSTEM" then tagColor = "rgb(255, 215, 0)" end
+    
+    -- الحاوية الرئيسية للرسالة
+    local MessageContainer = Instance.new("Frame")
+    MessageContainer.Size = UDim2.new(1, -5, 0, 40)
+    MessageContainer.BackgroundTransparency = 1
+    MessageContainer.Parent = ScrollingFrame
+    
+    -- صورة اللاعب
+    local AvatarImage = Instance.new("ImageLabel")
+    AvatarImage.Size = UDim2.new(0, 30, 0, 30)
+    AvatarImage.Position = UDim2.new(0, 2, 0, 5)
+    AvatarImage.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    AvatarImage.BorderSizePixel = 0
+    AvatarImage.Parent = MessageContainer
+    
+    local AvatarCorner = Instance.new("UICorner")
+    AvatarCorner.CornerRadius = UDim.new(1, 0)
+    AvatarCorner.Parent = AvatarImage
+    
+    local AvatarStroke = Instance.new("UIStroke")
+    AvatarStroke.Color = Color3.fromRGB(138, 43, 226)
+    AvatarStroke.Thickness = 1.5
+    AvatarStroke.Parent = AvatarImage
+    
+    -- جلب صورة اللاعب
+    if sender and sender.UserId then
+        local avatarUrl = getPlayerAvatar(sender.UserId)
+        AvatarImage.Image = avatarUrl
+    else
+        AvatarImage.Image = "rbxassetid://0"
+    end
+    
+    -- اسم اللاعب + الرسالة
+    local MessageText = Instance.new("TextLabel")
+    MessageText.Size = UDim2.new(1, -40, 1, 0)
+    MessageText.Position = UDim2.new(0, 38, 0, 0)
+    MessageText.BackgroundTransparency = 1
+    MessageText.RichText = true
+    
+    local senderName = sender and sender.DisplayName or "Unknown"
+    local nameColor = tagColor
+    
+    if channelTag == "WHISPER" then
+        nameColor = "rgb(255, 0, 255)"
+    elseif channelTag == "TEAM" then
+        nameColor = "rgb(30, 144, 255)"
+    elseif channelTag == "SYSTEM" then
+        nameColor = "rgb(255, 215, 0)"
+    end
+    
+    -- تنسيق مثل الديسكورد
+    MessageText.Text = string.format("<font color='%s'><b>[%s] %s:</b></font> %s", nameColor, channelTag, senderName, messageText)
+    MessageText.TextColor3 = Color3.fromRGB(230, 230, 240)
+    MessageText.TextSize = 13
+    MessageText.Font = Enum.Font.SourceSans
+    MessageText.TextXAlignment = Enum.TextXAlignment.Left
+    MessageText.TextWrapped = true
+    MessageText.TextYAlignment = Enum.TextYAlignment.Center
+    MessageText.Parent = MessageContainer
+    
+    -- تحديث الحجم حسب النص
+    MessageContainer.Size = UDim2.new(1, -5, 0, 40)
+    MessageText.Size = UDim2.new(1, -40, 1, 0)
+    
+    -- وظيفة البحث والفلترة
+    local function applyFilter()
+        local filterText = string.lower(SearchBox.Text)
+        if filterText == "" or string.find(string.lower(senderName), filterText) or string.find(string.lower(messageText), filterText) then
+            MessageContainer.Visible = true
+        else
+            MessageContainer.Visible = false
+        end
+    end
+    
+    SearchBox.GetPropertyChangedSignal(SearchBox, "Text"):Connect(applyFilter)
+    applyFilter()
+    
+    -- تحديث الـ Canvas مع منع النزول التلقائي
+    task.wait(0.02)
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+    
+    if autoScroll then
+        ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
+    end
+end
 
--- ============================================================
--- حماية خفيفة
--- ============================================================
-local cancelAttempts = 0
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.Escape then
-        if not isLoadingComplete then
-            cancelAttempts = cancelAttempts + 1
-            if cancelAttempts >= 3 then
-                isLoadingComplete = true
-                task.cancel(particleLoop)
-                pcall(function() ScreenGui:Destroy() end)
-                print("⏹ Loading cancelled")
-            else
-                showNotification("ESC " .. (3 - cancelAttempts) .. " more", Color3.fromRGB(255, 200, 50))
+-- ============================================
+-- مراقبة إذا كان المستخدم يمرر للأعلى
+-- ============================================
+ScrollingFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        task.wait(0.1)
+        if ScrollingFrame.CanvasPosition.Y < ScrollingFrame.CanvasSize.Y.Offset - 100 then
+            autoScroll = false
+        end
+    end
+end)
+
+ScrollingFrame:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+    if ScrollingFrame.CanvasPosition.Y >= ScrollingFrame.CanvasSize.Y.Offset - 50 then
+        autoScroll = true
+    end
+end)
+
+-- ============================================
+-- 5. Deep Packet Capture Core
+-- ============================================
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+    TextChatService.MessageReceived:Connect(function(textMessage)
+        local source = textMessage.TextSource
+        if source then
+            local sender = Players:GetPlayerByUserId(source.UserId)
+            if sender then
+                local channel = "GLOBAL"
+                if textMessage.TextChannel and string.find(string.lower(textMessage.TextChannel.Name), "whisper") then
+                    channel = "WHISPER"
+                elseif textMessage.TextChannel and string.find(string.lower(textMessage.TextChannel.Name), "team") then
+                    channel = "TEAM"
+                end
+                addMessageToGui(sender, textMessage.Text, channel)
+            end
+        end
+    end)
+else
+    local SayMessageEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("OnMessageDoneFiltering")
+    if SayMessageEvent and SayMessageEvent:IsA("RemoteEvent") then
+        SayMessageEvent.OnClientEvent:Connect(function(messageData)
+            if messageData then
+                local sender = messageData.FromPlayer
+                local message = messageData.Message
+                local channel = "GLOBAL"
+                
+                if messageData.MessageType == "Whisper" then channel = "WHISPER"
+                elseif messageData.MessageType == "Team" then channel = "TEAM" end
+                
+                if sender and message then
+                    local player = Players:GetPlayerByUserId(sender)
+                    if player then
+                        addMessageToGui(player, message, channel)
+                    end
+                end
+            end
+        end)
+    else
+        local function hookPlayer(player)
+            player.Chatted:Connect(function(message)
+                addMessageToGui(player, message, "GLOBAL")
+            end)
+        end
+        for _, player in ipairs(Players:GetPlayers()) do hookPlayer(player) end
+        Players.PlayerAdded:Connect(hookPlayer)
+    end
+end
+
+-- ============================================
+-- 6. وظيفة حفظ المحادثة
+-- ============================================
+local function saveChatLog()
+    local messages = {}
+    local count = 0
+    
+    -- جلب كل الرسائل من ScrollingFrame
+    for _, child in pairs(ScrollingFrame:GetChildren()) do
+        if child:IsA("Frame") then
+            local textLabel = child:FindFirstChildOfClass("TextLabel")
+            if textLabel and textLabel.RichText then
+                -- استخراج النص بدون الألوان والتنسيق
+                local rawText = textLabel.Text
+                -- إزالة تنسيق الـ RichText
+                rawText = rawText:gsub("<[^>]*>", "")
+                messages[#messages + 1] = rawText
+                count = count + 1
+            end
+        end
+    end
+    
+    if count == 0 then
+        addMessageToGui(nil, "No messages to save!", "SYSTEM")
+        return
+    end
+    
+    -- تجميع النص
+    local fullLog = "=== ABC Spy Pro Chat Log ===\n"
+    fullLog = fullLog .. "Date: " .. os.date("%Y-%m-%d %H:%M:%S") .. "\n"
+    fullLog = fullLog .. "Total Messages: " .. count .. "\n"
+    fullLog = fullLog .. "===============================\n\n"
+    
+    for i, msg in ipairs(messages) do
+        fullLog = fullLog .. msg .. "\n"
+    end
+    
+    -- حفظ في الـ Clipboard
+    local success = pcall(function()
+        setclipboard(fullLog)
+    end)
+    
+    if success then
+        addMessageToGui(nil, "✅ Chat log saved to clipboard! (" .. count .. " messages)", "SYSTEM")
+    else
+        addMessageToGui(nil, "❌ Failed to save! Try copying manually.", "SYSTEM")
+    end
+end
+
+-- ============================================
+-- 7. التحكم بالأزرار
+-- ============================================
+
+-- زر Save (حفظ المحادثة)
+SaveBtn.MouseButton1Click:Connect(function()
+    saveChatLog()
+end)
+
+-- زر Settings (⚙️)
+SettingsBtn.MouseButton1Click:Connect(function()
+    addMessageToGui(nil, "⚙️ Settings menu coming soon!", "SYSTEM")
+end)
+
+-- زر Clear (مسح السجل)
+ClearBtn.MouseButton1Click:Connect(function()
+    for _, item in ipairs(ScrollingFrame:GetChildren()) do
+        if item:IsA("Frame") then
+            item:Destroy()
+        end
+    end
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    autoScroll = true
+    addMessageToGui(nil, "🗑️ Chat log cleared!", "SYSTEM")
+end)
+
+-- زر X (إخفاء)
+CloseBtn.MouseButton1Click:Connect(function()
+    uiVisible = false
+    MainFrame.Visible = false
+    stopParticles()
+end)
+
+-- زر ABC (فتح/إغلاق)
+local uiVisible = false
+
+ABCToggle.MouseButton1Click:Connect(function()
+    uiVisible = not uiVisible
+    MainFrame.Visible = uiVisible
+    
+    if uiVisible then
+        startParticles()
+        task.wait(0.1)
+        ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
+    else
+        stopParticles()
+        for _, child in pairs(MainFrame:GetChildren()) do
+            if child:IsA("Frame") and child ~= TitleBar and child ~= SearchBox and child ~= ScrollingFrame then
+                local corner = child:FindFirstChildOfClass("UICorner")
+                if corner and child.Size.X.Offset < 10 then
+                    child:Destroy()
+                end
             end
         end
     end
 end)
 
-print("📱 ABC Premium Mobile Loading Screen Loaded!")
-print("✨ Welcome, " .. LocalPlayer.Name .. "!")
+-- رسالة ترحيب
+addMessageToGui(nil, "ABC Spy Pro v1.0 activated successfully!", "SYSTEM")
+addMessageToGui(nil, "💾 Click Save button to copy all messages!", "SYSTEM")
