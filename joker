@@ -46,57 +46,57 @@ PurpleBorder.Transparency = 0.3
 PurpleBorder.Parent = MainFrame
 
 -- ============================================
--- نافذة الإعدادات (Settings Window)
+-- نافذة المحفوظات (Saved Chats Window)
 -- ============================================
-local SettingsFrame = Instance.new("Frame")
-SettingsFrame.Name = "SettingsFrame"
-SettingsFrame.Size = UDim2.new(0, 380, 0, 300)
-SettingsFrame.Position = UDim2.new(0.5, -190, 0.5, -150)
-SettingsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-SettingsFrame.BorderSizePixel = 0
-SettingsFrame.Visible = false
-SettingsFrame.Parent = ScreenGui
+local SavedFrame = Instance.new("Frame")
+SavedFrame.Name = "SavedFrame"
+SavedFrame.Size = UDim2.new(0, 380, 0, 300)
+SavedFrame.Position = UDim2.new(0.5, -190, 0.5, -150)
+SavedFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+SavedFrame.BorderSizePixel = 0
+SavedFrame.Visible = false
+SavedFrame.Parent = ScreenGui
 
-local SettingsCorner = Instance.new("UICorner")
-SettingsCorner.CornerRadius = UDim.new(0, 10)
-SettingsCorner.Parent = SettingsFrame
+local SavedCorner = Instance.new("UICorner")
+SavedCorner.CornerRadius = UDim.new(0, 10)
+SavedCorner.Parent = SavedFrame
 
--- إطار بنفسجي للإعدادات
-local SettingsBorder = Instance.new("UIStroke")
-SettingsBorder.Color = Color3.fromRGB(138, 43, 226)
-SettingsBorder.Thickness = 2
-SettingsBorder.Transparency = 0.3
-SettingsBorder.Parent = SettingsFrame
+-- إطار بنفسجي للمحفوظات
+local SavedBorder = Instance.new("UIStroke")
+SavedBorder.Color = Color3.fromRGB(138, 43, 226)
+SavedBorder.Thickness = 2
+SavedBorder.Transparency = 0.3
+SavedBorder.Parent = SavedFrame
 
--- عنوان الإعدادات
-local SettingsTitle = Instance.new("TextLabel")
-SettingsTitle.Size = UDim2.new(1, 0, 0, 40)
-SettingsTitle.Position = UDim2.new(0, 0, 0, 0)
-SettingsTitle.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-SettingsTitle.Text = "📁 Saved Chats"
-SettingsTitle.TextColor3 = Color3.fromRGB(138, 43, 226)
-SettingsTitle.TextSize = 18
-SettingsTitle.Font = Enum.Font.GothamBold
-SettingsTitle.Parent = SettingsFrame
+-- عنوان المحفوظات
+local SavedTitle = Instance.new("TextLabel")
+SavedTitle.Size = UDim2.new(1, 0, 0, 40)
+SavedTitle.Position = UDim2.new(0, 0, 0, 0)
+SavedTitle.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+SavedTitle.Text = "📁 Saved Chats"
+SavedTitle.TextColor3 = Color3.fromRGB(138, 43, 226)
+SavedTitle.TextSize = 18
+SavedTitle.Font = Enum.Font.GothamBold
+SavedTitle.Parent = SavedFrame
 
-local SettingsTitleCorner = Instance.new("UICorner")
-SettingsTitleCorner.CornerRadius = UDim.new(0, 10)
-SettingsTitleCorner.Parent = SettingsTitle
+local SavedTitleCorner = Instance.new("UICorner")
+SavedTitleCorner.CornerRadius = UDim.new(0, 10)
+SavedTitleCorner.Parent = SavedTitle
 
--- زر إغلاق الإعدادات
-local SettingsCloseBtn = Instance.new("TextButton")
-SettingsCloseBtn.Size = UDim2.new(0, 30, 0, 30)
-SettingsCloseBtn.Position = UDim2.new(0.92, 0, 0.05, 0)
-SettingsCloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-SettingsCloseBtn.Text = "✕"
-SettingsCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SettingsCloseBtn.Font = Enum.Font.GothamBold
-SettingsCloseBtn.TextSize = 18
-SettingsCloseBtn.Parent = SettingsTitle
+-- زر إغلاق المحفوظات
+local SavedCloseBtn = Instance.new("TextButton")
+SavedCloseBtn.Size = UDim2.new(0, 30, 0, 30)
+SavedCloseBtn.Position = UDim2.new(0.92, 0, 0.05, 0)
+SavedCloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+SavedCloseBtn.Text = "✕"
+SavedCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SavedCloseBtn.Font = Enum.Font.GothamBold
+SavedCloseBtn.TextSize = 18
+SavedCloseBtn.Parent = SavedTitle
 
-local SettingsCloseCorner = Instance.new("UICorner")
-SettingsCloseCorner.CornerRadius = UDim.new(1, 0)
-SettingsCloseCorner.Parent = SettingsCloseBtn
+local SavedCloseCorner = Instance.new("UICorner")
+SavedCloseCorner.CornerRadius = UDim.new(1, 0)
+SavedCloseCorner.Parent = SavedCloseBtn
 
 -- ScrollingFrame للمحفوظات
 local SavedScrollingFrame = Instance.new("ScrollingFrame")
@@ -107,7 +107,7 @@ SavedScrollingFrame.BorderSizePixel = 0
 SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 SavedScrollingFrame.ScrollBarThickness = 4
 SavedScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(138, 43, 226)
-SavedScrollingFrame.Parent = SettingsFrame
+SavedScrollingFrame.Parent = SavedFrame
 
 local SavedUIListLayout = Instance.new("UIListLayout")
 SavedUIListLayout.Parent = SavedScrollingFrame
@@ -123,7 +123,7 @@ ClearSavedBtn.Text = "🗑️ Clear All"
 ClearSavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ClearSavedBtn.Font = Enum.Font.GothamBold
 ClearSavedBtn.TextSize = 13
-ClearSavedBtn.Parent = SettingsFrame
+ClearSavedBtn.Parent = SavedFrame
 
 local ClearSavedCorner = Instance.new("UICorner")
 ClearSavedCorner.CornerRadius = UDim.new(0, 6)
@@ -257,7 +257,7 @@ TitleCorner.CornerRadius = UDim.new(0, 10)
 TitleCorner.Parent = TitleBar
 
 local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(0.35, 0, 1, 0)
+TitleText.Size = UDim2.new(0.3, 0, 1, 0)
 TitleText.Position = UDim2.new(0, 12, 0, 0)
 TitleText.BackgroundTransparency = 1
 TitleText.Text = "⚡ ABC Spy Pro"
@@ -268,63 +268,78 @@ TitleText.TextXAlignment = Enum.TextXAlignment.Left
 TitleText.Parent = TitleBar
 
 -- ============================================
--- الأزرار الأربعة (Save, Settings, Clear, X) جنب بعض
+-- الأزرار الخمسة (Save, Saved, Settings, Clear, X) جنب بعض
 -- ============================================
 
--- 1. زر Save (💾)
+-- 1. زر Save (💾) - حفظ المحادثة الحالية
 local SaveBtn = Instance.new("TextButton")
-SaveBtn.Size = UDim2.new(0, 30, 0, 30)
-SaveBtn.Position = UDim2.new(0.62, 0, 0.05, 0)
+SaveBtn.Size = UDim2.new(0, 28, 0, 28)
+SaveBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
 SaveBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
 SaveBtn.Text = "💾"
 SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SaveBtn.Font = Enum.Font.GothamBold
-SaveBtn.TextSize = 16
+SaveBtn.TextSize = 14
 SaveBtn.Parent = TitleBar
 
 local SaveCorner = Instance.new("UICorner")
 SaveCorner.CornerRadius = UDim.new(1, 0)
 SaveCorner.Parent = SaveBtn
 
--- 2. زر Settings (⚙️)
+-- 2. زر Saved (📁) - فتح المحفوظات
+local SavedBtn = Instance.new("TextButton")
+SavedBtn.Size = UDim2.new(0, 28, 0, 28)
+SavedBtn.Position = UDim2.new(0.62, 0, 0.06, 0)
+SavedBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 180)
+SavedBtn.Text = "📁"
+SavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SavedBtn.Font = Enum.Font.GothamBold
+SavedBtn.TextSize = 14
+SavedBtn.Parent = TitleBar
+
+local SavedCornerBtn = Instance.new("UICorner")
+SavedCornerBtn.CornerRadius = UDim.new(1, 0)
+SavedCornerBtn.Parent = SavedBtn
+
+-- 3. زر Settings (⚙️) - إعدادات
 local SettingsBtn = Instance.new("TextButton")
-SettingsBtn.Size = UDim2.new(0, 30, 0, 30)
-SettingsBtn.Position = UDim2.new(0.72, 0, 0.05, 0)
+SettingsBtn.Size = UDim2.new(0, 28, 0, 28)
+SettingsBtn.Position = UDim2.new(0.72, 0, 0.06, 0)
 SettingsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
 SettingsBtn.Text = "⚙"
 SettingsBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
 SettingsBtn.Font = Enum.Font.GothamBold
-SettingsBtn.TextSize = 18
+SettingsBtn.TextSize = 16
 SettingsBtn.Parent = TitleBar
 
 local SettingsCornerBtn = Instance.new("UICorner")
 SettingsCornerBtn.CornerRadius = UDim.new(1, 0)
 SettingsCornerBtn.Parent = SettingsBtn
 
--- 3. زر Clear (🗑️)
+-- 4. زر Clear (🗑️) - مسح السجل
 local ClearBtn = Instance.new("TextButton")
-ClearBtn.Size = UDim2.new(0, 30, 0, 30)
-ClearBtn.Position = UDim2.new(0.82, 0, 0.05, 0)
+ClearBtn.Size = UDim2.new(0, 28, 0, 28)
+ClearBtn.Position = UDim2.new(0.82, 0, 0.06, 0)
 ClearBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
 ClearBtn.Text = "🗑"
 ClearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ClearBtn.Font = Enum.Font.GothamBold
-ClearBtn.TextSize = 16
+ClearBtn.TextSize = 14
 ClearBtn.Parent = TitleBar
 
 local ClearCorner = Instance.new("UICorner")
 ClearCorner.CornerRadius = UDim.new(1, 0)
 ClearCorner.Parent = ClearBtn
 
--- 4. زر X (✕)
+-- 5. زر X (✕) - إخفاء
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(0.92, 0, 0.05, 0)
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+CloseBtn.Position = UDim2.new(0.92, 0, 0.06, 0)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
 CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 18
+CloseBtn.TextSize = 16
 CloseBtn.Parent = TitleBar
 
 local CloseCorner = Instance.new("UICorner")
@@ -558,7 +573,7 @@ else
 end
 
 -- ============================================
--- 6. وظيفة حفظ المحادثة (مع اختيار)
+-- 6. وظيفة حفظ المحادثة
 -- ============================================
 local function saveCurrentChat()
     local messages = {}
@@ -597,7 +612,7 @@ local function saveCurrentChat()
     local saveName = "Chat #" .. savedChatsCount .. " (" .. os.date("%H:%M") .. ")"
     savedChats[saveName] = fullLog
     
-    -- إضافة للإعدادات
+    -- إضافة للمحفوظات
     local savedItem = Instance.new("TextButton")
     savedItem.Size = UDim2.new(1, -10, 0, 30)
     savedItem.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
@@ -630,7 +645,6 @@ local function saveCurrentChat()
     deleteBtn.MouseButton1Click:Connect(function()
         savedChats[saveName] = nil
         savedItem:Destroy()
-        -- تحديث Canvas
         task.wait(0.02)
         SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
         addMessageToGui(nil, "🗑️ Deleted: " .. saveName, "SYSTEM")
@@ -659,22 +673,26 @@ end
 -- 7. التحكم بالأزرار
 -- ============================================
 
--- زر Save (حفظ المحادثة)
+-- زر Save (💾) - حفظ المحادثة
 SaveBtn.MouseButton1Click:Connect(function()
     saveCurrentChat()
 end)
 
--- زر Settings (فتح الإعدادات)
-SettingsBtn.MouseButton1Click:Connect(function()
-    SettingsFrame.Visible = not SettingsFrame.Visible
-    if SettingsFrame.Visible then
-        -- تحديث Canvas
+-- زر Saved (📁) - فتح المحفوظات
+SavedBtn.MouseButton1Click:Connect(function()
+    SavedFrame.Visible = not SavedFrame.Visible
+    if SavedFrame.Visible then
         task.wait(0.02)
         SavedScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, SavedUIListLayout.AbsoluteContentSize.Y + 10)
     end
 end)
 
--- زر Clear (مسح السجل)
+-- زر Settings (⚙️) - إعدادات (مثال)
+SettingsBtn.MouseButton1Click:Connect(function()
+    addMessageToGui(nil, "⚙️ Settings menu coming soon!", "SYSTEM")
+end)
+
+-- زر Clear (🗑️) - مسح السجل
 ClearBtn.MouseButton1Click:Connect(function()
     for _, item in ipairs(ScrollingFrame:GetChildren()) do
         if item:IsA("Frame") then
@@ -686,16 +704,16 @@ ClearBtn.MouseButton1Click:Connect(function()
     addMessageToGui(nil, "🗑️ Chat log cleared!", "SYSTEM")
 end)
 
--- زر X (إخفاء)
+-- زر X (✕) - إخفاء
 CloseBtn.MouseButton1Click:Connect(function()
     uiVisible = false
     MainFrame.Visible = false
     stopParticles()
 end)
 
--- إغلاق الإعدادات
-SettingsCloseBtn.MouseButton1Click:Connect(function()
-    SettingsFrame.Visible = false
+-- إغلاق المحفوظات
+SavedCloseBtn.MouseButton1Click:Connect(function()
+    SavedFrame.Visible = false
 end)
 
 -- مسح المحفوظات
@@ -737,4 +755,4 @@ end)
 
 -- رسالة ترحيب
 addMessageToGui(nil, "ABC Spy Pro v1.0 activated successfully!", "SYSTEM")
-addMessageToGui(nil, "💾 Click Save to store chats in Settings!", "SYSTEM")
+addMessageToGui(nil, "💾 Save | 📁 Saved Chats | ⚙️ Settings", "SYSTEM")
